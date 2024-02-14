@@ -73,54 +73,8 @@ function SignUp() {
 
     return (
         <>
-            {/* {!isOtp ? <>
+        
 
-                <div>
-                    <label htmlFor="">Name</label>
-                    <input type="text"
-                        onChange={(e) => setName(e.target.value)}
-
-                    />
-                    <br />
-                    <label htmlFor="">Phone</label>
-                    <input type="number"
-                        onChange={(e) => setPhone(e.target.value)}
-
-                    />
-
-                    <br />
-                    <p>{error || " "}</p>
-                    <label htmlFor="">Password</label>
-                    <input type="text"
-                        onChange={(e) => setPassword(e.target.value)}
-
-                    />
-                </div>
-                {notify && (
-                    <>
-                        <p>{notify}</p>
-                    </>
-                )}
-                <button onClick={validate}>Submit</button>
-            </>
-                :
-                <>
-                    <div>
-
-
-                        <label htmlFor="">OTP</label>
-                        <input type="text"
-                            value={otp}
-                            onChange={(e) => setOtp(e.target.value)}
-
-                        />
-
-
-                    </div>
-                    <button onClick={verifyUser}>Verify</button>
-                </>
-
-            } */}
 
             {!isOtp ? <>
 
@@ -146,12 +100,7 @@ function SignUp() {
                                                     <input type="number" class="form-control" id="useremail" placeholder="Enter mobile number" 
                                                             max="10"
                                                         onChange={(e) =>{
-                                                            // if(phone.length ===10){
-                                                            //    console.log()
-                                                            // }
-                                                            // else{
-                                                               
-                                                            // }
+                                                       
                                                             setPhone(e.target.value)
                                                         }
                                                         

@@ -4,11 +4,7 @@ import Config from "../Config"
 import { useSelector } from "react-redux";
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
-import { addNewCityReducer, fetchDataStart, updateCityReducer, deleteCityReducer } from '../features/CitiySlice'
-import { addNewDistrictReducer, updateDistrictReducer, deleteDistrictReducer } from "../features/DistrictSlice"
-import { addNewPanchayathReducer, updatePanchayathReducer, deletePanchayathReducer } from "../features/PanchayathSlice"
-import { setWard, addNewWardReducer, updateWardReducer, deleteWardReducer } from "../features/WardSlice"
-import { useDispatch } from "react-redux";
+
 
 
 
@@ -27,12 +23,13 @@ const errStr = "This Field is Required"
 function Panchayat() {
 
 
-    const panchayathList = useSelector((state) => state?.panchayath?.value);
+    // const panchayathList = useSelector((state) => state?.panchayath?.value);
     const districtList = useSelector((state) => state?.district?.value);
     const cityList = useSelector((state) => state?.city?.value);
 
-    const dispatch = useDispatch()
-    const [addPanchayat, setAddPanchayath] = useState()
+   
+    const [panchayathList,setPanchayathList]=useState();
+    const [addPanchayat, setAddPanchayath] = useState();
 
     const [view, setIsView] = useState(false);
     const [isedit, setIsEdit] = useState(false);
@@ -48,6 +45,13 @@ function Panchayat() {
 
     }
 
+
+    useEffect(()=>{
+        getPanchayaths()
+    },[])
+
+
+
     // handle add values
     const handleChange = (e, name) => {
         const { value } = e.target
@@ -59,6 +63,27 @@ function Panchayat() {
         })
 
     }
+
+
+
+    const getPanchayaths = () => {
+        axios.get(`${Config.BASE_URL}get-panchayath`,
+          Config?.config
+        )
+          .then(function (response) {
+            if (response.status === 200) {
+                setPanchayathList(response.data)
+    
+            }
+    
+          })
+          .catch(function (error) {
+            console.log(error);
+    
+          });
+    
+    
+      }
 
     // get single district
     const getPanchayath = (id, edit) => {
@@ -87,7 +112,6 @@ function Panchayat() {
     }
 
 
-
     const createPanchayath = (() => {
 
         const check = checkValidation()
@@ -102,21 +126,30 @@ function Panchayat() {
         data.append("city", addPanchayat?.city)
         data.append("name", addPanchayat?.name)
 
-        Config.axios({
-            url: Config.BASE_URL + "get-panchayath",
-            method: "post",
-            data: data,
-            auth: true,
-            success: (response) => {
-                console.log(response.data)
-                dispatch(addNewPanchayathReducer(response?.data))
-                handleClose()
-
-            },
-            error: (error) => {
-                console.log(error.response.status);
-            }
+        axios.post(`${Config.BASE_URL}get-panchayath`,
+        data,Config?.config
+      )
+        .then(function (response) {
+  
+          if (response.status === 201) {          
+            setPanchayathList((prevstate) => {
+                return [...prevstate, response?.data]
+            })
+            handleClose()
+  
+          }
+  
+        })
+        .catch(function (error) {
+          if (error.response.status === 401) {
+            console.log(error);
+            
+  
+          }
         });
+
+
+
     })
 
 
@@ -138,20 +171,35 @@ function Panchayat() {
         data.append("city", addPanchayat?.city)
         data.append("name", addPanchayat?.name)
 
-        Config.axios({
-            url: Config.BASE_URL + `get-panchayath/${id}/`,
-            method: "put",
-            data: data,
-            auth: true,
-            success: (response) => {
-                console.log(response.data)
-                dispatch(updatePanchayathReducer({ uid: id, newData: response?.data }))
-                handleClose()
-
-            },
-            error: (error) => {
-                console.log(error.response.status);
-            }
+        axios.put(`${Config.BASE_URL}get-panchayath/${id}/`,
+        data,Config?.config
+      )
+        .then(function (response) {
+  
+          if (response.status === 200) {          
+            setPanchayathList(prevArray => {
+                const index = prevArray.findIndex(obj => obj.id === id);
+                if (index !== -1) {
+                    return [
+                        ...prevArray.slice(0, index),
+                        { ...prevArray[index], ...response.data },
+                        ...prevArray.slice(index + 1),
+                    ];
+                }
+                return prevArray;
+            });
+           
+            handleClose()
+  
+          }
+  
+        })
+        .catch(function (error) {
+          if (error.response.status === 401) {
+            console.log(error);
+            // Config.logout()
+  
+          }
         });
 
     }
@@ -160,19 +208,25 @@ function Panchayat() {
 
     // delete district
     const deletePanchayath = (id) => {
-        Config.axios({
-            url: Config.BASE_URL + `get-panchayath/${id}/`,
-            method: "delete",
-            auth: true,
-            success: (response) => {
-                console.log(response.data)
-                dispatch(deletePanchayathReducer(id))
-                handleClose()
 
-            },
-            error: (error) => {
-                console.log(error.response.status);
-            }
+        axios.delete(`${Config.BASE_URL}get-panchayath/${id}/`,
+        Config?.config
+      )
+        .then(function (response) {
+  
+          if (response.status === 204) {          
+            setPanchayathList(panchayathList?.filter((e) => e.id !== id))
+            handleClose()
+  
+          }
+  
+        })
+        .catch(function (error) {
+          if (error.response.status === 401) {
+            console.log(error);
+          
+  
+          }
         });
 
     }
@@ -370,16 +424,19 @@ function Panchayat() {
 
 
 function District() {
-
-
-    const districtList = useSelector((state) => state?.district?.value);
-    const dispatch = useDispatch()
-    const [addDistrict, setAddDistrict] = useState()
-
+  
+    const [addDistrict, setAddDistrict] = useState();
+    const [districtList,setDistrictList] =useState();
     const [view, setIsView] = useState(false);
     const [edit, setIsEdit] = useState(false);
     const [add, setIsAdd] = useState(false);
-    const [error, setError] = useState(false)
+    const [error, setError] = useState(false);
+
+
+
+    useEffect(()=>{
+        getAllDistricts();
+    },[])
 
 
     const handleClose = () => {
@@ -429,6 +486,26 @@ function District() {
     }
 
 
+    const getAllDistricts = () => {
+        axios.get(`${Config.BASE_URL}districts`,
+          Config?.config
+        )
+          .then(function (response) {
+            if (response.status === 200) {
+              setDistrictList(response?.data)
+    
+            }
+    
+          })
+          .catch(function (error) {
+            console.log(error);
+    
+          });
+    
+    
+      }
+    
+
     // create new district
     const createDistrict = () => {
 
@@ -448,8 +525,9 @@ function District() {
         )
             .then(function (response) {
                 if (response.status === 201) {
-                    console.log(response);
-                    dispatch(addNewDistrictReducer(response?.data))
+                    setDistrictList((prevstate) => {
+                        return [...prevstate, response?.data]
+                    })
                     handleClose()
 
                 }
@@ -481,8 +559,18 @@ function District() {
         )
             .then(function (response) {
                 if (response.status === 200) {
-                    console.log(response);
-                    dispatch(updateDistrictReducer({ uid: id, newData: response?.data }))
+
+                    setDistrictList(prevArray => {
+                        const index = prevArray.findIndex(obj => obj.id === id);
+                        if (index !== -1) {
+                            return [
+                                ...prevArray.slice(0, index),
+                                { ...prevArray[index], ...response.data },
+                                ...prevArray.slice(index + 1),
+                            ];
+                        }
+                        return prevArray;
+                    });
                     handleClose()
 
                 }
@@ -504,8 +592,7 @@ function District() {
         )
             .then(function (response) {
                 if (response.status === 204) {
-                    console.log(response);
-                    dispatch(deleteDistrictReducer(id))
+                     setDistrictList(districtList?.filter((e) => e.id !== id))
 
                 }
 
@@ -648,10 +735,10 @@ function District() {
 function City() {
 
     const district = useSelector((state) => state?.district?.value);
-    const cityList = useSelector((state) => state?.city?.value);
+    // const cityList = useSelector((state) => state?.city?.value);
 
+    const [cityList,setCityList]=useState();
     const [addCity, setAddCity] = useState();
-
     // modal state
     const [view, setIsView] = useState(false);
     const [isAdd, setIsAdd] = useState(false);
@@ -667,7 +754,33 @@ function City() {
 
     }
 
-    const dispatch = useDispatch()
+
+    useEffect(()=>{
+
+        getCities()
+
+    },[])
+
+
+    const getCities = () => {
+        axios.get(`${Config.BASE_URL}get-cities`,
+          Config?.config
+        )
+          .then(function (response) {
+            if (response.status === 200) {
+    
+                setCityList(response?.data)
+    
+            }
+    
+          })
+          .catch(function (error) {
+            console.log(error);
+    
+          });
+    
+    
+      }
 
 
 
@@ -717,8 +830,6 @@ function City() {
             return
         }
 
-        dispatch(fetchDataStart());
-
         const data = new FormData()
 
         data.append("name", addCity?.name)
@@ -731,8 +842,9 @@ function City() {
             .then(function (response) {
                 if (response.status === 201) {
                     console.log(response);
-                    dispatch(addNewCityReducer(response?.data))
-                    // dispatch(addCity(response?.data))
+                    setCityList((prevstate) => {
+                        return [...prevstate, response?.data]
+                    })
                     handleClose()
 
                 }
@@ -768,7 +880,17 @@ function City() {
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response);
-                    dispatch(updateCityReducer({ uid: id, newData: response?.data }))
+                    setCityList(prevArray => {
+                        const index = prevArray.findIndex(obj => obj.id === id);
+                        if (index !== -1) {
+                            return [
+                                ...prevArray.slice(0, index),
+                                { ...prevArray[index], ...response.data },
+                                ...prevArray.slice(index + 1),
+                            ];
+                        }
+                        return prevArray;
+                    });
                     handleClose()
 
                 }
@@ -790,7 +912,7 @@ function City() {
             .then(function (response) {
                 if (response.status === 204) {
                     console.log(response);
-                    dispatch(deleteCityReducer(id))
+                    setCityList(cityList?.filter((e) => e.id !== id))
                 }
 
             })
@@ -958,12 +1080,12 @@ function City() {
 
 function Ward() {
 
-    const WardList = useSelector((state) => state?.ward?.value);
+    // const WardList = useSelector((state) => state?.ward?.value);
     const panchayathList = useSelector((state) => state?.panchayath?.value);
     const districtList = useSelector((state) => state?.district?.value);
     const cityList = useSelector((state) => state?.city?.value);
 
-    const dispatch = useDispatch()
+    const [WardList,setWardList] =useState();
     const [addWard, setAddWard] = useState();
     const [error, setError] = useState();
 
@@ -980,6 +1102,11 @@ function Ward() {
         setError(false)
 
     }
+
+    useEffect(()=>{
+        getAllWards()
+    
+    },[])
 
     // handle add values
     const handleChange = (e, name) => {
@@ -1000,6 +1127,29 @@ function Ward() {
         setIsEdit(edit);
 
     }
+
+    const getAllWards = () => {
+
+    
+        axios.get(`${Config.BASE_URL}get-ward`,
+          Config?.config
+        )
+          .then(function (response) {
+            if (response.status === 200) {
+             setWardList(response?.data)
+    
+            }
+    
+          })
+          .catch(function (error) {
+            console.log(error);
+    
+          });
+    
+    
+      }
+
+
 
 
 
@@ -1037,21 +1187,29 @@ function Ward() {
         data.append("ward_no", addWard?.ward_no)
         data.append("name", addWard?.name)
 
-        Config.axios({
-            url: Config.BASE_URL + "get-ward",
-            method: "post",
-            data: data,
-            auth: true,
-            success: (response) => {
-                console.log(response.data)
-                dispatch(addNewWardReducer(response?.data))
-                handleClose()
 
-            },
-            error: (error) => {
-                console.log(error.response.status);
-            }
+        axios.post(`${Config.BASE_URL}get-ward`,
+        data,Config?.config
+      )
+        .then(function (response) {
+  
+          if (response.status === 201) {          
+            setWardList((prevstate) => {
+                return [...prevstate, response?.data]
+            })
+            handleClose()
+  
+          }
+  
+        })
+        .catch(function (error) {
+          if (error.response.status === 401) {
+            console.log(error);
+          
+  
+          }
         });
+
     })
 
 
@@ -1073,20 +1231,35 @@ function Ward() {
         data.append("ward_no", addWard?.ward_no)
         data.append("name", addWard?.name)
 
-        Config.axios({
-            url: Config.BASE_URL + `get-ward/${id}/`,
-            method: "put",
-            data: data,
-            auth: true,
-            success: (response) => {
-                console.log(response.data)
-                dispatch(updateWardReducer({ uid: id, newData: response?.data }))
-                handleClose()
+        axios.put(`${Config.BASE_URL}get-ward/${id}/`,
+        data,Config?.config
+      )
+        .then(function (response) {
+  
+          if (response.status === 200) {          
+            setWardList(prevArray => {
+                const index = prevArray.findIndex(obj => obj.id === id);
+                if (index !== -1) {
+                    return [
+                        ...prevArray.slice(0, index),
+                        { ...prevArray[index], ...response.data },
+                        ...prevArray.slice(index + 1),
+                    ];
+                }
+                return prevArray;
+            });
 
-            },
-            error: (error) => {
-                console.log(error.response.status);
-            }
+            handleClose()
+  
+          }
+  
+        })
+        .catch(function (error) {
+          if (error.response.status === 401) {
+            console.log(error);
+          
+  
+          }
         });
 
     }
@@ -1095,19 +1268,21 @@ function Ward() {
 
     // delete district
     const deleteWard = (id) => {
-        Config.axios({
-            url: Config.BASE_URL + `get-ward/${id}/`,
-            method: "delete",
-            auth: true,
-            success: (response) => {
-                console.log(response.data)
-                dispatch(deleteWardReducer(id))
-                handleClose()
-
-            },
-            error: (error) => {
-                console.log(error.response.status);
-            }
+        axios.delete(`${Config.BASE_URL}get-ward/${id}/`,
+        data,Config?.config
+      )
+        .then(function (response) {
+  
+          if (response.status === 201) {          
+            setWardList(WardList?.filter((e) => e.id !== id))
+            handleClose()
+          }
+  
+        })
+        .catch(function (error) {
+          if (error.response.status === 401) {
+            console.log(error);
+          }
         });
 
     }

@@ -68,34 +68,7 @@ function Login() {
 
 
 
-    // const Config ={
-    //     axios:(
-    //         method="",
-    //         data="",
-    //     )=> {
-
-    //         if (method ==="POST"){
-
-    //         }
-    //         else if (method === "GET")
-    //         {
-
-    //         }
-    //         else if (method === "PUT")
-    //         {
-
-    //         }
-    //         else if (method === "DELETE")
-    //         {
-
-    //         }
-
-    //     }
-    //     ,
-    //     token:token,
-
-    // }
-
+    
 
 
     return (

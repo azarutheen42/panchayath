@@ -5,7 +5,7 @@ export const CollectorSlice = createSlice({
     initialState: {value: null},
     reducers: {
         setCollector: (state, action) => {
-            // console.log(state)
+          
             state.value = action.payload
         }
     }

@@ -21,7 +21,7 @@ function Routers() {
             {! Config?.userState  ?
 
                 <Routes path="/" >
-                     <Route path="" element={<Login />} />
+                     <Route path="/" element={<Login />} />
                     <Route path="login" element={<Login />} />
                     <Route path="sign-up" element={<SignUp />} />
                     <Route path="password-reset" element={<PasswordReset />} />
@@ -31,7 +31,6 @@ function Routers() {
                 <Routes path="/*" >
                      <Route path="login" element={<Login />} />
                     <Route path="dashboard" index element={<Dashboard />}></Route>
-                    {/* <Route path="/*" element={<Dashboard />}></Route> */}
                 </Routes>
 
             }

@@ -4,7 +4,6 @@ import { React, Component } from 'react';
 import Routers from "./route"
 import axios from 'axios'
 import Config from './Config'
-import { createContext } from 'react'
 import UserContext from './Context';
 import { useDispatch } from "react-redux";
 import { setCollector } from './features/CollectorSlice';
@@ -19,8 +18,6 @@ import { setCity } from './features/CitiySlice';
 function App() {
 
   const [user, setUser] = useState();
-
-  const userq = useContext(UserContext)
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -40,43 +37,25 @@ function App() {
 
   const getUser = () => {
 
-    // axios.get(`${Config.BASE_URL}auth/users/me/`,
-    //   Config?.config
-    // )
-    //   .then(function (response) {
+    axios.get(`${Config.BASE_URL}auth/users/me/`,
+      Config?.config
+    )
+      .then(function (response) {
 
-    //     if (response.status === 200) {
+        if (response.status === 200) {
 
-    //       setUser(response.data)
+          setUser(response.data)
 
-    //     }
-
-    //   })
-    //   .catch(function (error) {
-    //     if (error.response.status === 401) {
-    //       console.log(error);
-    //       // Config.logout()
-
-    //     }
-    //   });
-
-      Config.axios({
-        url: Config.BASE_URL + "auth/users/me",
-        method: "get",
-        // data: data,
-        auth: true,
-        success: (response) => {
-            console.log(response.data)
-            setUser(response.data)
-
-        },
-        error: (error) => {
-            console.log(error.response.status);
         }
-    });
 
-      
+      })
+      .catch(function (error) {
+        if (error.response.status === 401) {
+          console.log(error);
+          // Config.logout()
 
+        }
+      });
 
   }
 
@@ -124,7 +103,7 @@ function App() {
   }
 
 
-
+console.log(Config.config)
   const getDistricts = () => {
     axios.get(`${Config.BASE_URL}districts`,
       Config?.config
@@ -170,6 +149,8 @@ function App() {
 
 
   const getWards = () => {
+
+
     axios.get(`${Config.BASE_URL}get-ward`,
       Config?.config
     )
