@@ -1,0 +1,81 @@
+
+{(error && !collector?.name) && (
+                                                                    <span className="req-text">{errStr}</span>
+                                                                )}
+
+
+const [error, setError] = useState(false)
+
+    const checkValidation = () => {
+
+        if (!collector?.name || !collector?.phone_number || !collector?.start_date || !ward) {
+            console.log("please fill required fields")
+            setError(true)
+            return false
+
+        }
+        else {
+            setError(false)
+            return true
+        }
+
+    }
+
+
+      const check= checkValidation()
+
+        if (!check){
+            return
+        }
+
+
+
+
+
+            const handleEditChange = (e, name) => {
+        console.log("trigger")
+
+
+        if (name === "image") {
+            let value = e.target.files[0]
+
+            const check = fileType(value.name)
+
+            if (!check) {
+                console.log("not supported")
+                return
+            }
+
+            setViewCollector((prevstate) => ({
+                ...prevstate,
+                employee_info: {
+                    ...prevstate.employee_info,
+                    [name]: value
+                }
+
+            }))
+        }
+        else {
+            const { value } = e.target
+            setViewCollector((prevstate) => ({
+                ...prevstate,
+                employee_info: {
+                    ...prevstate.employee_info,
+                    [name]: value
+                }
+
+            }))
+        }
+
+    }
+
+
+
+ <div class="col-lg-6 col-sm-12 col-12">
+                                                            <div class="form-group">
+                                                                <label class="form-label">Image :
+                                                                    <span class="form-required">*</span></label>
+                                                                <input type="file" class="form-control"
+                                                                    name="category_name" />
+                                                            </div>
+                                                        </div>
