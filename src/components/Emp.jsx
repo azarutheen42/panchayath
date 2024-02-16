@@ -70,7 +70,7 @@ function Employee(props) {
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response);
-                    setRoles(response?.data?.filter((e) => e.id === 1))
+                    setRoles(response?.data?.filter((e) => e?.type === 1))
 
                 }
 
@@ -221,7 +221,7 @@ function Employee(props) {
 
 
     const getRoleLabel = (id) => {
-        const label = roles?.find((e) => e.id === id)?.name
+        const label = roles?.find((e) => e?.id === id)?.name
         return label
     }
 

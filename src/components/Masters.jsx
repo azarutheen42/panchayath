@@ -27,8 +27,8 @@ function Panchayat() {
     const districtList = useSelector((state) => state?.district?.value);
     const cityList = useSelector((state) => state?.city?.value);
 
-   
-    const [panchayathList,setPanchayathList]=useState();
+
+    const [panchayathList, setPanchayathList] = useState();
     const [addPanchayat, setAddPanchayath] = useState();
 
     const [view, setIsView] = useState(false);
@@ -46,9 +46,9 @@ function Panchayat() {
     }
 
 
-    useEffect(()=>{
+    useEffect(() => {
         getPanchayaths()
-    },[])
+    }, [])
 
 
 
@@ -68,22 +68,22 @@ function Panchayat() {
 
     const getPanchayaths = () => {
         axios.get(`${Config.BASE_URL}get-panchayath`,
-          Config?.config
+            Config?.config
         )
-          .then(function (response) {
-            if (response.status === 200) {
-                setPanchayathList(response.data)
-    
-            }
-    
-          })
-          .catch(function (error) {
-            console.log(error);
-    
-          });
-    
-    
-      }
+            .then(function (response) {
+                if (response.status === 200) {
+                    setPanchayathList(response.data)
+
+                }
+
+            })
+            .catch(function (error) {
+                console.log(error);
+
+            });
+
+
+    }
 
     // get single district
     const getPanchayath = (id, edit) => {
@@ -127,26 +127,26 @@ function Panchayat() {
         data.append("name", addPanchayat?.name)
 
         axios.post(`${Config.BASE_URL}get-panchayath`,
-        data,Config?.config
-      )
-        .then(function (response) {
-  
-          if (response.status === 201) {          
-            setPanchayathList((prevstate) => {
-                return [...prevstate, response?.data]
+            data, Config?.config
+        )
+            .then(function (response) {
+
+                if (response.status === 201) {
+                    setPanchayathList((prevstate) => {
+                        return [...prevstate, response?.data]
+                    })
+                    handleClose()
+
+                }
+
             })
-            handleClose()
-  
-          }
-  
-        })
-        .catch(function (error) {
-          if (error.response.status === 401) {
-            console.log(error);
-            
-  
-          }
-        });
+            .catch(function (error) {
+                if (error.response.status === 401) {
+                    console.log(error);
+
+
+                }
+            });
 
 
 
@@ -172,35 +172,35 @@ function Panchayat() {
         data.append("name", addPanchayat?.name)
 
         axios.put(`${Config.BASE_URL}get-panchayath/${id}/`,
-        data,Config?.config
-      )
-        .then(function (response) {
-  
-          if (response.status === 200) {          
-            setPanchayathList(prevArray => {
-                const index = prevArray.findIndex(obj => obj.id === id);
-                if (index !== -1) {
-                    return [
-                        ...prevArray.slice(0, index),
-                        { ...prevArray[index], ...response.data },
-                        ...prevArray.slice(index + 1),
-                    ];
+            data, Config?.config
+        )
+            .then(function (response) {
+
+                if (response.status === 200) {
+                    setPanchayathList(prevArray => {
+                        const index = prevArray.findIndex(obj => obj.id === id);
+                        if (index !== -1) {
+                            return [
+                                ...prevArray.slice(0, index),
+                                { ...prevArray[index], ...response.data },
+                                ...prevArray.slice(index + 1),
+                            ];
+                        }
+                        return prevArray;
+                    });
+
+                    handleClose()
+
                 }
-                return prevArray;
+
+            })
+            .catch(function (error) {
+                if (error.response.status === 401) {
+                    console.log(error);
+                    // Config.logout()
+
+                }
             });
-           
-            handleClose()
-  
-          }
-  
-        })
-        .catch(function (error) {
-          if (error.response.status === 401) {
-            console.log(error);
-            // Config.logout()
-  
-          }
-        });
 
     }
 
@@ -210,24 +210,24 @@ function Panchayat() {
     const deletePanchayath = (id) => {
 
         axios.delete(`${Config.BASE_URL}get-panchayath/${id}/`,
-        Config?.config
-      )
-        .then(function (response) {
-  
-          if (response.status === 204) {          
-            setPanchayathList(panchayathList?.filter((e) => e.id !== id))
-            handleClose()
-  
-          }
-  
-        })
-        .catch(function (error) {
-          if (error.response.status === 401) {
-            console.log(error);
-          
-  
-          }
-        });
+            Config?.config
+        )
+            .then(function (response) {
+
+                if (response.status === 204) {
+                    setPanchayathList(panchayathList?.filter((e) => e.id !== id))
+                    handleClose()
+
+                }
+
+            })
+            .catch(function (error) {
+                if (error.response.status === 401) {
+                    console.log(error);
+
+
+                }
+            });
 
     }
 
@@ -424,9 +424,9 @@ function Panchayat() {
 
 
 function District() {
-  
+
     const [addDistrict, setAddDistrict] = useState();
-    const [districtList,setDistrictList] =useState();
+    const [districtList, setDistrictList] = useState();
     const [view, setIsView] = useState(false);
     const [edit, setIsEdit] = useState(false);
     const [add, setIsAdd] = useState(false);
@@ -434,9 +434,9 @@ function District() {
 
 
 
-    useEffect(()=>{
+    useEffect(() => {
         getAllDistricts();
-    },[])
+    }, [])
 
 
     const handleClose = () => {
@@ -488,23 +488,23 @@ function District() {
 
     const getAllDistricts = () => {
         axios.get(`${Config.BASE_URL}districts`,
-          Config?.config
+            Config?.config
         )
-          .then(function (response) {
-            if (response.status === 200) {
-              setDistrictList(response?.data)
-    
-            }
-    
-          })
-          .catch(function (error) {
-            console.log(error);
-    
-          });
-    
-    
-      }
-    
+            .then(function (response) {
+                if (response.status === 200) {
+                    setDistrictList(response?.data)
+
+                }
+
+            })
+            .catch(function (error) {
+                console.log(error);
+
+            });
+
+
+    }
+
 
     // create new district
     const createDistrict = () => {
@@ -592,7 +592,7 @@ function District() {
         )
             .then(function (response) {
                 if (response.status === 204) {
-                     setDistrictList(districtList?.filter((e) => e.id !== id))
+                    setDistrictList(districtList?.filter((e) => e.id !== id))
 
                 }
 
@@ -737,7 +737,7 @@ function City() {
     const district = useSelector((state) => state?.district?.value);
     // const cityList = useSelector((state) => state?.city?.value);
 
-    const [cityList,setCityList]=useState();
+    const [cityList, setCityList] = useState();
     const [addCity, setAddCity] = useState();
     // modal state
     const [view, setIsView] = useState(false);
@@ -755,32 +755,32 @@ function City() {
     }
 
 
-    useEffect(()=>{
+    useEffect(() => {
 
         getCities()
 
-    },[])
+    }, [])
 
 
     const getCities = () => {
         axios.get(`${Config.BASE_URL}get-cities`,
-          Config?.config
+            Config?.config
         )
-          .then(function (response) {
-            if (response.status === 200) {
-    
-                setCityList(response?.data)
-    
-            }
-    
-          })
-          .catch(function (error) {
-            console.log(error);
-    
-          });
-    
-    
-      }
+            .then(function (response) {
+                if (response.status === 200) {
+
+                    setCityList(response?.data)
+
+                }
+
+            })
+            .catch(function (error) {
+                console.log(error);
+
+            });
+
+
+    }
 
 
 
@@ -1085,7 +1085,7 @@ function Ward() {
     const districtList = useSelector((state) => state?.district?.value);
     const cityList = useSelector((state) => state?.city?.value);
 
-    const [WardList,setWardList] =useState();
+    const [WardList, setWardList] = useState();
     const [addWard, setAddWard] = useState();
     const [error, setError] = useState();
 
@@ -1103,10 +1103,10 @@ function Ward() {
 
     }
 
-    useEffect(()=>{
+    useEffect(() => {
         getAllWards()
-    
-    },[])
+
+    }, [])
 
     // handle add values
     const handleChange = (e, name) => {
@@ -1130,24 +1130,24 @@ function Ward() {
 
     const getAllWards = () => {
 
-    
+
         axios.get(`${Config.BASE_URL}get-ward`,
-          Config?.config
+            Config?.config
         )
-          .then(function (response) {
-            if (response.status === 200) {
-             setWardList(response?.data)
-    
-            }
-    
-          })
-          .catch(function (error) {
-            console.log(error);
-    
-          });
-    
-    
-      }
+            .then(function (response) {
+                if (response.status === 200) {
+                    setWardList(response?.data)
+
+                }
+
+            })
+            .catch(function (error) {
+                console.log(error);
+
+            });
+
+
+    }
 
 
 
@@ -1189,26 +1189,26 @@ function Ward() {
 
 
         axios.post(`${Config.BASE_URL}get-ward`,
-        data,Config?.config
-      )
-        .then(function (response) {
-  
-          if (response.status === 201) {          
-            setWardList((prevstate) => {
-                return [...prevstate, response?.data]
+            data, Config?.config
+        )
+            .then(function (response) {
+
+                if (response.status === 201) {
+                    setWardList((prevstate) => {
+                        return [...prevstate, response?.data]
+                    })
+                    handleClose()
+
+                }
+
             })
-            handleClose()
-  
-          }
-  
-        })
-        .catch(function (error) {
-          if (error.response.status === 401) {
-            console.log(error);
-          
-  
-          }
-        });
+            .catch(function (error) {
+                if (error.response.status === 401) {
+                    console.log(error);
+
+
+                }
+            });
 
     })
 
@@ -1232,35 +1232,35 @@ function Ward() {
         data.append("name", addWard?.name)
 
         axios.put(`${Config.BASE_URL}get-ward/${id}/`,
-        data,Config?.config
-      )
-        .then(function (response) {
-  
-          if (response.status === 200) {          
-            setWardList(prevArray => {
-                const index = prevArray.findIndex(obj => obj.id === id);
-                if (index !== -1) {
-                    return [
-                        ...prevArray.slice(0, index),
-                        { ...prevArray[index], ...response.data },
-                        ...prevArray.slice(index + 1),
-                    ];
-                }
-                return prevArray;
-            });
+            data, Config?.config
+        )
+            .then(function (response) {
 
-            handleClose()
-  
-          }
-  
-        })
-        .catch(function (error) {
-          if (error.response.status === 401) {
-            console.log(error);
-          
-  
-          }
-        });
+                if (response.status === 200) {
+                    setWardList(prevArray => {
+                        const index = prevArray.findIndex(obj => obj.id === id);
+                        if (index !== -1) {
+                            return [
+                                ...prevArray.slice(0, index),
+                                { ...prevArray[index], ...response.data },
+                                ...prevArray.slice(index + 1),
+                            ];
+                        }
+                        return prevArray;
+                    });
+
+                    handleClose()
+
+                }
+
+            })
+            .catch(function (error) {
+                if (error.response.status === 401) {
+                    console.log(error);
+
+
+                }
+            });
 
     }
 
@@ -1269,21 +1269,21 @@ function Ward() {
     // delete district
     const deleteWard = (id) => {
         axios.delete(`${Config.BASE_URL}get-ward/${id}/`,
-        data,Config?.config
-      )
-        .then(function (response) {
-  
-          if (response.status === 201) {          
-            setWardList(WardList?.filter((e) => e.id !== id))
-            handleClose()
-          }
-  
-        })
-        .catch(function (error) {
-          if (error.response.status === 401) {
-            console.log(error);
-          }
-        });
+            data, Config?.config
+        )
+            .then(function (response) {
+
+                if (response.status === 201) {
+                    setWardList(WardList?.filter((e) => e.id !== id))
+                    handleClose()
+                }
+
+            })
+            .catch(function (error) {
+                if (error.response.status === 401) {
+                    console.log(error);
+                }
+            });
 
     }
 
@@ -1498,12 +1498,255 @@ function Ward() {
 
 function House() {
 
-
+    const title="House"
     return (
 
         <>
 
+            <div class="content">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h4>{title}  Details</h4>
+                    </div>
+                    <div class="page-btn">
+                        <button class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+                            <span class="glyphicon glyphicon-user"></span> Add new {title}
+                        </button>
+                        <div id="myModal" class="modal fade" role="dialog">
+                            <div class="modal-dialog modal-lg modal-dialog-centered">
+                               
+                                <div class="modal-content">
 
+                           
+                                        <h3 style={{marginLeft:20}}>New {title} Details</h3>
+                                        <div class="modal-body">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="row">
+
+                                                        <div class="col-lg-6 col-sm-12 col-12">
+                                                            <div class="form-group">
+                                                                <label class="form-label">Ward No : <span class="form-required">*</span></label>
+                                                                <select name="" id="" className="custom-dropdown">
+                                                                    <option value="">01</option>
+                                                                    <option value="">02</option>
+                                                                    <option value="">03</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6 col-sm-12 col-12">
+                                                            <div class="form-group">
+                                                                <label class="form-label">Shop Name : <span class="form-required">*</span></label>
+                                                                <input type="text" class="form-control" name="category_name" required /> 
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6 col-sm-12 col-12">
+                                                            <div class="form-group">
+                                                                <label class="form-label">Shop No : <span class="form-required">*</span></label>
+                                                                <input type="text" class="form-control" name="category_name" required />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6 col-sm-12 col-12">
+                                                            <div class="form-group">
+                                                                <label class="form-label">Contact No : <span class="form-required">*</span></label>
+                                                                <input type="text" class="form-control" name="category_name" required />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-12 col-sm-12 col-12">
+                                                            <div class="form-group">
+                                                                <label class="form-label">Address :</label>
+                                                                <textarea cols="30" rows="2"></textarea>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-success">Register</button>
+                                            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                                        </div>
+                                  
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr class="table-info">
+                                        <th>S.No</th>
+                                        <th>Ward No</th>
+                                        <th>Name</th>
+                                        <th>Building No</th>
+                                        <th>Contact No</th>
+                                        <th>Address</th>
+                                        <th>QR code</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1.</td>
+                                        <td>05</td>
+                                        <td>jeeva</td>
+                                        <td>25</td>
+                                        <td>123456789</td>
+                                        <td>Tenkasi</td>
+                                        <td>Qr code</td>
+                                        <td>
+                                            <button class="btn btn-success">
+                                                <span class="glyphicon glyphicon-pencil"></span> Edit
+                                            </button>
+                                            <button class="btn btn-info">
+                                                <span class="glyphicon glyphicon-eye-open"></span> View
+                                            </button>
+                                            <button class="btn btn-danger">
+                                                <span class="glyphicon glyphicon-trash"></span> Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                        {/* <br> */}
+                    </div>
+                </div>
+            </div>
+
+
+
+        </>
+    )
+}
+
+function Shop() {
+
+    const title="Shops"
+    return (
+
+        <>
+
+            <div class="content">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h4>{title}  Details</h4>
+                    </div>
+                    <div class="page-btn">
+                        <button class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+                            <span class="glyphicon glyphicon-user"></span> Add new {title}
+                        </button>
+                        <div id="myModal" class="modal fade" role="dialog">
+                            <div class="modal-dialog modal-lg modal-dialog-centered">
+                               
+                                <div class="modal-content">
+
+                           
+                                        <h3 style={{marginLeft:20}}>New {title} Details</h3>
+                                        <div class="modal-body">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="row">
+
+                                                        <div class="col-lg-6 col-sm-12 col-12">
+                                                            <div class="form-group">
+                                                                <label class="form-label">Ward No : <span class="form-required">*</span></label>
+                                                                <select name="" id="" className="custom-dropdown">
+                                                                    <option value="">01</option>
+                                                                    <option value="">02</option>
+                                                                    <option value="">03</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6 col-sm-12 col-12">
+                                                            <div class="form-group">
+                                                                <label class="form-label">Shop Name : <span class="form-required">*</span></label>
+                                                                <input type="text" class="form-control" name="category_name" required /> 
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6 col-sm-12 col-12">
+                                                            <div class="form-group">
+                                                                <label class="form-label">Shop No : <span class="form-required">*</span></label>
+                                                                <input type="text" class="form-control" name="category_name" required />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6 col-sm-12 col-12">
+                                                            <div class="form-group">
+                                                                <label class="form-label">Contact No : <span class="form-required">*</span></label>
+                                                                <input type="text" class="form-control" name="category_name" required />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-12 col-sm-12 col-12">
+                                                            <div class="form-group">
+                                                                <label class="form-label">Address :</label>
+                                                                <textarea cols="30" rows="2"></textarea>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-success">Register</button>
+                                            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                                        </div>
+                                  
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr class="table-info">
+                                        <th>S.No</th>
+                                        <th>Ward No</th>
+                                        <th>Name</th>
+                                        <th>Building No</th>
+                                        <th>Contact No</th>
+                                        <th>Address</th>
+                                        <th>QR code</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1.</td>
+                                        <td>05</td>
+                                        <td>jeeva</td>
+                                        <td>25</td>
+                                        <td>123456789</td>
+                                        <td>Tenkasi</td>
+                                        <td>Qr code</td>
+                                        <td>
+                                            <button class="btn btn-success">
+                                                <span class="glyphicon glyphicon-pencil"></span> Edit
+                                            </button>
+                                            <button class="btn btn-info">
+                                                <span class="glyphicon glyphicon-eye-open"></span> View
+                                            </button>
+                                            <button class="btn btn-danger">
+                                                <span class="glyphicon glyphicon-trash"></span> Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                        {/* <br> */}
+                    </div>
+                </div>
+            </div>
 
 
 
@@ -1523,8 +1766,12 @@ function Content(props) {
             return <Panchayat />
         case "ward":
             return <Ward />
+        case "house":
+            return < House/>
+        case "shops":
+            return <Shop/>
         default:
-            return <OverallColletor />
+            return <Ward />
     }
 
 }

@@ -160,7 +160,7 @@ function Street(){
         <div class="content">
         <div class="page-header">
             <div class="page-title">
-                <h4>Street Report Details</h4>
+                <h4>Ward Report Details</h4>
             </div>
         </div>
         <div class="card">

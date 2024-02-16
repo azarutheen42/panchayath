@@ -297,6 +297,7 @@ function Type(props) {
         "street-light": "Street Light",
         "sanittion": "Sanitation",
         "solid-waste": "Solid Waste",
+        "qr-issue" :"QR Issue"
     }
 
     return (

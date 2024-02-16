@@ -8,6 +8,154 @@ function Requests(props) {
     return (
 
         <>
+
+        {  props?.path === "list" &&(
+
+        
+            <>
+  
+            <div class="content">
+                <div class="page-header">
+                    <h4>Request List</h4>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 col-lg-3 col-xs-8">
+                                <div class="form-group">
+                                 <label for="fromDate">Ward No :</label>
+                               <select name="" id="" className="custom-dropdown">
+                                                <option value="">01</option>
+                                                <option value="">02</option>
+                                                <option value="">03</option>
+                                            </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-lg-2 col-xs-4">
+                               
+                                <div class="form-group">
+                                    <label for="fromDate" style={{ color: "white" }}>Search :</label>
+                                    <button class="btn btn-success" onclick="getReport()">Search</button>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-lg-2 col-xs-6">
+                                <div class="form-group">
+                                    <label for="fromDate">From Date :</label>
+                                    <input type="date" class="form-control" id="fromDate" />
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-lg-2 col-xs-6">
+                                <div class="form-group">
+                                    <label for="toDate">To Date :</label>
+                                    <input type="date" class="form-control" id="toDate" />
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3 col-lg-3 col-xs-6">
+                               
+                                <div class="form-group">
+                                    <label for="fromDate" style={{ color: "white" }}>Next :</label>
+                                    <button class="btn btn-success" onclick="getReport()">Get</button>
+                                </div>
+                            </div>
+                           
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                <tr class="table-info">
+                                    <th>S NO</th>
+                                    <th>Request ID</th>
+                                    <th>Date</th>
+                                    <th>Ward No</th>
+                                    <th>Request Type</th>
+                                    <th>Address </th>
+                                    <th>Details </th>
+                                    <th>Action</th>
+                                </tr>
+
+                                </thead>
+                              <tbody>
+
+                              
+                                <tr>
+                                    <td>1</td>
+                                    <td>001</td>
+                                    <td>27-04-2023</td>
+                                    <td>05</td>
+                                    <td>Water </td>
+                                    <td>address</td>
+                                  
+                                    <td>details</td>
+                                    
+                                    <td>
+                                        <button class="btn btn-success">
+                                            <span class="glyphicon glyphicon-pencil"></span> Edit
+                                        </button>
+                                        <button class="btn btn-info">
+                                            <span class="glyphicon glyphicon-eye-open"></span> View
+                                        </button>
+                                        <button class="btn btn-danger">
+                                            <span class="glyphicon glyphicon-trash"></span> Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>002</td>
+                                    <td>27-04-2023</td>
+                                    <td>05</td>
+                                    <td>Water </td>
+                                    <td>address</td>
+                                  
+                                    <td>details</td>
+                                   
+                                    <td>
+                                        <button class="btn btn-success">
+                                            <span class="glyphicon glyphicon-pencil"></span> Edit
+                                        </button>
+                                        <button class="btn btn-info">
+                                            <span class="glyphicon glyphicon-eye-open"></span> View
+                                        </button>
+                                        <button class="btn btn-danger">
+                                            <span class="glyphicon glyphicon-trash"></span> Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>003</td>
+                                    <td>27-04-2023</td>
+                                    <td>05</td>
+                                    <td>Water </td>
+                                    <td>address </td>
+                                  
+                                    <td>details </td>
+                              
+                                    <td>
+                                        <button class="btn btn-success">
+                                            <span class="glyphicon glyphicon-pencil"></span> Edit
+                                        </button>
+                                        <button class="btn btn-info">
+                                            <span class="glyphicon glyphicon-eye-open"></span> View
+                                        </button>
+                                        <button class="btn btn-danger">
+                                            <span class="glyphicon glyphicon-trash"></span> Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                                </tbody> 
+                               
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+      
+            
+            </>
+        )}
             {props?.path === "public-toilet" && (
 
 
