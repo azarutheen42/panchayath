@@ -1775,8 +1775,6 @@ function Content(props) {
             return <Panchayat />
         case "ward":
             return <Ward />
-        default:
-            return <OverallColletor />
         case "house":
             return < House/>
         case "shops":
