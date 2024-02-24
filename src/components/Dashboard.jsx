@@ -40,20 +40,18 @@ function Dashboard() {
     const search = useLocation().search;
 
 
-    useEffect(() => {
-        // console.log("triggered",url)
-        if (url) {
-            const main = new URLSearchParams(search).get("m");
-            const sub = new URLSearchParams(search).get("s");
-            // console.log(main, "URLS", sub);
-            setView(main)
-            setpath(sub)
-        }
-        else {
-            setView("dashboard")
-        }
+    // useEffect(() => {
+    //     if (url) {
+    //         const main = new URLSearchParams(search).get("m");
+    //         const sub = new URLSearchParams(search).get("s");
+    //         setView(main)
+    //         setpath(sub)
+    //     }
+    //     else {
+    //         setView("dashboard")
+    //     }
 
-    }, [url])
+    // }, [url])
 
 
 
@@ -75,8 +73,11 @@ function Dashboard() {
 
                 <div className="page-wrapper">
                     <Content
-                        path={path}
-                        view={view}
+                        // path={path}
+                        // view={view}
+                        // setView={setView}
+                        // setpath={setpath
+                        // }
                     />
 
                 </div>
@@ -101,48 +102,77 @@ export default Dashboard;
 
 function Content(props) {
 
-    switch (props?.view) {
+    const userName = useContext(UserContext);
+
+    console.log(userName, "action")
+
+    const [path, setpath] = useState();
+
+    const [view, setView] = useState();
+
+    const { state } = useLocation()
+    const search = useLocation().search;
+    const url = window.location.search
+
+
+    useEffect(() => {
+        // console.log("triggered",url)
+        if (url) {
+            const main = new URLSearchParams(search).get("m");
+            const sub = new URLSearchParams(search).get("s");
+            // console.log(main, "URLS", sub);
+            setView(main)
+            setpath(sub)
+        }
+        else {
+            setView("dashboard")
+        }
+
+    }, [url])
+
+
+    switch (view) {
         case "employee":
             return <Employee
-                path={props?.path}
+                path={path}
             />
         case "attendance":
             return <Attendance />
         case "collector":
             return <Collectors
-                path={props?.path}
+                path={path}
             />
         case "user-register":
             return <UserRegister />
         case "complaint":
             return <Complaint
-                path={props?.path}
+                path={path}
             />
 
         case "activity":
             return <Events
-                path={props?.path}
+                path={path}
             />
 
         case "request":
             return <Requests
-                path={props?.path}
+                path={path}
             />
         case "reports":
             return <Reports
-                path={props?.path}
+                path={path}
             />
         case "settings":
             return <Settings
-                path={props?.path}
+                path={path}
             />
         case "masters":
             return <Masters
-                path={props?.path}
+                path={path}
             />
         case "qr":
             return <Qrhandler
-                path={props?.path}
+                path={path}
             />
         case "dashboard":
             return <OverView />

@@ -122,7 +122,7 @@ function SideBar(props) {
                                             <li><a onClick={() => handlenavigate("m=complaint&s=street-light")}>Street Light</a></li>
                                             <li><a onClick={() => handlenavigate("m=complaint&s=sanittion")}>Sanitation</a></li>
                                             <li><a onClick={() => handlenavigate("m=complaint&s=solid-waste")}>Solid Waste</a></li>
-                                            <li><a href="#">QR issue </a></li>
+                                            <li><a onClick={() => handlenavigate("m=complaint&s=qr-issue")}>QR Issue</a></li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -134,6 +134,7 @@ function SideBar(props) {
                                     <li class="submenu">
                                         <a href="javascript:void(0);"><i data-feather="shopping-bag"></i><span>Request</span><span class="menu-arrow"></span></a>
                                         <ul>
+                                        <li><a onClick={() => handlenavigate("m=request&s=list")}>Request List</a></li>
                                             <li><a onClick={() => handlenavigate("m=request&s=public-toilet")}>Public Toilet</a></li>
                                             <li><a onClick={() => handlenavigate("m=request&s=tank-cleaning")}>Specific Tank Cleaning</a></li>
                                         </ul>
@@ -149,7 +150,7 @@ function SideBar(props) {
                                             <li><a onClick={() => handlenavigate("m=activity&s=minutes-of-meeting")}>Minutes of Meeting</a></li>
                                             <li><a onClick={() => handlenavigate("m=activity&s=scheme")}> Scheme </a></li>
                                             <li><a onClick={() => handlenavigate("m=activity&s=events")}>Events </a></li>
-                                            <li><a onClick={() => handlenavigate("m=activity&s=public-notice")}>Public Notice Board</a></li>
+                                            {/* <li><a onClick={() => handlenavigate("m=activity&s=public-notice")}>Public Notice Board</a></li> */}
                                             <li><a onClick={() => handlenavigate("m=activity&s=staff-notice")} >Staff Notice Board</a></li>
                                             <li><a onClick={() => handlenavigate("m=activity&s=announcements")}>Announcements </a></li>
 
@@ -162,9 +163,9 @@ function SideBar(props) {
                                     <li class="submenu">
                                         <a href="javascript:void(0);"><i data-feather="maximize"></i><span>Reports</span><span class="menu-arrow"></span></a>
                                         <ul>
-                                            <li><a onClick={() => handlenavigate("m=reports&s=house")}>House Reports</a></li>
-                                            <li><a onClick={() => handlenavigate("m=reports&s=street")}>Street Reports</a></li>
-                                            <li><a onClick={() => handlenavigate("m=reports&s=shop")}>Shop Reports</a></li>
+                                            {/* <li><a onClick={() => handlenavigate("m=reports&s=house")}>House Reports</a></li> */}
+                                            <li><a onClick={() => handlenavigate("m=reports&s=street")}>Ward Reports</a></li>
+                                            {/* <li><a onClick={() => handlenavigate("m=reports&s=shop")}>Shop Reports</a></li> */}
                                             <li><a onClick={() => handlenavigate("m=reports&s=overall")}>Overall Reports</a></li>
                                         </ul>
                                     </li>
@@ -191,9 +192,10 @@ function SideBar(props) {
                                         <ul>
                                             <li><a onClick={() => handlenavigate("m=masters&s=districts")}>District</a></li>
                                             <li><a onClick={() => handlenavigate("m=masters&s=cities")}>City</a></li>
-                                            {!user?.admin && ( <li><a onClick={() => handlenavigate("m=masters&s=panchayath")}>Panchayath</a></li>)}
-                                           
+                                            <li><a onClick={() => handlenavigate("m=masters&s=panchayath")}>Panchayath</a></li>
                                             <li><a onClick={() => handlenavigate("m=masters&s=ward")}>Ward</a></li>
+                                            <li><a onClick={() => handlenavigate("m=masters&s=house")}>Register House</a></li>
+                                            <li><a onClick={() => handlenavigate("m=masters&s=shops")}>Register Shops</a></li>
                                         </ul>
                                     </li>
                                 </ul>
