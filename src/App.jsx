@@ -38,7 +38,7 @@ function App() {
 
   const getUser = () => {
 
-    axios.get(`${Config.BASE_URL}auth/users/me/`,
+    axios.get(`${Config.BASE_URL}auth/users/me`,
       Config?.config
     )
       .then(function (response) {

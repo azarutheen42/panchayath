@@ -20,6 +20,9 @@ const style = {
 
 function Employee(props) {
 
+
+    const [loader,setLoader] =useState();
+
     // list all employees
     const [permEmployee, setPermEmployee] = useState();
     // const [tempEmployee, setTempEmployee] = useState()
@@ -196,6 +199,7 @@ function Employee(props) {
 
 
     const getEmployee = (id, edit) => {
+        setLoader(true)
 
         axios.get(`${Config.BASE_URL}permanentemployees/${id}/`,
         Config?.config
@@ -208,6 +212,7 @@ function Employee(props) {
                     // setViewEmployee(response?.data)
                     setisEdit(edit)
                     setIsOpen(true)
+                    setLoader(false)
 
                     // $('#myModal').modal('show')
                     // $('.modal-backdrop').show();
@@ -217,6 +222,7 @@ function Employee(props) {
             })
             .catch(function (error) {
                 console.log(error);
+                setLoader(false)
 
             });
 
@@ -573,16 +579,18 @@ function Employee(props) {
                                                 <td>{emp?.start_date}</td>
                                                 <td>
                                                     <button class="btn btn-success" onClick={() => getEmployee(emp?.id, true)}>
-                                                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                                                        {(loader && emp?.id ===employee?.id) ? Config.loader :<span class="glyphicon glyphicon-pencil"></span>} Edit
                                                     </button>
+                                                    
                                                     <button class="btn btn-info"
                                                         // data-toggle="modal" data-target="#viewModal"
                                                         onClick={() => getEmployee(emp?.id, false)}
                                                     >
-                                                        <span class="glyphicon glyphicon-eye-open"></span> View
+                                                         {(loader && emp?.id ===employee?.id) ? Config.loader :<span class="glyphicon glyphicon-pencil"></span>} View
                                                     </button>
+
                                                     <button class="btn btn-danger" onClick={() => deleteEmployee(emp?.id)}>
-                                                        <span class="glyphicon glyphicon-trash"></span> Delete
+                                                    {(loader && emp?.id ===employee?.id) ? Config.loader :<span class="glyphicon glyphicon-pencil"></span>} Delete
                                                     </button>
                                                 </td>
                                             </tr>

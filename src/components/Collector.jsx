@@ -765,7 +765,7 @@ function HouseCollector(props) {
 
                                 (
                                     <tr key={index}>
-                                        <td>{index + 1}</td>
+                                        <td>{index + 1}</td>            
                                         <td><img src={e?.employee_info?.image ?
                                             // Config.BASE_URL + 
                                             e?.employee_info?.image
