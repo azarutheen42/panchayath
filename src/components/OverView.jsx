@@ -1,3 +1,7 @@
+import { useState, useEffect } from "react"
+import Config from "../Config";
+import axios from "axios";
+import CountUp from 'react-countup';
 
 
 
@@ -6,6 +10,203 @@
 
 function OverView() {
 
+
+    const [overData, setOverData] = useState();
+    const [worker, setWorker] = useState();
+    const [compData, setcompData] = useState([]);
+
+    const [registerUser, setRegisterUser] = useState();
+    const [totalWeight, setTotalWeight] = useState();
+
+    // render chart
+    const [isRender,setIsRender] =useState(false);
+
+
+    useEffect(() => {
+
+
+        getoverData();
+        getComplaints();
+        getAtendence();
+        getRegisteredUsers()
+
+
+    }, [])
+
+
+    useEffect(() => {
+        // console.log("enter")
+        // if(isRender){
+            render()
+            setIsRender(true)
+        // }
+       
+    }, [overData])
+
+
+    const getoverData = () => {
+        axios.get(`${Config.BASE_URL}garbage-stats`,
+            Config?.config
+        )
+            .then(function (response) {
+                if (response.status === 200) {
+                    console.log(response);
+                    setOverData(response?.data)
+                    // weighconversion()
+                   
+
+                }
+
+            })
+            .catch(function (error) {
+                console.log(error);
+
+            });
+    }
+
+
+
+    const getComplaints = () => {
+        axios.get(`${Config.BASE_URL}complaint-stats`,
+            Config?.config
+        )
+            .then(function (response) {
+                if (response.status === 200) {
+                    console.log(response);
+                    setcompData(response?.data)
+
+                }
+
+            })
+            .catch(function (error) {
+                console.log(error);
+
+            });
+    }
+
+
+    const getAtendence = () => {
+        axios.get(`${Config.BASE_URL}worker-stats`,
+            Config?.config
+        )
+            .then(function (response) {
+                if (response.status === 200) {
+                    console.log(response);
+                    setWorker(response?.data)
+
+                }
+
+            })
+            .catch(function (error) {
+                console.log(error);
+
+            });
+    }
+
+
+    const weighconversion = () => {
+        const data = Math.ceil((parseFloat(overData?.bio) + parseFloat(overData?.non_bio) + parseFloat(overData?.hazard)))
+        if (data < 1000) {
+            setTotalWeight({ "total": data, "unit": "kg" })
+        }
+        else {
+            setTotalWeight({ "total": data / 1000, "unit": "Ton" })
+        }
+
+    }
+
+
+    const getRegisteredUsers = () => {
+        axios.get(`${Config.BASE_URL}register-user-stats`,
+            Config?.config
+        )
+            .then(function (response) {
+                if (response.status === 200) {
+                    console.log(response);
+                    setRegisterUser(response?.data)
+
+                }
+
+            })
+            .catch(function (error) {
+                console.log(error);
+
+            });
+    }
+
+
+    function render() {
+        if (overData) {
+            var sCol = {
+                chart: {
+                    height: 400,
+                    type: 'bar',
+                    toolbar: {
+                        show: false,
+                    }
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        columnWidth: '25%',
+                        endingShape: 'rounded'
+                    },
+                },
+                // colors: ['#888ea8', '#4361ee'],
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    show: true,
+                    width: 2,
+                    colors: ['transparent']
+                },
+                series: [{
+                    name: 'bio',
+                    data: [overData?.bio    ]
+                },
+                 {
+                    name: 'non-bio',
+                    data: [overData?.non_bio]
+                },
+
+                {
+                    name: 'hazard',
+                    data: [overData?.hazard] 
+                },
+
+
+                ],
+                xaxis: {
+                    categories: ['Garbage collection Chart'],
+                },
+                yaxis: {    
+                    title: {
+                        text: 'Kg'
+                    }
+                },
+                fill: {
+                    opacity: 1
+
+                },
+                tooltip: {
+                    y: {
+                        formatter: function (val) {
+                            return  + val + "Kg"
+                        }
+                    }
+                }
+            }
+
+            var chart = new ApexCharts(
+                document.querySelector("#g-col"),
+                sCol
+            );
+
+            chart.render();
+        }
+
+    }    
 
 
     return (
@@ -24,7 +225,8 @@ function OverView() {
                                     <div class="col-lg-3 col-sm-6 col-12 d-flex">
                                         <div class="dash-count">
                                             <div class="dash-counts">
-                                                <h5>Yesterday's Weighing</h5>
+                                                <h5> {parseFloat(overData?.total) < 1000 ? parseFloat(overData?.total) : (parseFloat(overData?.total) / 1000)}{" "}
+                                                    {parseFloat(overData?.total) < 1000 ? "Kg" : "Ton"} of total waste</h5>
 
                                             </div>
                                             <div class="dash-imgs">
@@ -32,10 +234,33 @@ function OverView() {
                                             </div>
                                         </div>
                                     </div>
+
+                                    <div class="col-lg-3 col-sm-6 col-12 d-flex">
+                                        <div class="dash-count das3">
+                                            <div class="dash-counts">
+                                                <h5>{overData?.non_bio} kg of Degradable waste</h5>
+                                            </div>
+                                            <div class="dash-imgs">
+                                                <i data-feather="clipboard"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-3 col-sm-6 col-12 d-flex">
+                                        <div class="dash-count das2">
+                                            <div class="dash-counts">
+                                                <h5>{overData?.bio} kg of Bio Degradable waste</h5>
+                                            </div>
+                                            <div class="dash-imgs">
+                                                <i data-feather="archive"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="col-lg-3 col-sm-6 col-12 d-flex">
                                         <div class="dash-count das1">
                                             <div class="dash-counts">
-                                                <h5>20 Tons of Total waste</h5>
+                                                <h5>{overData?.hazard}  Kg of Hazard waste</h5>
 
                                             </div>
                                             <div class="dash-imgs">
@@ -44,26 +269,7 @@ function OverView() {
 
                                         </div>
                                     </div>
-                                    <div class="col-lg-3 col-sm-6 col-12 d-flex">
-                                        <div class="dash-count das2">
-                                            <div class="dash-counts">
-                                                <h5>15 Tons of Bio Degradable waste</h5>
-                                            </div>
-                                            <div class="dash-imgs">
-                                                <i data-feather="archive"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-3 col-sm-6 col-12 d-flex">
-                                        <div class="dash-count das3">
-                                            <div class="dash-counts">
-                                                <h5>5 Tons of Degradable waste</h5>
-                                            </div>
-                                            <div class="dash-imgs">
-                                                <i data-feather="clipboard"></i>
-                                            </div>
-                                        </div>
-                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -81,7 +287,11 @@ function OverView() {
                                                     </div>
                                                     <div class="col-md-8 col-7">
                                                         <h3>
-                                                            <span class="counters" data-count="3000">3000</span>
+                                                            <CountUp
+                                                                end={registerUser?.user_count}
+                                                            />
+
+                                                            {/* <span class="counters" data-coun    t={registerUser?.user_count || 0}>{registerUser?.user_count || 0}</span> */}
                                                         </h3>
                                                         <h4>User Registration</h4>
                                                     </div>
@@ -100,7 +310,10 @@ function OverView() {
                                                     </div>
                                                     <div class="col-md-8 col-7">
                                                         <h3>
-                                                            <span class="counters" data-count="210">210</span>
+                                                            {/* <span class="counters" 
+                                                            data-count={compData?.total? compData?.total : 0.00}
+                                                            ></span> */}
+                                                            <CountUp end={compData?.total ? compData?.total : 0.00} />
                                                         </h3>
                                                         <h4> Ward Complaints</h4>
                                                     </div>
@@ -119,7 +332,12 @@ function OverView() {
                                                     </div>
                                                     <div class="col-md-8 col-7">
                                                         <h3>
-                                                            <span class="counters" data-count="300">300 Ton</span>
+                                                            <span >
+                                                                <CountUp
+                                                                    end={parseFloat(overData?.total) < 1000 ? parseFloat(overData?.total) : (parseFloat(overData?.total) / 1000)}
+                                                                />
+                                                               {" "}{parseFloat(overData?.total) < 1000 ? "Kg" : "Ton"}
+                                                            </span>
                                                         </h3>
                                                         <h4>Garbage Wastages</h4>
                                                     </div>
@@ -143,7 +361,7 @@ function OverView() {
                                         <li class="active">
                                             <a href="#today" data-toggle="pill">Today</a>
                                         </li>
-                                        <li>
+                                        {/* <li>
                                             <a href="#weekly" data-toggle="pill">Weekly</a>
                                         </li>
                                         <li>
@@ -151,7 +369,7 @@ function OverView() {
                                         </li>
                                         <li>
                                             <a href="#lastyear" data-toggle="pill">Last Year</a>
-                                        </li>
+                                        </li> */}
                                     </ul>
                                     <div class="tab-content">
                                         <div class="tab-pane active" id="today">
@@ -159,10 +377,10 @@ function OverView() {
                                                 <h5 class="card-title">Column Chart</h5>
                                             </div>
                                             <div class="card-body">
-                                                <div id="s-col" class="chart-set"></div>
+                                                <div id="g-col" class="chart-set"></div>
                                             </div>
                                         </div>
-                                        <div class="tab-pane" id="weekly">
+                                        {/* <div class="tab-pane" id="weekly">
 
                                         </div>
                                         <div class="tab-pane" id="monthly">
@@ -170,7 +388,7 @@ function OverView() {
                                         </div>
                                         <div class="tab-pane" id="lastyear">
 
-                                        </div>
+                                        </div> */}
                                     </div>
 
 
@@ -196,18 +414,14 @@ function OverView() {
                                         <ul class="nav nav-pills"
                                             style={{ marginTop: 20 }}
                                         >
-                                            <li class="active">
-                                                <a href="#permanent" data-toggle="pill">Shift 1</a>
-                                            </li>
-                                            <li>
-                                                <a href="#contract" data-toggle="pill">Shift 2</a>
-                                            </li>
-                                            <li>
+
+                                            {/* <li>
                                                 <a href="#Shift" data-toggle="pill">Shift 3</a>
-                                            </li>
+                                            </li> */}
                                         </ul>
                                         <div class="tab-content">
-                                            <div class="tab-pane active" id="permanent">
+
+                                            <div class="" id="Shift">
                                                 <br />
                                                 <div class="table-responsive">
                                                     <table class="table table-bordered">
@@ -215,155 +429,24 @@ function OverView() {
                                                             <tr class="table-info">
 
                                                                 <th>Employee</th>
-                                                                <th>Shift</th>
+                                                                <th>Role</th>
                                                                 <th>Timing</th>
                                                                 <th>Action</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            <tr>
+                                                            {worker?.map((e, index) => (
+                                                                <tr key={index}>
 
-                                                                <td>Nandhini</td>
-                                                                <td>Shift 1</td>
-                                                                <td>6.00 AM</td>
-                                                                <td>Punched</td>
-                                                            </tr>
-                                                            <tr>
+                                                                    <td>{e?.name}</td>
+                                                                    <td>{e?.role_name}</td>
+                                                                    <td>{e?.clock_in ? e.clock_in : "0.00"}</td>
+                                                                    <td>{e?.present ? "present" : "absent"}</td>
+                                                                </tr>
+                                                            )
+                                                            )}
 
-                                                                <td>Vignesh</td>
-                                                                <td>Shift 1</td>
-                                                                <td>6.00 AM</td>
-                                                                <td>Punched</td>
-                                                            </tr>
-                                                            <tr>
 
-                                                                <td>Nithya</td>
-                                                                <td>Shift 1</td>
-                                                                <td>6.00 AM</td>
-                                                                <td>Punched</td>
-                                                            </tr>
-                                                            <tr>
-
-                                                                <td>Deepa</td>
-                                                                <td>Shift 1</td>
-                                                                <td>6.00 AM</td>
-                                                                <td>Punched</td>
-                                                            </tr>
-                                                            <tr>
-
-                                                                <td>Muthu</td>
-                                                                <td>Shift 1</td>
-                                                                <td>6.00 AM</td>
-                                                                <td>Punched</td>
-                                                            </tr>
-
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                            <div class="tab-pane fade" id="contract">
-                                                <br />
-                                                <div class="table-responsive">
-                                                    <table class="table table-bordered">
-                                                        <thead>
-                                                            <tr class="table-info">
-
-                                                                <th>Employee</th>
-                                                                <th>Shift</th>
-                                                                <th>Timing</th>
-                                                                <th>Action</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr>
-
-                                                                <td>Abi</td>
-                                                                <td>Shift 2</td>
-                                                                <td>6.00 PM</td>
-                                                                <td>Punched</td>
-                                                            </tr>
-                                                            <tr>
-
-                                                                <td>Anu</td>
-                                                                <td>Shift 2</td>
-                                                                <td>6.00 PM</td>
-                                                                <td>Punched</td>
-                                                            </tr>
-                                                            <tr>
-
-                                                                <td>Indhu</td>
-                                                                <td>Shift 2</td>
-                                                                <td>6.00 PM</td>
-                                                                <td>Punched</td>
-                                                            </tr>
-                                                            <tr>
-
-                                                                <td>Jefrin</td>
-                                                                <td>Shift 2</td>
-                                                                <td>6.00 PM</td>
-                                                                <td>Punched</td>
-                                                            </tr>
-                                                            <tr>
-
-                                                                <td>Udhaya</td>
-                                                                <td>Shift 2</td>
-                                                                <td>6.00 PM</td>
-                                                                <td>Punched</td>
-                                                            </tr>
-
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                            <div class="tab-pane fade" id="Shift">
-                                                <br />
-                                                <div class="table-responsive">
-                                                    <table class="table table-bordered">
-                                                        <thead>
-                                                            <tr class="table-info">
-
-                                                                <th>Employee</th>
-                                                                <th>Shift</th>
-                                                                <th>Timing</th>
-                                                                <th>Action</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr>
-
-                                                                <td>Thiru</td>
-                                                                <td>Shift 3</td>
-                                                                <td>6.00 PM</td>
-                                                                <td>Punched</td>
-                                                            </tr>
-                                                            <tr>
-
-                                                                <td>Akshaya</td>
-                                                                <td>Shift 3</td>
-                                                                <td>6.00 PM</td>
-                                                                <td>Punched</td>
-                                                            </tr>
-                                                            <tr>
-
-                                                                <td>Siva</td>
-                                                                <td>Shift 3</td>
-                                                                <td>6.00 PM</td>
-                                                                <td>Punched</td>
-                                                            </tr>
-                                                            <tr>
-
-                                                                <td>Banu</td>
-                                                                <td>Shift 3</td>
-                                                                <td>6.00 PM</td>
-                                                                <td>Punched</td>
-                                                            </tr>
-                                                            <tr>
-
-                                                                <td>Magesh</td>
-                                                                <td>Shift 3</td>
-                                                                <td>6.00 PM</td>
-                                                                <td>Punched</td>
-                                                            </tr>
 
                                                         </tbody>
                                                     </table>

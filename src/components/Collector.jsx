@@ -123,7 +123,7 @@ function HouseCollector(props) {
 
     const getHouseCollectors = () => {
 
-        axios.get(`${Config.BASE_URL}house-collector/`,
+        axios.get(`${Config.BASE_URL}house-collector`,
             Config?.config
         )
             .then(function (response) {
@@ -765,15 +765,15 @@ function HouseCollector(props) {
 
                                 (
                                     <tr key={index}>
-                                        <td>{index + 1}</td>
+                                        <td>{index + 1}</td>            
                                         <td><img src={e?.employee_info?.image ?
-                                            // Config.BASE_URL + 
+                                            Config.MEDIA_URL +
                                             e?.employee_info?.image
                                             : "assets/img/profiles/no_avatar.jpg"} className="emp-thumb" /></td>
                                         {/* <td><img src={e?.employee_info?.image} className="emp-thumb" /></td> */}
                                         <td>{e?.employee_info?.name}</td>
                                         <td>{e?.employee_info?.phone_number}</td>
-                                        <td>{e?.ward?.ward}</td>
+                                        <td>{e?.ward}</td>
                                         <td>House Collector</td>
                                         <td>
                                             <button class="btn btn-success" onClick={() => getHouseCollector(e?.id, true)}>
@@ -1476,12 +1476,12 @@ function ShopCollector(props) {
                                     <tr key={index}>
                                         <td>{index + 1}</td>
                                         <td><img src={e?.employee_info?.image ?
-                                            // Config.BASE_URL +
+                                            Config.MEDIA_URL +
                                             e?.employee_info?.image : "assets/img/profiles/no_avatar.jpg"} className="emp-thumb" /></td>
                                         {/* <td><img src={e?.employee_info?.image} className="emp-thumb" /></td> */}
                                         <td>{e?.employee_info?.name}</td>
                                         <td>{e?.employee_info?.phone_number}</td>
-                                        <td>{e?.ward?.ward}</td>
+                                        <td>{e?.ward}</td>
                                         <td>{title}  Collector</td>
                                         <td>
                                             <button class="btn btn-success" onClick={() => getCollector(e?.id, true)}>
@@ -1665,6 +1665,10 @@ function StreetCollector(props) {
                     console.log(response);
                     createCollector(response?.data?.id)
                     setCollector()
+
+                    // setCollectorList((prevstate) => {
+                    //     return [...prevstate, response?.data]
+                    // })
 
                 }
 
@@ -2249,15 +2253,15 @@ function StreetCollector(props) {
                                     <tr key={index}>
                                         <td>{index + 1}</td>
                                         <td><img src={e?.employee_info?.image ?
-                                            // Config.BASE_URL + 
+                                            Config.MEDIA_URL + 
                                             e?.employee_info?.image : "assets/img/profiles/no_avatar.jpg"} className="emp-thumb" /></td>
                                         {/* <td><img src={e?.employee_info?.image} className="emp-thumb" /></td> */}
 
                                         <td>{e?.employee_info?.name}</td>
                                         <td>{e?.employee_info?.phone_number}</td>
                                         <td>
-                                            {e?.ward?.map((e, index) => (
-                                                <span>{e?.ward}</span>
+                                            {e?.ward?.map((i, index) => (
+                                                <span>{i}</span>
 
                                             ))}
                                         </td>
@@ -3000,7 +3004,7 @@ function OverallCollector(props) {
                                     <tr key={index}>
                                         <td>{index + 1}</td>
                                         <td><img src={e?.employee_info?.image ?
-                                            //  Config.BASE_URL +
+                                             Config.MEDIA_URL +
                                             e?.employee_info?.image : "assets/img/profiles/no_avatar.jpg"} className="emp-thumb" /></td>
                                         {/* <td><img src={e?.employee_info?.image} className="emp-thumb" /></td> */}
                                         {/* <td>    
