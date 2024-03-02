@@ -16,6 +16,7 @@ const Config = {
     HOST_URL: "../../../",
     BASE_URL: import.meta.env.VITE_APP_BASE_URL,
     LOGIN_URL: import.meta.env.VITE_APP_LOGIN_URL,
+    MEDIA_URL:import.meta.env.VITE_APP_MEDIA_URL,
 
     config: {
         headers: { Authorization: `Bearer ${userState?.token}` }

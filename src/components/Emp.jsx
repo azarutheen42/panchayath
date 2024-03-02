@@ -5,6 +5,7 @@ import axios from "axios";
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
+import ButtonWithLoader from "./Button"
 
 
 
@@ -21,7 +22,7 @@ const style = {
 function Employee(props) {
 
 
-    const [loader,setLoader] =useState();
+    const [loader, setLoader] = useState();
 
     // list all employees
     const [permEmployee, setPermEmployee] = useState();
@@ -73,7 +74,7 @@ function Employee(props) {
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response);
-                    setRoles(response?.data?.filter((e) => e.id === 1))
+                    setRoles(response?.data?.filter((e) => e.type === 'ADMIN'))
 
                 }
 
@@ -85,7 +86,7 @@ function Employee(props) {
     }
 
 
-
+console.log(roles,'hrets')
 
     const getPermemployee = () => {
         axios.get(`${Config.BASE_URL}permanentemployees/`,
@@ -140,6 +141,7 @@ function Employee(props) {
         data.append("phone_number", employee?.phone_number)
         data.append("start_date", employee?.start_date)
         data.append("is_permenant", true)
+        // data.append("ward", true)
         // data.append("panchayat", employee?.panchayat)
 
         if (image) {
@@ -174,16 +176,19 @@ function Employee(props) {
 
 
 
-    const deleteEmployee = (id) => {
+    const deleteEmployee = (id, load_state) => {
 
-        axios.delete(`${Config.BASE_URL}permanentemployees/${id}/`,
-        Config?.config
+        setLoader(load_state)
+
+        axios.get(`${Config.BASE_URL}permanentemployees/${id}/`,
+            Config?.config
 
         )
             .then(function (response) {
                 if (response.status === 204) {
                     console.log(response);
-                    setPermEmployee(permEmployee?.filter((e) => e.id !== id))
+                    // setPermEmployee(permEmployee?.filter((e) => e.id !== id))
+                    // setLoader()
 
 
                 }
@@ -191,6 +196,7 @@ function Employee(props) {
             })
             .catch(function (error) {
                 console.log(error);
+                setLoader()
 
             });
 
@@ -198,11 +204,11 @@ function Employee(props) {
 
 
 
-    const getEmployee = (id, edit) => {
-        setLoader(true)
+    const getEmployee = async(id, edit, load_state) => {
+        setLoader(load_state)
 
         axios.get(`${Config.BASE_URL}permanentemployees/${id}/`,
-        Config?.config
+            Config?.config
 
         )
             .then(function (response) {
@@ -211,8 +217,8 @@ function Employee(props) {
                     setEmployee(response?.data)
                     // setViewEmployee(response?.data)
                     setisEdit(edit)
-                    setIsOpen(true)
-                    setLoader(false)
+                    // setIsOpen(true)
+                    // setLoader(false)
 
                     // $('#myModal').modal('show')
                     // $('.modal-backdrop').show();
@@ -299,7 +305,7 @@ function Employee(props) {
 
 
         axios.patch(`${Config.BASE_URL}permanentemployees/${id}/`, data,
-        Config?.config
+            Config?.config
 
         )
             .then(function (response) {
@@ -421,7 +427,7 @@ function Employee(props) {
 
                                                                 {/* <div class="col-lg-6 col-sm-12 col-12">
                                                                     <div class="form-group">
-                                                                        <label class="form-label">Select Panchayath : <span class="form-required">*</span></label>
+                                                                        <label class="form-label">Select Ward : <span class="form-required">*</span></label>
                                                                         <select name="" id="" className="report-dropdown"
                                                                             onChange={(e) => handleChange(e, "panchayat")}
                                                                             disabled={!isedit && !isAdd}
@@ -571,27 +577,55 @@ function Employee(props) {
 
                                             <tr key={index}>
                                                 <td>{index + 1}</td>
-                                                <td><img src={emp?.image ? Config.BASE_URL + emp?.image : "assets/img/profiles/no_avatar.jpg"} className="emp-thumb" /></td>
+                                                <td><img src={emp?.image ? Config.MEDIA_URL + emp?.image : "assets/img/profiles/no_avatar.jpg"} className="emp-thumb" /></td>
                                                 <td>{emp?.name}</td>
                                                 <td>{getRoleLabel(emp?.role)}</td>
                                                 {/* <td>{emp?.role?.emp_role}</td> */}
                                                 <td>{emp?.phone_number}</td>
                                                 <td>{emp?.start_date}</td>
                                                 <td>
-                                                    <button class="btn btn-success" onClick={() => getEmployee(emp?.id, true)}>
-                                                        {(loader && emp?.id ===employee?.id) ? Config.loader :<span class="glyphicon glyphicon-pencil"></span>} Edit
-                                                    </button>
-                                                    
-                                                    <button class="btn btn-info"
+                                                    {/* <button class="btn btn-success" onClick={() => getEmployee(emp?.id, true,"edit")} >
+                                                        {(loader ==="edit" && emp?.id ===employee?.id) ? Config.loader :<span class="glyphicon glyphicon-pencil"></span>} Edit
+                                                    </button> */}
+
+
+                                                    <ButtonWithLoader
+                                                        itemId={emp?.id}
+                                                        onClick={() => getEmployee(emp?.id, true, "edit")}
+                                                        class_name="btn btn-success"
+                                                        text="Edit1"
+                                                        span_class="glyphicon glyphicon-pencil"
+                                                    />
+
+                                                    <ButtonWithLoader
+                                                        itemId={emp?.id}
+                                                        onClick={() => getEmployee(emp?.id, true, "edit")}
+                                                        class_name="btn btn-info"
+                                                        text="View"
+                                                        span_class="glyphicon glyphicon-pencil"
+                                                    />
+
+
+
+                                                    <ButtonWithLoader
+                                                        itemId={emp?.id}
+                                                        onClick={() => deleteEmployee(emp?.id, "delete")}
+                                                        class_name="btn btn-danger"
+                                                        text="Delete"
+                                                        span_class="glyphicon glyphicon-pencil"
+                                                    />
+
+
+                                                    {/* <button class="btn btn-info"
                                                         // data-toggle="modal" data-target="#viewModal"
-                                                        onClick={() => getEmployee(emp?.id, false)}
+                                                        onClick={() => getEmployee(emp?.id, false, "view")}
                                                     >
-                                                         {(loader && emp?.id ===employee?.id) ? Config.loader :<span class="glyphicon glyphicon-pencil"></span>} View
+                                                        {(loader === "view" && emp?.id === employee?.id) ? Config.loader : <span class="glyphicon glyphicon-pencil"></span>} View
                                                     </button>
 
-                                                    <button class="btn btn-danger" onClick={() => deleteEmployee(emp?.id)}>
-                                                    {(loader && emp?.id ===employee?.id) ? Config.loader :<span class="glyphicon glyphicon-pencil"></span>} Delete
-                                                    </button>
+                                                    <button class="btn btn-danger" onClick={() => deleteEmployee(emp?.id, "delete")}>
+                                                        {(loader === "delete") ? Config.loader : <span class="glyphicon glyphicon-pencil"></span>} Delete
+                                                    </button> */}
                                                 </td>
                                             </tr>
 
@@ -776,7 +810,7 @@ function ViewModal(props) {
 
 
         axios.patch(`${Config.BASE_URL}permanentemployees/${id}/`, data,
-        Config?.config
+            Config?.config
 
         )
             .then(function (response) {
