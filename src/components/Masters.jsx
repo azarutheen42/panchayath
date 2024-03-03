@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useContext } from "react"
 import axios from "axios"
 import Config from "../Config"
 import { useSelector } from "react-redux";
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
+import UserContext                                             from "../Context"
 
 
 
@@ -1505,9 +1506,235 @@ function Ward() {
 
 // house 
 
+// 
+
+
 function House() {
 
-    const title="House"
+    ///Post New House Method
+    const [hward, setHWard] = useState();
+    const [hbuilding, setHBuilding] = useState();
+    const [hname, setHName] = useState();
+    const [hphone, setHPhone] = useState();
+    const [hdoor, setHDoor] = useState();
+    const [haddress, setHAddress] = useState();
+
+    const [isedit, setisEdit] = useState()
+    const [isAdd, setisAdd] = useState()
+    const [id, setId] = useState()
+    const [error, setError] = useState()
+    const [open, setOpen] = useState(false)
+
+
+    const handleSubmitNewHouse = async (e) => {
+        e.preventDefault();
+        // console.log(date,time,schme_name,period,announced_by,schme_details);
+        const data = new FormData()
+        data.append("ward", hward)
+        data.append("building_type", hbuilding)
+        data.append("name", hname)
+        data.append("phone_num", hphone)
+        data.append("door_no", hdoor)
+        data.append("line1", haddress)
+        axios.post(`${Config.BASE_URL}buildingregister`,
+            data,
+            Config.config,
+        )
+            .then(function (response) {
+                if (response.status === 201) {
+                    console.log(response);
+
+                }
+
+            })
+            .catch(function (error) {
+                console.log(error);
+
+            });
+    }
+
+    ///Get Scheme Method
+
+    const [houseList, setHouseList] = useState([]);
+    const [wardList, setWardList] = useState([]);
+    const [buildingList, setBuildingList] = useState([]);
+
+
+    useEffect(() => {
+        fetchHouse()
+        fetchWards()
+        fetchBuildingType()
+    }, [])
+
+    const fetchHouse = async () => {
+        try {
+            // Make an API call to fetch data from the backend
+            const response = await fetch(
+                Config.BASE_URL + 'buildingregister',
+                Config?.config,
+            )
+            const data = await response.json()
+
+            console.log(data)
+            setHouseList(data)
+            // Assuming your data is an array of objects with 'value' and 'label' properties
+            // setWardList(data)
+        } catch (error) {
+            console.error('Error fetching data:', error)
+        }
+    }
+
+
+    const fetchWards = async () => {
+        try {
+            // Make an API call to fetch data from the backend
+            const response = await fetch(
+                Config.BASE_URL + 'get-ward',
+                Config?.config,
+            )
+            const data = await response.json()
+
+            console.log(data)
+            setWardList(data)
+            // Assuming your data is an array of objects with 'value' and 'label' properties
+            // setWardList(data)
+        } catch (error) {
+            console.error('Error fetching data:', error)
+        }
+    }
+
+
+
+    const fetchBuildingType = async () => {
+        try {
+            // Make an API call to fetch data from the backend
+            const response = await fetch(
+                Config.BASE_URL + 'building-type',
+                Config?.config,
+            )
+            const data = await response.json()
+
+            console.log(data)
+            setBuildingList(data)
+            // Assuming your data is an array of objects with 'value' and 'label' properties
+            // setWardList(data)
+        } catch (error) {
+            console.error('Error fetching data:', error)
+        }
+    }
+
+    const getHouse = (id, edit) => {
+        // setOpen(true)
+        axios
+          .get(`${Config.BASE_URL}buildingregister/${id}`, Config.config)
+          .then(function (response) {
+            if (response.status === 200) {
+              // console.log(response);
+              // setupdatemeetings(response?.data)
+              setHWard(response.data.ward)
+              setHBuilding(response.data.building_type)
+              setHName(response.data.name)
+              // settime(response.data.time)
+              setHPhone(response.data.phone_num)
+              setHDoor(response.data.door_no)
+              setHAddress(response.data.line1)
+              // setScheme_Details(response.data.details)
+              setId(response.data.id)
+    
+              // setViewEmployee(response?.data)
+              setisEdit(edit)
+              setOpen(true)
+    
+              // $('#myModal').modal('show')
+              // $('.modal-backdrop').show();
+            }
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      }
+      const handleOpen = (id) => {
+        getHouse(id)
+        setOpen(true)
+      }
+
+      const handleClose = () => {
+        setOpen(false)
+        setisEdit()
+      }
+    
+     
+      //UPDATE ANNOUNCEMENT
+      const updateHouse = (id) => {
+        // const check = checkSchemeValidation()
+    
+        // if (!check) {
+        //   return
+        // }
+    
+        const data = new FormData()
+        data.append('ward', hward)
+        data.append('building_type', hbuilding)
+        data.append('name', hname)
+        data.append('phone_num', hphone)
+        data.append('door_no', hdoor)
+        data.append('line1', haddress)
+    
+        axios
+          .put(`${Config.BASE_URL}buildingregister/${id}/`, data, Config.config)
+          .then(function (response) {
+            if (response.status === 200) {
+              console.log(response)
+    
+              setHouseList((prevArray) => {
+                const index = prevArray.findIndex((obj) => obj.id === id)
+                if (index !== -1) {
+                  return [
+                    ...prevArray.slice(0, index),
+                    { ...prevArray[index], ...response.data },
+                    ...prevArray.slice(index + 1),
+                  ]
+                }
+                return prevArray
+              })
+              // setIsOpen(false)
+              handleClose()
+    
+              // $('#myModal').modal('show')
+              // $('.modal-backdrop').show();
+            }
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      }
+    
+
+    ///Delete House Method
+
+
+    const deleteHouse = (id) => {
+        console.log('deleting')
+        axios
+            .delete(`${Config.BASE_URL}buildingregister/${id}`, Config.config)
+            .then(function (response) {
+                if (response.status === 204) {
+                    console.log(response)
+                    setHouseList(houseList?.filter((e) => e.id !== id))
+                }
+            })
+            .catch(function (error) {
+                console.log(error)
+            })
+    }
+
+
+
+    const user = useContext(UserContext);
+    console.log(user)
+    console.log(user?.employee_info?.panchayat, "panchayat")
+
+    const title = "House"
     return (
 
         <>
@@ -1521,50 +1748,73 @@ function House() {
                         <button class="btn btn-primary" data-toggle="modal" data-target="#myModal">
                             <span class="glyphicon glyphicon-user"></span> Add new {title}
                         </button>
-                        <div id="myModal" class="modal fade" role="dialog">
-                            <div class="modal-dialog modal-lg modal-dialog-centered">
-                               
-                                <div class="modal-content">
-
-                           
-                                        <h3 style={{marginLeft:20}}>New {title} Details</h3>
+                        {open && (
+                            <Modal
+                                // keepMounted
+                                open={open}
+                                onClose={handleClose}
+                                aria-labelledby="keep-mounted-modal-title"
+                                aria-describedby="keep-mounted-modal-description"
+                            >
+                                <Box sx={style}>
+                                    <div class="modal-content">
+                                        <h3 style={{ marginLeft: 20 }}>Announcement</h3>
                                         <div class="modal-body">
                                             <div class="card">
-                                                <div class="card-body">
+                                                <div className="card-body">
                                                     <div class="row">
+
+                                                        <div className="col-lg-6 col-sm-6 col-12">
+                                                            <div className="form-group">
+                                                                <label style={{ color: 'grey' }}>Ward No :</label>
+                                                                <select
+                                                                    name="ward"
+                                                                    id=""
+                                                                    className="custom-dropdown"
+                                                                    onChange={(e) => setHWard(e?.target?.value)}
+                                                                    defaultValue={hward ||''}
+
+                                                                >
+                                                                    {wardList?.map((e) => (
+                                                                        <option value={e?.id}>{e?.ward_no}</option>
+                                                                    ))}
+                                                                </select>
+                                                            </div>
+                                                        </div>
 
                                                         <div class="col-lg-6 col-sm-12 col-12">
                                                             <div class="form-group">
-                                                                <label class="form-label">Ward No : <span class="form-required">*</span></label>
-                                                                <select name="" id="" className="custom-dropdown">
-                                                                    <option value="">01</option>
-                                                                    <option value="">02</option>
-                                                                    <option value="">03</option>
+                                                                <label class="form-label">Building Type : <span class="form-required">*</span></label>
+                                                                <select name="building_type" id="" className="custom-dropdown"      defaultValue={hbuilding ||''} onChange={(e) => setHBuilding(e?.target?.value)}>
+                                                                    {buildingList?.map((e) => (
+                                                                        <option value={e?.id}>{e?.id}</option>
+                                                                    ))}
+
                                                                 </select>
                                                             </div>
                                                         </div>
                                                         <div class="col-lg-6 col-sm-12 col-12">
                                                             <div class="form-group">
-                                                                <label class="form-label">Shop Name : <span class="form-required">*</span></label>
-                                                                <input type="text" class="form-control" name="category_name" required /> 
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Shop No : <span class="form-required">*</span></label>
-                                                                <input type="text" class="form-control" name="category_name" required />
+                                                                <label class="form-label">Name : <span class="form-required">*</span></label>
+                                                                <input type="text" class="form-control" name="name"      defaultValue={hname ||''} onChange={(e) => setHName(e.target.value)} required />
                                                             </div>
                                                         </div>
                                                         <div class="col-lg-6 col-sm-12 col-12">
                                                             <div class="form-group">
                                                                 <label class="form-label">Contact No : <span class="form-required">*</span></label>
-                                                                <input type="text" class="form-control" name="category_name" required />
+                                                                <input type="text" class="form-control" name="phone_num"      defaultValue={hphone ||''} onChange={(e) => setHPhone(e.target.value)} required />
                                                             </div>
                                                         </div>
-                                                        <div class="col-lg-12 col-sm-12 col-12">
+                                                        <div class="col-lg-6 col-sm-12 col-12">
+                                                            <div class="form-group">
+                                                                <label class="form-label">Door No : <span class="form-required">*</span></label>
+                                                                <input type="text" class="form-control" name="door_no"      defaultValue={hdoor ||''} onChange={(e) => setHDoor(e.target.value)} required />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6 col-sm-6 col-6">
                                                             <div class="form-group">
                                                                 <label class="form-label">Address :</label>
-                                                                <textarea cols="30" rows="2"></textarea>
+                                                                <textarea cols="30" rows="2" name="line1" onChange={(e) => setHAddress(e.target.value)} defaultValue={haddress || ''}></textarea>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1572,10 +1822,104 @@ function House() {
                                             </div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="submit" class="btn btn-success">Register</button>
-                                            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                                            {isedit && (
+                                                <button
+                                                    type="submit"
+                                                    class="btn btn-success"
+                                                    onClick={() => updateHouse(id)}
+                                               
+                                                  
+                                                >
+                                                    Save
+                                                </button>
+                                            )}
+                                            <button
+                                                type="button"
+                                                class="btn btn-danger"
+                                                data-dismiss="modal"
+                                                onClick={handleClose}
+                                            >
+                                                Close
+                                            </button>
                                         </div>
-                                  
+                                    </div>
+                                </Box>
+                            </Modal>
+                        )}
+
+                        <div id="myModal" class="modal fade" role="dialog">
+                            <div class="modal-dialog modal-lg modal-dialog-centered">
+
+                                <div class="modal-content">
+
+
+                                    <h3 style={{ marginLeft: 20 }}>New {title} Details</h3>
+                                    <div class="modal-body">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row">
+
+                                                    <div className="col-lg-6 col-sm-6 col-12">
+                                                        <div className="form-group">
+                                                            <label style={{ color: 'grey' }}>Ward No :</label>
+                                                            <select
+                                                                name="ward"
+                                                                id=""
+                                                                className="custom-dropdown"
+                                                                onChange={(e) => setHWard(e?.target?.value)}
+
+                                                            >
+                                                                {wardList?.map((e) => (
+                                                                    <option value={e?.id}>{e?.ward_no}</option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-lg-6 col-sm-12 col-12">
+                                                        <div class="form-group">
+                                                            <label class="form-label">Building Type : <span class="form-required">*</span></label>
+                                                            <select name="building_type" id="" className="custom-dropdown" onChange={(e) => setHBuilding(e?.target?.value)}>
+                                                                {buildingList?.map((e) => (
+                                                                    <option value={e?.id}>{e?.id}</option>
+                                                                ))}
+
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6 col-sm-12 col-12">
+                                                        <div class="form-group">
+                                                            <label class="form-label">Name : <span class="form-required">*</span></label>
+                                                            <input type="text" class="form-control" name="name" onChange={(e) => setHName(e.target.value)} required />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6 col-sm-12 col-12">
+                                                        <div class="form-group">
+                                                            <label class="form-label">Contact No : <span class="form-required">*</span></label>
+                                                            <input type="text" class="form-control" name="phone_num" onChange={(e) => setHPhone(e.target.value)} required />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6 col-sm-12 col-12">
+                                                        <div class="form-group">
+                                                            <label class="form-label">Door No : <span class="form-required">*</span></label>
+                                                            <input type="text" class="form-control" name="door_no" onChange={(e) => setHDoor(e.target.value)} required />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6 col-sm-6 col-6">
+                                                        <div class="form-group">
+                                                            <label class="form-label">Address :</label>
+                                                            <textarea cols="30" rows="2" name="line1" onChange={(e) => setHAddress(e.target.value)}></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-success" onClick={handleSubmitNewHouse}>Register</button>
+                                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -1590,35 +1934,42 @@ function House() {
                                     <tr class="table-info">
                                         <th>S.No</th>
                                         <th>Ward No</th>
+                                        <th>Building Type</th>
                                         <th>Name</th>
-                                        <th>Building No</th>
                                         <th>Contact No</th>
+                                        <th>Door No</th>
                                         <th>Address</th>
                                         <th>QR code</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>1.</td>
-                                        <td>05</td>
-                                        <td>jeeva</td>
-                                        <td>25</td>
-                                        <td>123456789</td>
-                                        <td>Tenkasi</td>
-                                        <td>Qr code</td>
-                                        <td>
-                                            <button class="btn btn-success">
-                                                <span class="glyphicon glyphicon-pencil"></span> Edit
-                                            </button>
-                                            <button class="btn btn-info">
-                                                <span class="glyphicon glyphicon-eye-open"></span> View
-                                            </button>
-                                            <button class="btn btn-danger">
-                                                <span class="glyphicon glyphicon-trash"></span> Delete
-                                            </button>
-                                        </td>
-                                    </tr>
+                                    {houseList?.map(user => (
+
+                                        <tr key={user.id}>
+
+                                            <td></td>
+                                            <td>{user.ward}</td>
+                                            <td>{user.building_type}</td>
+                                            <td>{user.name}</td>
+                                            <td>{user.phone_num}</td>
+                                            <td>{user.door_no}</td>
+                                            <td>{user.line1}</td>
+                                            <td><img src={Config.BASE_URL + user.qr_code} className="emp-thumb" /></td>
+                                            <td>
+                                                <button className="btn btn-success" onClick={() => getHouse(user?.id, true)}> 
+                                                    <span className="glyphicon glyphicon-pencil"></span> Edit
+                                                </button>
+                                                <button className="btn btn-info" onClick={() => getHouse(user?.id, false)} >
+                                                    <span className="glyphicon glyphicon-eye-open"></span> View
+                                                </button>
+                                                <button className="btn btn-danger"    onClick={() => deleteHouse(user?.id)} >
+                                                    <span className="glyphicon glyphicon-trash"></span> Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+
 
                                 </tbody>
                             </table>
@@ -1803,3 +2154,136 @@ function Masters(props) {
 
 
 export default Masters;
+
+
+
+
+
+// function House() {
+
+    //     const title="House"
+    //     return (
+    
+    //         <>
+    
+    //             <div class="content">
+    //                 <div class="page-header">
+    //                     <div class="page-title">
+    //                         <h4>{title}  Details</h4>
+    //                     </div>
+    //                     <div class="page-btn">
+    //                         <button class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+    //                             <span class="glyphicon glyphicon-user"></span> Add new {title}
+    //                         </button>
+    //                         <div id="myModal" class="modal fade" role="dialog">
+    //                             <div class="modal-dialog modal-lg modal-dialog-centered">
+                                   
+    //                                 <div class="modal-content">
+    
+                               
+    //                                         <h3 style={{marginLeft:20}}>New {title} Details</h3>
+    //                                         <div class="modal-body">
+    //                                             <div class="card">
+    //                                                 <div class="card-body">
+    //                                                     <div class="row">
+    
+    //                                                         <div class="col-lg-6 col-sm-12 col-12">
+    //                                                             <div class="form-group">
+    //                                                                 <label class="form-label">Ward No : <span class="form-required">*</span></label>
+    //                                                                 <select name="" id="" className="custom-dropdown">
+    //                                                                     <option value="">01</option>
+    //                                                                     <option value="">02</option>
+    //                                                                     <option value="">03</option>
+    //                                                                 </select>
+    //                                                             </div>
+    //                                                         </div>
+    //                                                         <div class="col-lg-6 col-sm-12 col-12">
+    //                                                             <div class="form-group">
+    //                                                                 <label class="form-label">Shop Name : <span class="form-required">*</span></label>
+    //                                                                 <input type="text" class="form-control" name="category_name" required /> 
+    //                                                             </div>
+    //                                                         </div>
+    //                                                         <div class="col-lg-6 col-sm-12 col-12">
+    //                                                             <div class="form-group">
+    //                                                                 <label class="form-label">Shop No : <span class="form-required">*</span></label>
+    //                                                                 <input type="text" class="form-control" name="category_name" required />
+    //                                                             </div>
+    //                                                         </div>
+    //                                                         <div class="col-lg-6 col-sm-12 col-12">
+    //                                                             <div class="form-group">
+    //                                                                 <label class="form-label">Contact No : <span class="form-required">*</span></label>
+    //                                                                 <input type="text" class="form-control" name="category_name" required />
+    //                                                             </div>
+    //                                                         </div>
+    //                                                         <div class="col-lg-12 col-sm-12 col-12">
+    //                                                             <div class="form-group">
+    //                                                                 <label class="form-label">Address :</label>
+    //                                                                 <textarea cols="30" rows="2"></textarea>
+    //                                                             </div>
+    //                                                         </div>
+    //                                                     </div>
+    //                                                 </div>
+    //                                             </div>
+    //                                         </div>
+    //                                         <div class="modal-footer">
+    //                                             <button type="submit" class="btn btn-success">Register</button>
+    //                                             <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+    //                                         </div>
+                                      
+    //                                 </div>
+    //                             </div>
+    //                         </div>
+    //                     </div>
+    //                 </div>
+    //                 <div class="card">
+    //                     <div class="card-body">
+    
+    //                         <div class="table-responsive">
+    //                             <table class="table table-bordered">
+    //                                 <thead>
+    //                                     <tr class="table-info">
+    //                                         <th>S.No</th>
+    //                                         <th>Ward No</th>
+    //                                         <th>Name</th>
+    //                                         <th>Building No</th>
+    //                                         <th>Contact No</th>
+    //                                         <th>Address</th>
+    //                                         <th>QR code</th>
+    //                                         <th>Action</th>
+    //                                     </tr>
+    //                                 </thead>
+    //                                 <tbody>
+    //                                     <tr>
+    //                                         <td>1.</td>
+    //                                         <td>05</td>
+    //                                         <td>jeeva</td>
+    //                                         <td>25</td>
+    //                                         <td>123456789</td>
+    //                                         <td>Tenkasi</td>
+    //                                         <td>Qr code</td>
+    //                                         <td>
+    //                                             <button class="btn btn-success">
+    //                                                 <span class="glyphicon glyphicon-pencil"></span> Edit
+    //                                             </button>
+    //                                             <button class="btn btn-info">
+    //                                                 <span class="glyphicon glyphicon-eye-open"></span> View
+    //                                             </button>
+    //                                             <button class="btn btn-danger">
+    //                                                 <span class="glyphicon glyphicon-trash"></span> Delete
+    //                                             </button>
+    //                                         </td>
+    //                                     </tr>
+    
+    //                                 </tbody>
+    //                             </table>
+    //                         </div>
+    //                         {/* <br> */}
+    //                     </div>
+    //                 </div>
+    //             </div>
+    
+    
+    
+    //         </>
+    //     )
+    // }
