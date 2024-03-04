@@ -2,6 +2,11 @@ import { useState, useEffect } from "react"
 import Config from "../Config";
 import axios from "axios";
 import CountUp from 'react-countup';
+// import { Doughnut } from 'react-chartjs-2';
+// // import { PieChart } from '@mui/x-charts/PieChart';
+
+import { Pie } from "react-chartjs-2";
+import Chart from "chart.js/auto";
 
 
 
@@ -19,7 +24,7 @@ function OverView() {
     const [totalWeight, setTotalWeight] = useState();
 
     // render chart
-    const [isRender,setIsRender] =useState(false);
+    const [isRender, setIsRender] = useState(false);
 
 
     useEffect(() => {
@@ -37,10 +42,10 @@ function OverView() {
     useEffect(() => {
         // console.log("enter")
         // if(isRender){
-            render()
-            setIsRender(true)
+        // render()
+        setIsRender(true)
         // }
-       
+
     }, [overData])
 
 
@@ -53,7 +58,7 @@ function OverView() {
                     console.log(response);
                     setOverData(response?.data)
                     // weighconversion()
-                   
+
 
                 }
 
@@ -135,79 +140,104 @@ function OverView() {
     }
 
 
-    function render() {
-        if (overData) {
-            var sCol = {
-                chart: {
-                    height: 400,
-                    type: 'bar',
-                    toolbar: {
-                        show: false,
-                    }
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: false,
-                        columnWidth: '25%',
-                        endingShape: 'rounded'
-                    },
-                },
-                // colors: ['#888ea8', '#4361ee'],
-                dataLabels: {
-                    enabled: false
-                },
-                stroke: {
-                    show: true,
-                    width: 2,
-                    colors: ['transparent']
-                },
-                series: [{
-                    name: 'bio',
-                    data: [overData?.bio    ]
-                },
-                 {
-                    name: 'non-bio',
-                    data: [overData?.non_bio]
-                },
+    // function render() {
+    //     if (overData) {
+    //         var sCol = {
+    //             chart: {
+    //                 height: 400,
+    //                 type: 'bar',
+    //                 toolbar: {
+    //                     show: false,
+    //                 }
+    //             },
+    //             plotOptions: {
+    //                 bar: {
+    //                     horizontal: false,
+    //                     columnWidth: '25%',
+    //                     endingShape: 'rounded'
+    //                 },
+    //             },
+    //             // colors: ['#888ea8', '#4361ee'],
+    //             dataLabels: {
+    //                 enabled: false
+    //             },
+    //             stroke: {
+    //                 show: true,
+    //                 width: 2,
+    //                 colors: ['transparent']
+    //             },
+    //             series: [{
+    //                 name: 'bio',
+    //                 data: [overData?.bio]
+    //             },
+    //             {
+    //                 name: 'non-bio',
+    //                 data: [overData?.non_bio]
+    //             },
 
-                {
-                    name: 'hazard',
-                    data: [overData?.hazard] 
-                },
+    //             {
+    //                 name: 'hazard',
+    //                 data: [overData?.hazard]
+    //             },
 
 
-                ],
-                xaxis: {
-                    categories: ['Garbage collection Chart'],
-                },
-                yaxis: {    
-                    title: {
-                        text: 'Kg'
-                    }
-                },
-                fill: {
-                    opacity: 1
+    //             ],
+    //             xaxis: {
+    //                 categories: ['Garbage collection Chart'],
+    //             },
+    //             yaxis: {
+    //                 title: {
+    //                     text: 'Kg'
+    //                 }
+    //             },
+    //             fill: {
+    //                 opacity: 1
 
-                },
-                tooltip: {
-                    y: {
-                        formatter: function (val) {
-                            return  + val + "Kg"
-                        }
-                    }
-                }
-            }
+    //             },
+    //             tooltip: {
+    //                 y: {
+    //                     formatter: function (val) {
+    //                         return + val + "Kg"
+    //                     }
+    //                 }
+    //             }
+    //         }
 
-            var chart = new ApexCharts(
-                document.querySelector("#g-col"),
-                sCol
-            );
+    //         var chart = new ApexCharts(
+    //             document.querySelector("#g-col"),
+    //             sCol
+    //         );
 
-            chart.render();
-        }
+    //         chart.render();
+    //     }
 
-    }    
+    // }
 
+
+    const data = {
+        labels: [
+            'bio',
+            'non-bio',
+            'hazard'
+        ],
+        datasets: [{
+            label: 'Garbage Report',
+            data: [overData?.bio, overData?.non_bio, overData?.hazard],
+            backgroundColor: [
+              
+                'rgb(54, 162, 235)',
+                'rgb(255, 205, 86)',
+                'rgb(255, 99, 132)',
+            ],
+            hoverOffset: 4
+        }]
+    };
+
+
+    const config = {
+        type: 'pie',
+        data: data,
+    };
 
     return (
 
@@ -336,7 +366,7 @@ function OverView() {
                                                                 <CountUp
                                                                     end={parseFloat(overData?.total) < 1000 ? parseFloat(overData?.total) : (parseFloat(overData?.total) / 1000)}
                                                                 />
-                                                               {" "}{parseFloat(overData?.total) < 1000 ? "Kg" : "Ton"}
+                                                                {" "}{parseFloat(overData?.total) < 1000 ? "Kg" : "Ton"}
                                                             </span>
                                                         </h3>
                                                         <h4>Garbage Wastages</h4>
@@ -359,7 +389,7 @@ function OverView() {
                                     // style="margin-top: 20px;" 
                                     >
                                         <li class="active">
-                                            <a href="#today" data-toggle="pill">Today</a>
+                                            {/* <a href="#today" data-toggle="pill">Today</a> */}
                                         </li>
                                         {/* <li>
                                             <a href="#weekly" data-toggle="pill">Weekly</a>
@@ -374,10 +404,18 @@ function OverView() {
                                     <div class="tab-content">
                                         <div class="tab-pane active" id="today">
                                             <div class="card-header">
-                                                <h5 class="card-title">Column Chart</h5>
+                                                {/* <h5 class="card-title">Column Chart</h5> */}
                                             </div>
-                                            <div class="card-body">
-                                                <div id="g-col" class="chart-set"></div>
+                                            <div class="card-body" style={{width:500}}>
+                                                <Pie data={data} 
+                                                arc={20}
+                                                // width={50} height={50}
+                                                // height={2000}
+                                                //     width={2000}
+                                                     />
+                                                {/* <div id="g-col" class="chart-set"></div> */}
+
+                                                {/* <ChartA type='Pie' data={data} /> */}
                                             </div>
                                         </div>
                                         {/* <div class="tab-pane" id="weekly">
@@ -464,6 +502,10 @@ function OverView() {
 
                 </div>
             </div>
+
+            {/* <div>
+            <Pie data={data} />
+            </div> */}
 
         </>
     )
