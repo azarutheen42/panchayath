@@ -13,6 +13,20 @@ import { setWard } from './features/WardSlice';
 import { setCity } from './features/CitiySlice';
 import { setUser } from './features/UserSlice';
 
+// css
+import "./assets/css/app.min.css"
+import "./assets/css/icons.min.css"
+import "./assets/css/style.css"
+import "./assets/css/custom.css"
+
+import "./assets/plugins/fontawesome/css/all.min.css"
+import "./assets/plugins/fontawesome/css/fontawesome.min.css"
+import "./assets/css/dataTables.bootstrap4.min.css"
+import "./assets/css/animate.css"
+import "./assets/css/responsive.css"
+// import "./assets/css/bootstrap.min.css"  #responsive issue
+
+
 // const UserContext = createContext()
 
 
