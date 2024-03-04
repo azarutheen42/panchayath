@@ -117,7 +117,7 @@ function SideBar(props) {
                                         <a href="javascript:void(0);"><i data-feather="box"></i><span>Complaint</span><span class="menu-arrow"></span></a>
                                         <ul>
                                             <li><a onClick={() => handlenavigate("m=complaint&s=list")}>Complaints List</a></li>
-                                            <li><a onClick={() => handlenavigate("m=complaint&s=status")}>Complaints Status</a></li>
+                                            {/* <li><a onClick={() => handlenavigate("m=complaint&s=status")}>Complaints Status</a></li> */}
                                             <li><a onClick={() => handlenavigate("m=complaint&s=water-supply")}>Water Supply</a></li>
                                             <li><a onClick={() => handlenavigate("m=complaint&s=street-light")}>Street Light</a></li>
                                             <li><a onClick={() => handlenavigate("m=complaint&s=sanittion")}>Sanitation</a></li>
@@ -132,11 +132,13 @@ function SideBar(props) {
 
                                 <ul>
                                     <li class="submenu">
-                                        <a href="javascript:void(0);"><i data-feather="shopping-bag"></i><span>Request</span><span class="menu-arrow"></span></a>
+                                        <a href="javascript:void(0);" onClick={() => handlenavigate("m=request&s=list")}><i data-feather="shopping-bag"></i><span>Request</span>
+                                            {/* <span class="menu-arrow"></span> */}
+                                        </a>
                                         <ul>
-                                        <li><a onClick={() => handlenavigate("m=request&s=list")}>Request List</a></li>
+                                            {/* <li><a onClick={() => handlenavigate("m=request&s=list")}>Request List</a></li>
                                             <li><a onClick={() => handlenavigate("m=request&s=public-toilet")}>Public Toilet</a></li>
-                                            <li><a onClick={() => handlenavigate("m=request&s=tank-cleaning")}>Specific Tank Cleaning</a></li>
+                                            <li><a onClick={() => handlenavigate("m=request&s=tank-cleaning")}>Specific Tank Cleaning</a></li> */}
                                         </ul>
                                     </li>
                                 </ul>
@@ -171,19 +173,7 @@ function SideBar(props) {
                                     </li>
                                 </ul>
                             </li>
-                            <li class="submenu-open">
 
-                                <ul>
-                                    <li class="submenu">
-                                        <a href="javascript:void(0);"><i data-feather="settings"></i><span>Settings</span><span class="menu-arrow"></span></a>
-                                        <ul>
-                                            <li><a onClick={() => handlenavigate("m=settings&s=permissions")}>Permission</a></li>
-                                            <li><a onClick={() => handlenavigate("m=settings&s=roles")}>Roles</a></li>
-                                            <li><a onClick={() => handlenavigate("m=settings&s=menu")}>Menus</a></li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
                             <li class="submenu-open">
 
                                 <ul>
@@ -194,13 +184,13 @@ function SideBar(props) {
                                             <li><a onClick={() => handlenavigate("m=masters&s=cities")}>City</a></li>
                                             <li><a onClick={() => handlenavigate("m=masters&s=panchayath")}>Panchayath</a></li>
                                             <li><a onClick={() => handlenavigate("m=masters&s=ward")}>Ward</a></li>
-                                            <li><a onClick={() => handlenavigate("m=masters&s=house")}>Register House</a></li>
-                                            <li><a onClick={() => handlenavigate("m=masters&s=shops")}>Register Shops</a></li>
+                                            <li><a onClick={() => handlenavigate("m=masters&s=house")}>Building</a></li>
+                                            {/* <li><a onClick={() => handlenavigate("m=masters&s=shops")}>Register Shops</a></li> */}
                                         </ul>
                                     </li>
                                 </ul>
                             </li>
-                            <li class="submenu-open">
+                            {/* <li class="submenu-open">
 
                                 <ul>
                                     <li class="submenu">
@@ -208,6 +198,19 @@ function SideBar(props) {
                                         <ul>
                                             <li><a onClick={() => handlenavigate("m=qr&s=generator")}>QR generator</a></li>
                                             <li><a onClick={() => handlenavigate("m=qr&s=issuelist")}>QR issue list</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li> */}
+                            <li class="submenu-open">
+
+                                <ul>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);"><i data-feather="settings"></i><span>Settings</span><span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a onClick={() => handlenavigate("m=settings&s=permissions")}>Permission</a></li>
+                                            <li><a onClick={() => handlenavigate("m=settings&s=roles")}>Roles</a></li>
+                                            {/* <li><a onClick={() => handlenavigate("m=settings&s=menu")}>Menus</a></li> */}
                                         </ul>
                                     </li>
                                 </ul>
