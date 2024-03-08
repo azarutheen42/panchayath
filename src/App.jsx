@@ -24,7 +24,11 @@ import "./assets/plugins/fontawesome/css/fontawesome.min.css"
 import "./assets/css/dataTables.bootstrap4.min.css"
 import "./assets/css/animate.css"
 import "./assets/css/responsive.css"
-// import "./assets/css/bootstrap.min.css"  #responsive issue
+
+// import "./assets/css/bootstrap.min.css"                         
+// #responsive issue
+
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 // const UserContext = createContext()

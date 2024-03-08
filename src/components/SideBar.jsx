@@ -180,10 +180,12 @@ function SideBar(props) {
                                     <li class="submenu">
                                         <a href="javascript:void(0);"><i data-feather="gift"></i><span>Masters</span><span class="menu-arrow"></span></a>
                                         <ul>
-                                            <li><a onClick={() => handlenavigate("m=masters&s=districts")}>District</a></li>
+                                            {/* <li><a onClick={() => handlenavigate("m=masters&s=districts")}>District</a></li>
                                             <li><a onClick={() => handlenavigate("m=masters&s=cities")}>City</a></li>
-                                            <li><a onClick={() => handlenavigate("m=masters&s=panchayath")}>Panchayath</a></li>
+                                            <li><a onClick={() => handlenavigate("m=masters&s=panchayath")}>Panchayath</a></li> */}
+                                            
                                             <li><a onClick={() => handlenavigate("m=masters&s=ward")}>Ward</a></li>
+                                            <li><a onClick={() => handlenavigate("m=masters&s=streets")}>Street</a></li>
                                             <li><a onClick={() => handlenavigate("m=masters&s=house")}>Building</a></li>
                                             {/* <li><a onClick={() => handlenavigate("m=masters&s=shops")}>Register Shops</a></li> */}
                                         </ul>

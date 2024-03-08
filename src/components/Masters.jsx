@@ -1088,7 +1088,7 @@ function City() {
 function Ward() {
 
     // const WardList = useSelector((state) => state?.ward?.value);
-    const panchayathList = useSelector((state) => state?.panchayath?.value);
+    // const panchayathList = useSelector((state) => state?.panchayath?.value);
     const districtList = useSelector((state) => state?.district?.value);
     const cityList = useSelector((state) => state?.city?.value);
 
@@ -1371,7 +1371,7 @@ function Ward() {
                                                         </div>
 
 
-                                                        <div class="col-lg-6 col-sm-12 col-12">
+                                                        {/* <div class="col-lg-6 col-sm-12 col-12">
                                                             <div class="form-group">
                                                                 <label class="form-label">Select Panchayath : <span class="form-required">*</span></label>
                                                                 <select name="" id="" className="report-dropdown"
@@ -1390,7 +1390,7 @@ function Ward() {
                                                                     <span className="req-text">{errStr}</span>
                                                                 )}
                                                             </div>
-                                                        </div>
+                                                        </div> */}
 
 
                                                         <div class="col-lg-6 col-sm-12 col-12">
@@ -1955,7 +1955,7 @@ function House() {
                                             <td>{user.phone_num}</td>
                                             <td>{user.door_no}</td>
                                             <td>{user.line1}</td>
-                                            <td><img src={Config.BASE_URL + user.qr_code} className="emp-thumb" /></td>
+                                            <td><img src={Config.MEDIA_URL + user.qr_code} className="emp-thumb" /></td>
                                             <td>
                                                 <button className="btn btn-success" onClick={() => getHouse(user?.id, true)}> 
                                                     <span className="glyphicon glyphicon-pencil"></span> Edit
@@ -2115,6 +2115,446 @@ function Shop() {
 }
 
 
+
+function Street() {
+
+    ///Post New House Method
+    const [hward, setHWard] = useState();
+    const [addstreet, setAddstreet] = useState();
+    const [addstreetName, setaddstreetName] = useState();
+    const [view, setIsView] = useState(false);
+     const [isedit, setisEdit] = useState()
+     const [isAdd, setisAdd] = useState()
+    const [add, setIsAdd] = useState(false);
+    const [error, setError] = useState(false);
+    const [id, setId] = useState()
+  
+
+  const [open, setOpen] = useState(false)
+
+    // const handleClose = () => {
+    //     setOpen(false)
+    //     setisEdit()
+    //   }
+    
+    //   const handleOpen = () => {
+    //     getmeeting()
+    //     setOpen(true)
+    //   }
+
+
+    const fetchStreetData = async () => {
+        try {
+          const response = await fetch(
+            Config.BASE_URL + 'street/',
+            Config?.config,
+          )
+          const data = await response.json()
+          console.log(data)
+          setstreetList(data)
+        } catch (error) {
+          console.log('Announcement Data Fetching Error', error)
+        }
+      }
+
+      const getStreet = (id, edit) => {
+        // setOpen(true)
+        axios
+            .get(`${Config.BASE_URL}street/${id}`, Config.config)
+            .then(function (response) {
+                if (response.status === 200) {
+                    setAddstreet(response.data.street_no)
+                    setaddstreetName(response.data.name)
+                    setHWard(response.data.ward)
+                    setId(response.data.id)
+                    setisEdit(edit)
+                    setOpen(true)
+                }
+            })
+            .catch(function (error) {
+                console.log(error)
+            })
+    }
+    const handleOpen = (id) => {
+            getStreet(id)
+            setOpen(true)
+          }
+    
+          const handleClose = () => {
+            setOpen(false)
+            setisEdit()
+          }
+   
+
+    const handleSubmitNewStreet = async (e) => {
+        e.preventDefault();
+   
+        const data = new FormData()
+        data.append("ward", hward)
+        data.append("street_no", addstreet)
+        data.append("name", addstreetName)
+   
+        axios.post(`${Config.BASE_URL}street/`,
+            data,
+            Config.config,
+        )
+            .then(function (response) {
+                if (response.status === 201) {
+                    console.log(response);
+
+                }
+
+            })
+            .catch(function (error) {
+                console.log(error);
+
+            });
+    }
+    
+
+    ///Get Scheme Method
+
+    const [streetList, setstreetList] = useState([]);
+    const [wardList, setWardList] = useState([]);
+    // const [buildingList, setBuildingList] = useState([]);
+
+
+    useEffect(() => {
+        // fetchHouse()
+        fetchWards()
+        fetchStreetData()
+        // fetchBuildingType()
+    }, [])
+
+    const deleteStreet = (id) => {
+        console.log('deleting')
+    
+        axios
+          .delete(`${Config.BASE_URL}street/${id}`, Config.config)
+          .then(function (response) {
+            if (response.status === 204) {
+              console.log(response)
+              setstreetList(streetList?.filter((e) => e.id !== id))
+            }
+          })
+    
+          .catch(function (error) {
+            console.log(error)
+          })
+      }
+
+    const fetchWards = async () => {
+        try {
+            // Make an API call to fetch data from the backend
+            const response = await fetch(
+                Config.BASE_URL + 'get-ward',
+                Config?.config,
+            )
+            const data = await response.json()
+
+            console.log(data)
+            setWardList(data)
+            // Assuming your data is an array of objects with 'value' and 'label' properties
+            // setWardList(data)
+        } catch (error) {
+            console.error('Error fetching data:', error)
+        }
+    }
+
+     
+      //UPDATE ANNOUNCEMENT
+      const updateStreet = (id) => {
+        // const check = checkSchemeValidation()
+    
+        // if (!check) {
+        //   return
+        // }
+    
+        const data = new FormData()
+        data.append("ward", hward)
+        data.append("street_no", addstreet)
+        data.append("name", addstreetName)
+    
+        axios
+          .put(`${Config.BASE_URL}street/${id}/`, data, Config.config)
+          .then(function (response) {
+            if (response.status === 200) {
+              console.log(response)
+    
+              setstreetList((prevArray) => {
+                const index = prevArray.findIndex((obj) => obj.id === id)
+                if (index !== -1) {
+                  return [
+                    ...prevArray.slice(0, index),
+                    { ...prevArray[index], ...response.data },
+                    ...prevArray.slice(index + 1),
+                  ]
+                }
+                return prevArray
+              })
+              // setIsOpen(false)
+              handleClose()
+    
+              // $('#myModal').modal('show')
+              // $('.modal-backdrop').show();
+            }
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      }
+    
+
+    // ///Delete House Method
+
+
+    // const deleteHouse = (id) => {
+    //     console.log('deleting')
+    //     axios
+    //         .delete(`${Config.BASE_URL}buildingregister/${id}`, Config.config)
+    //         .then(function (response) {
+    //             if (response.status === 204) {
+    //                 console.log(response)
+    //                 setHouseList(houseList?.filter((e) => e.id !== id))
+    //             }
+    //         })
+    //         .catch(function (error) {
+    //             console.log(error)
+    //         })
+    // }
+
+
+
+    // const user = useContext(UserContext);
+    // console.log(user)
+    // console.log(user?.employee_info?.panchayat, "panchayat")
+
+    const title = "Street"
+    return (
+
+        <>
+
+            <div className="content">
+                <div className="page-header">
+                    <div className="page-title">
+                        <h4>{title}  Details</h4>
+                    </div>
+                    <div className="page-btn">
+                        <button className="btn btn-primary" data-toggle="modal" data-target="#myModal">
+                            <span className="glyphicon glyphicon-user"></span> Add new {title}
+                        </button>
+                        {open && (
+                            <Modal
+                                // keepMounted
+                                open={open}
+                                onClose={handleClose}
+                                aria-labelledby="keep-mounted-modal-title"
+                                aria-describedby="keep-mounted-modal-description"
+                            >
+                                <Box sx={style}>
+                                    <div className="modal-content">
+                                        <h3 style={{ marginLeft: 20 }}>Announcement</h3>
+                                        <div className="modal-body">
+                                            <div className="card">
+                                            <div className="card-body">
+                                                <div className="row">
+
+                                                    <div className="col-lg-6 col-sm-6 col-12">
+                                                        <div className="form-group">
+                                                            <label style={{ color: 'grey' }}>Ward No :</label>
+                                                            <select
+                                                                name="ward"
+                                                                id=""
+                                                                className="custom-dropdown"
+                                                                onChange={(e) => setHWard(e?.target?.value)} defaultValue={hward||''}
+
+                                                            >
+                                                                {wardList?.map((e) => (
+                                                                    <option value={e?.id}>{e?.ward_no}</option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                  
+                                                    <div className="col-lg-6 col-sm-12 col-12">
+                                                        <div className="form-group">
+                                                            <label className="form-label">Street No : <span className="form-required">*</span></label>
+                                                            <input type="text" className="form-control" name="name" onChange={(e) => setAddstreet(e?.target?.value)} defaultValue={addstreet||''}  required />
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-lg-6 col-sm-12 col-12">
+                                                        <div className="form-group">
+                                                            <label className="form-label">Street Name : <span className="form-required">*</span></label>
+                                                            <input type="text" className="form-control" name="street_name"  onChange={(e) => setaddstreetName(e?.target?.value)} defaultValue={addstreetName||''} required />
+                                                        </div>
+                                                    </div>
+                                                   
+                                                </div>
+                                            </div>
+                                            </div>
+                                        </div>
+                                        <div className="modal-footer">
+                                            {isedit && (
+                                                <button
+                                                    type="submit"
+                                                    className="btn btn-success"
+                                                    onClick={() => updateStreet(id)}
+                                               
+                                                  
+                                                >
+                                                    Save
+                                                </button>
+                                            )}
+                                            <button
+                                                type="button"
+                                                className="btn btn-danger"
+                                                data-dismiss="modal"
+                                                onClick={handleClose}
+                                            >
+                                                Close
+                                            </button>
+                                        </div>
+                                    </div>
+                                </Box>
+                            </Modal>
+                        )}
+
+                        <div id="myModal" className="modal fade" role="dialog">
+                            <div className="modal-dialog modal-lg modal-dialog-centered">
+
+                                <div className="modal-content">
+
+
+                                    <h3 style={{ marginLeft: 20 }}>New {title} Details</h3>
+                                    <div className="modal-body">
+                                        <div className="card">
+                                            <div className="card-body">
+                                                <div className="row">
+
+                                                    <div className="col-lg-6 col-sm-6 col-12">
+                                                        <div className="form-group">
+                                                            <label style={{ color: 'grey' }}>Ward No :</label>
+                                                            <select
+                                                                name="ward"
+                                                                id=""
+                                                                className="custom-dropdown"
+                                                                onChange={(e) => setHWard(e?.target?.value)}
+
+                                                            >
+                                                                {wardList?.map((e) => (
+                                                                    <option value={e?.id}>{e?.ward_no}</option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                  
+                                                    <div className="col-lg-6 col-sm-12 col-12">
+                                                        <div className="form-group">
+                                                            <label className="form-label">Street No : <span className="form-required">*</span></label>
+                                                            <input type="text" className="form-control" name="name" onChange={(e) => setAddstreet(e?.target?.value)}  required />
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-lg-6 col-sm-12 col-12">
+                                                        <div className="form-group">
+                                                            <label className="form-label">Street Name : <span className="form-required">*</span></label>
+                                                            <input type="text" className="form-control" name="street_name"  onChange={(e) => setaddstreetName(e?.target?.value)} required />
+                                                        </div>
+                                                    </div>
+                                                    {/* <div className="col-lg-6 col-sm-12 col-12">
+                                                        <div className="form-group">
+                                                            <label className="form-label">Door No : <span className="form-required">*</span></label>
+                                                            <input type="text" className="form-control" name="door_no"  required />
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-lg-6 col-sm-6 col-6">
+                                                        <div className="form-group">
+                                                            <label className="form-label">Address :</label>
+                                                            <textarea cols="30" rows="2" name="line1" ></textarea>
+                                                        </div>
+                                                    </div> */}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" className="btn btn-success" onClick={handleSubmitNewStreet} >Register</button>
+                                        <button type="button" className="btn btn-danger" data-dismiss="modal">Close</button>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr class="table-info">
+                                        <th>S.No</th>
+                                        <th>Ward No</th>
+                                        <th>Street No</th>
+                                        <th>Street Name</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                      {streetList?.map((streetdetails, e) => (
+                      <tr key={streetdetails.id}>
+                        <td>{e + 1}</td>
+                        <td>{streetdetails.ward}</td>
+                        <td>{streetdetails.street_no}</td>
+                        <td>{streetdetails.name}</td>
+                       
+
+                        <td>
+                          {/* <button class="btn btn-success">
+                            <span class="glyphicon glyphicon-pencil"></span>{' '}
+                            Edit
+                          </button> */}
+                          <button
+                            className="btn btn-success" onClick={() =>
+                                getStreet(streetdetails?.id, true)}
+                           
+                          >
+                            <span className="glyphicon glyphicon-pencil"></span>{' '}
+                            Edit
+                          </button>
+                          <button className="btn btn-info"  onClick={() =>
+                                getStreet(streetdetails?.id, false)}>
+                            <span className="glyphicon glyphicon-eye-open"></span>{' '}
+                            View
+                          </button>
+                          <button
+                            className="btn btn-danger"  onClick={() => deleteStreet(streetdetails?.id)}
+                           
+                          >
+                            <span className="glyphicon glyphicon-trash"></span>{' '}
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                            </table>
+                        </div>
+                        {/* <br> */}
+                    </div>
+                </div>
+            </div>
+
+
+
+        </>
+    )
+}
+
+
+
 function Content(props) {
 
     switch (props?.path) {
@@ -2130,6 +2570,8 @@ function Content(props) {
             return < House/>
         case "shops":
             return <Shop/>
+        case "streets":
+                return <Street />
         default:
             return <Ward />
     }

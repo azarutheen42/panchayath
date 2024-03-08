@@ -376,7 +376,7 @@ function Requests(props) {
                                                     <td>{requests.address}</td>
 
                                                     <td>{requests.details}</td>
-                                                    <td><img src={Config.BASE_URL + requests.image} /></td>
+                                                    <td><img src={Config.MEDIA_URL + requests.image} /></td>
                                                     {/* <td>{requests.details}</td> */}
                                                     <td>
                                                         <button
