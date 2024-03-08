@@ -28,6 +28,7 @@ function SideBar(props) {
 
         <div class="main-wrapper">
             <div class="sidebar" id="sidebar">
+
                 <div class="sidebar-inner slimscroll"
                 // style="background-color: aliceblue;"
                 >
@@ -218,10 +219,14 @@ function SideBar(props) {
                                 </ul>
                             </li>
                         </ul>
+
                     </div>
+
+
                 </div>
-            </div>
-        </div>
+                
+             </div>
+     </div>
     )
 }
 

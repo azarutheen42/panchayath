@@ -31,6 +31,20 @@ import "./assets/css/responsive.css"
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 
+// js
+// arrow mark drop
+import "./assets/js/feather.min.js"
+
+
+import "./assets/js/jquery-3.6.0.min.js"
+import  "./assets/js/jquery.slimscroll.min.js"
+import "./assets/js/jquery.dataTables.min.js"
+import "./assets/js/dataTables.bootstrap4.min.js"
+import "./assets/js/bootstrap.bundle.min.js"
+import "./assets/js/layout.js"
+// import "./assets/js/script.js"
+
+
 // const UserContext = createContext()
 
 
