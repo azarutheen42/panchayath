@@ -365,7 +365,7 @@ function SideBar(props) {
 
 
             <Drawer variant="permanent" open={open}>
-                <Toolbar
+                {/* <Toolbar
                     sx={{
                         display: 'flex',
                         alignItems: 'center',
@@ -374,11 +374,25 @@ function SideBar(props) {
                     }}
                 >
 
+
+
+                    <div class="header-left active">
+                        <a href="#" class="logo logo-normal">
+                            <img src="assets/img/logo.png" alt />
+                        </a>
+                        <a href="#" class="logo logo-white">
+                            <img src="assets/img/logo.png" alt />
+                        </a>
+                    </div>
+
+
+
                     <IconButton onClick={toggleDrawer}>
+
                         <ChevronLeftIcon />
                     </IconButton>
 
-                </Toolbar>
+                </Toolbar> */}
                 <Divider />
 
                 {/* DASHBOARD */}
