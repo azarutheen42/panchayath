@@ -5,7 +5,15 @@ import axios from "axios";
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
-import ButtonWithLoader from "./Button"
+import ButtonWithLoader from "./Button";
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TablePagination from '@mui/material/TablePagination';
+import TableRow from '@mui/material/TableRow';
 
 
 
@@ -20,7 +28,17 @@ const style = {
 
 
 function Employee(props) {
+    const [page, setPage] = React.useState(0);
+    const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(+event.target.value);
+        setPage(0);
+    };
 
     const [loader, setLoader] = useState();
 
@@ -86,7 +104,7 @@ function Employee(props) {
     }
 
 
-console.log(roles,'hrets')
+    console.log(roles, 'hrets')
 
     const getPermemployee = () => {
         axios.get(`${Config.BASE_URL}permanentemployees/`,
@@ -204,7 +222,7 @@ console.log(roles,'hrets')
 
 
 
-    const getEmployee = async(id, edit, load_state) => {
+    const getEmployee = async (id, edit, load_state) => {
         setLoader(load_state)
 
         axios.get(`${Config.BASE_URL}permanentemployees/${id}/`,
@@ -555,8 +573,60 @@ console.log(roles,'hrets')
 
                         </div>
                     </div>
+
+
+
                     <div class="card">
                         <div class="card-body">
+
+
+
+
+                            {/* <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+                    <TableContainer sx={{ maxHeight: 440 }}>
+                        <Table stickyHeader aria-label="sticky table">
+                            <TableHead>
+                                <TableRow>
+                                 
+                                        <TableCell
+                                        >
+                                            
+                                        </TableCell>
+                                   
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {rows
+                                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                    .map((row) => {
+                                        return (
+                                            <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
+                                                {columns.map((column) => {
+                                                    const value = row[column.id];
+                                                    return (
+                                                        <TableCell key={column.id} align={column.align}>
+                                                            {column.format && typeof value === 'number'
+                                                                ? column.format(value)
+                                                                : value}
+                                                        </TableCell>
+                                                    );
+                                                })}
+                                            </TableRow>
+                                        );
+                                    })}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                    <TablePagination
+                        rowsPerPageOptions={[10, 25, 100]}
+                        component="div"
+                        count={rows.length}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                    />
+                </Paper> */}
 
                             <div class="table-responsive">
                                 <table class="table table-bordered">
@@ -783,7 +853,6 @@ console.log(roles,'hrets')
 
 
 
-export default Employee;
 
 
 
@@ -993,3 +1062,13 @@ function ViewModal(props) {
 }
 
 
+
+
+
+
+
+
+
+
+
+export default Employee;

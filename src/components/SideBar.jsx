@@ -283,6 +283,10 @@ import SendIcon from '@mui/icons-material/Send';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import StarBorder from '@mui/icons-material/StarBorder';
+import PersonAddTwoToneIcon from '@mui/icons-material/PersonAddTwoTone';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import { ReceiptLong } from "@mui/icons-material";
+// import AssignmentIcon from '@mui/icons-material/Assignment';
 
 
 
@@ -365,7 +369,7 @@ function SideBar(props) {
 
 
             <Drawer variant="permanent" open={open}>
-                {/* <Toolbar
+                <Toolbar
                     sx={{
                         display: 'flex',
                         alignItems: 'center',
@@ -392,7 +396,7 @@ function SideBar(props) {
                         <ChevronLeftIcon />
                     </IconButton>
 
-                </Toolbar> */}
+                </Toolbar>
                 <Divider />
 
                 {/* DASHBOARD */}
@@ -479,7 +483,8 @@ function SideBar(props) {
 
                     <ListItemButton onClick={() => handlenavigate("m=user-register")}>
                         <ListItemIcon>
-                            <PeopleIcon />
+                            {/* <PeopleIcon /> */}
+                           < PersonAddTwoToneIcon/>
                             {/* <ShoppingCartIcon /> */}
                         </ListItemIcon>
                         <ListItemText primary="User Registeration" />
@@ -490,7 +495,8 @@ function SideBar(props) {
 
                     <ListItemButton onClick={() => handleClick("complaint")}>
                         <ListItemIcon>
-                            <BarChartIcon />
+                            {/* <BarChartIcon /> */}
+                            <AssignmentIcon/>
                         </ListItemIcon>
                         <ListItemText primary="Complaints" />
                         {show?.complaint ? <ExpandLess /> : <ExpandMore />}
@@ -621,7 +627,8 @@ function SideBar(props) {
                     {/* REPORTS */}
                     <ListItemButton onClick={() => handleClick("reports")}>
                         <ListItemIcon>
-                            <LayersIcon />
+                            {/* <LayersIcon /> */}
+                            <ReceiptLongIcon/>
                         </ListItemIcon>
                         <ListItemText primary="Reports" />
                         {show?.reports ? <ExpandLess /> : <ExpandMore />}

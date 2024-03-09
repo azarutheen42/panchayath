@@ -12,13 +12,7 @@ import IconButton from '@mui/material/IconButton';
 import Badge from '@mui/material/Badge';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
-import Link from '@mui/material/Link';
-import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import { mainListItems, secondaryListItems } from './listItems';
-
+import { Paper } from '@mui/material';
 
 
 
@@ -69,49 +63,6 @@ import Copyright from './copywright';
 
 const drawerWidth = 240;
 
-// const AppBar = styled(MuiAppBar, {
-//     shouldForwardProp: (prop) => prop !== 'open',
-// })(({ theme, open }) => ({
-//     zIndex: theme.zIndex.drawer + 1,
-//     transition: theme.transitions.create(['width', 'margin'], {
-//         easing: theme.transitions.easing.sharp,
-//         duration: theme.transitions.duration.leavingScreen,
-//     }),
-//     ...(open && {
-//         marginLeft: drawerWidth,
-//         width: `calc(100% - ${drawerWidth}px)`,
-//         transition: theme.transitions.create(['width', 'margin'], {
-//             easing: theme.transitions.easing.sharp,
-//             duration: theme.transitions.duration.enteringScreen,
-//         }),
-//     }),
-// }));
-
-// const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
-//     ({ theme, open }) => ({
-//         '& .MuiDrawer-paper': {
-//             position: 'relative',
-//             whiteSpace: 'nowrap',
-//             width: drawerWidth,
-//             transition: theme.transitions.create('width', {
-//                 easing: theme.transitions.easing.sharp,
-//                 duration: theme.transitions.duration.enteringScreen,
-//             }),
-//             boxSizing: 'border-box',
-//             ...(!open && {
-//                 overflowX: 'hidden',
-//                 transition: theme.transitions.create('width', {
-//                     easing: theme.transitions.easing.sharp,
-//                     duration: theme.transitions.duration.leavingScreen,
-//                 }),
-//                 width: theme.spacing(7),
-//                 [theme.breakpoints.up('sm')]: {
-//                     width: theme.spacing(9),
-//                 },
-//             }),
-//         },
-//     }),
-// );
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
@@ -127,31 +78,8 @@ export default function Dashboard() {
 
         <>
 
-            {/* <div className="main-wrapper">
-
-                <Header
-                    open={open}
-                    setOpen={setOpen}
-                    toggleDrawer={toggleDrawer}
-                    drawerWidth={drawerWidth}
-                />
-
-                <SideBar
-                    open={open}
-                    setOpen={setOpen}
-                    toggleDrawer={toggleDrawer}
-                    drawerWidth={drawerWidth}
-                />
 
 
-                <div className="page-wrapper">
-                    <Content
-
-                    />
-
-                </div>
-
-            </div> */}
 
 
             <ThemeProvider theme={defaultTheme}>
@@ -174,85 +102,81 @@ export default function Dashboard() {
                         drawerWidth={drawerWidth}
                     />
 
+
+
+
                     <Box
-                        component="main"
-                        sx={{
-                            backgroundColor: (theme) =>
-                                theme.palette.mode === 'light'
-                                    ? theme.palette.grey[100]
-                                    : theme.palette.grey[900],
-                            flexGrow: 1,
-                            height: '100vh',
-                            overflow: 'auto',
-                        }}
+                    sx={{ width: '100%', overflow: 'hidden' }}
+                        // component="main"
+                    // style={{backgroundColor:"grey"}}
+                    // sx={{
+                    //     backgroundColor: (theme) =>
+                    //         theme.palette.mode === 'light'
+                    //             ? theme.palette.grey[100]
+                    //             : theme.palette.grey[900],
+                    //     flexGrow: 1,
+                    //     height: '100vh',
+                    //     overflow: 'auto',
+                    // }}
                     >
-
-
-
 
 
                         <Toolbar />
 
+                        <div style={{ margin: 20 }} >
 
-                        <Container maxWidth="lg"
-                        //  sx={{ mt: 4, mb: 4 }}
-                        
-                        //  style={{backgroundColor:"grey"}}
-                         
-                         >
-                            <Content
+                            {/* <div class="content">
+                                <div class="row">
+                                    <div class="col-md-12 col-lg-12 col-12" > */}
 
-                            />
-                            {/* <Grid container spacing={3}>
+                                        <Content
+
+                                        />
+                                    {/* </div>
+                                </div>
+                            </div> */}
+                        </div>
+
+
+
+
+
+
+
+                        {/* <Container
+                            //  maxWidth="lg"
+                            sx={{ mt: 4, mb: 4 }}
+
+
+
+                        >
+
+                            <Grid container spacing={3}>
 
                                 <Grid item xs={12} md={12} lg={12}>
 
+                                    <Content
+
+                                    />
                                 </Grid>
 
-
-                                <Grid item xs={12} md={8} lg={9}>
-                                    <Paper
-                                        sx={{
-                                            p: 2,
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            height: 240,
-                                        }}
-                                    >
-                                        
-                                    </Paper>
-                                </Grid> 
-
-
-                                 <Grid item xs={12} md={4} lg={3}>
-                                    <Paper
-                                        sx={{
-                                            p: 2,
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            height: 240,
-                                        }}
-                                    >
-                                   
-                                    </Paper>
-                                </Grid>
-
-
-                       
                                 <Grid item xs={12}>
                                     <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                          
+
                                     </Paper>
                                 </Grid>
 
-                            </Grid> */}
+                            </Grid>
 
 
-                            {/* <Copyright sx={{ pt: 4 }} /> */}
-                        </Container>
+
+                        </Container> */}
 
 
                     </Box>
+
+
+                    {/* <Copyright sx={{ pt: 4 }} /> */}
 
 
                 </Box>

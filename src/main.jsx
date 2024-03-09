@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
+// import App from './App.jsx'
 // import './index.css'
 import { BrowserRouter } from "react-router-dom";
 import CollectorReducer from "./features/CollectorSlice.jsx"
@@ -11,6 +11,7 @@ import CityReducer from "./features/CitiySlice.jsx"
 import { configureStore } from '@reduxjs/toolkit'
 import UserReducer from "./features/UserSlice.jsx"
 import { Provider } from 'react-redux';
+import App  from "./App1.jsx"
 
 
 

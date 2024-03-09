@@ -247,7 +247,7 @@ function OverView() {
             <div class="content">
                 <div class="row">
                     <div class="col-md-12 col-lg-12 col-12" >
-                        <h1>Dashboard</h1>
+                       
                         {/* <span style={{color: "#E04A3C;"}}>Das</span><span style={{color: "#4A8AF4"}}>hbo</span><span   style={{color: "#16A25E"}}>ard</span>  */}
                         <div class="card">
                             <div class="card-body">
