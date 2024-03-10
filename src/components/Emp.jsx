@@ -15,6 +15,8 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 
+import CustomTable from "./Table";
+
 
 
 const style = {
@@ -235,8 +237,8 @@ function Employee(props) {
                     setEmployee(response?.data)
                     // setViewEmployee(response?.data)
                     setisEdit(edit)
-                    // setIsOpen(true)
-                    // setLoader(false)
+                    setIsOpen(true)
+                    setLoader(false)
 
                     // $('#myModal').modal('show')
                     // $('.modal-backdrop').show();
@@ -576,57 +578,8 @@ function Employee(props) {
 
 
 
-                    <div class="card">
+                    {/* <div class="card">
                         <div class="card-body">
-
-
-
-
-                            {/* <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-                    <TableContainer sx={{ maxHeight: 440 }}>
-                        <Table stickyHeader aria-label="sticky table">
-                            <TableHead>
-                                <TableRow>
-                                 
-                                        <TableCell
-                                        >
-                                            
-                                        </TableCell>
-                                   
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {rows
-                                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                    .map((row) => {
-                                        return (
-                                            <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
-                                                {columns.map((column) => {
-                                                    const value = row[column.id];
-                                                    return (
-                                                        <TableCell key={column.id} align={column.align}>
-                                                            {column.format && typeof value === 'number'
-                                                                ? column.format(value)
-                                                                : value}
-                                                        </TableCell>
-                                                    );
-                                                })}
-                                            </TableRow>
-                                        );
-                                    })}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                    <TablePagination
-                        rowsPerPageOptions={[10, 25, 100]}
-                        component="div"
-                        count={rows.length}
-                        rowsPerPage={rowsPerPage}
-                        page={page}
-                        onPageChange={handleChangePage}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
-                    />
-                </Paper> */}
 
                             <div class="table-responsive">
                                 <table class="table table-bordered">
@@ -650,52 +603,59 @@ function Employee(props) {
                                                 <td><img src={emp?.image ? Config.MEDIA_URL + emp?.image : "assets/img/profiles/no_avatar.jpg"} className="emp-thumb" /></td>
                                                 <td>{emp?.name}</td>
                                                 <td>{getRoleLabel(emp?.role)}</td>
-                                                {/* <td>{emp?.role?.emp_role}</td> */}
+                                                <td>{emp?.role?.emp_role}</td>
                                                 <td>{emp?.phone_number}</td>
                                                 <td>{emp?.start_date}</td>
                                                 <td>
-                                                    {/* <button class="btn btn-success" onClick={() => getEmployee(emp?.id, true,"edit")} >
+                                                    <button class="btn btn-success" onClick={() => getEmployee(emp?.id, true,"edit")} >
                                                         {(loader ==="edit" && emp?.id ===employee?.id) ? Config.loader :<span class="glyphicon glyphicon-pencil"></span>} Edit
-                                                    </button> */}
+                                                    </button>
 
 
                                                     <ButtonWithLoader
                                                         itemId={emp?.id}
-                                                        onClick={() => getEmployee(emp?.id, true, "edit")}
+                                                        onClick={() => getEmployee(emp?.id, true, index)}
                                                         class_name="btn btn-success"
-                                                        text="Edit1"
-                                                        span_class="glyphicon glyphicon-pencil"
-                                                    />
-
-                                                    <ButtonWithLoader
-                                                        itemId={emp?.id}
-                                                        onClick={() => getEmployee(emp?.id, true, "edit")}
-                                                        class_name="btn btn-info"
                                                         text="View"
                                                         span_class="glyphicon glyphicon-pencil"
+                                                        loader={loader}
+                                                        index={index}
+                                                    // key = {employee?.id}
+                                                    />
+
+                                                    <ButtonWithLoader
+                                                        itemId={emp?.id}
+                                                        onClick={() => getEmployee(emp?.id, true, index)}
+                                                        class_name="btn btn-info"
+                                                        text="Edit"
+                                                        span_class="glyphicon glyphicon-pencil"
+                                                        loader={loader}
+                                                        index={index}
                                                     />
 
 
 
                                                     <ButtonWithLoader
                                                         itemId={emp?.id}
-                                                        onClick={() => deleteEmployee(emp?.id, "delete")}
+                                                        onClick={() => deleteEmployee(emp?.id, index)}
                                                         class_name="btn btn-danger"
                                                         text="Delete"
                                                         span_class="glyphicon glyphicon-pencil"
+                                                        loader={loader}
+                                                        index={index}
                                                     />
 
 
-                                                    {/* <button class="btn btn-info"
+                                                    <button class="btn btn-info"
                                                         // data-toggle="modal" data-target="#viewModal"
                                                         onClick={() => getEmployee(emp?.id, false, "view")}
                                                     >
-                                                        {(loader === "view" && emp?.id === employee?.id) ? Config.loader : <span class="glyphicon glyphicon-pencil"></span>} View
+                                                        {(loader === "view" && ) ? Config.loader : <span class="glyphicon glyphicon-pencil"></span>} View
                                                     </button>
 
                                                     <button class="btn btn-danger" onClick={() => deleteEmployee(emp?.id, "delete")}>
                                                         {(loader === "delete") ? Config.loader : <span class="glyphicon glyphicon-pencil"></span>} Delete
-                                                    </button> */}
+                                                    </button>
                                                 </td>
                                             </tr>
 
@@ -705,10 +665,36 @@ function Employee(props) {
                                     </tbody>
                                 </table>
                             </div>
+
+
+
                             <br />
                         </div>
-                    </div>
+                    </div> */}
+
+                    <CustomTable
+                        headers={["Image", "Name", "Position", "Contact No", "Joined", "Action"]}
+                        data={permEmployee}
+                        fieldsToShow={[]}
+                        fields={{
+                            'image': (value) => value,
+                            'name': (value) => value,
+                            'role': (role) => getRoleLabel(role),
+                            'phone_number': (value) => value,
+                            'start_date': (value) => value,
+                        }}
+                        // getInstanceData={() => getEmployee(emp?.id, false, "view")}
+                        getInstanceData={ getEmployee}
+                        loader={loader}
+                    />
                 </div>
+
+
+
+            
+
+
+
             )}
 
             {props?.path === "contract" && (

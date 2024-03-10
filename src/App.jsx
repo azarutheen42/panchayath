@@ -19,6 +19,8 @@ import "./assets/css/icons.min.css"
 import "./assets/css/style.css"
 import "./assets/css/custom.css"
 
+
+
 import "./assets/plugins/fontawesome/css/all.min.css"
 import "./assets/plugins/fontawesome/css/fontawesome.min.css"
 import "./assets/css/dataTables.bootstrap4.min.css"

@@ -255,9 +255,9 @@ const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 function Header(props) {
 
 
-    useEffect(() => {
-        feather.replace();
-      }, []);
+    // useEffect(() => {
+    //     feather.replace();
+    //   }, []);
 
     const { open, setOpen, toggleDrawer, drawerWidth } = props
 

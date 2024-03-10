@@ -38,6 +38,7 @@ import Events from "./Events"
 import { useContext, createContext } from 'react';
 import Config from "../Config"
 import UserContext from "../Context"
+import CustomTable from "./Table"
 
 
 import Copyright from './copywright';
@@ -106,8 +107,8 @@ export default function Dashboard() {
 
 
                     <Box
-                    sx={{ width: '100%', overflow: 'hidden' }}
-                        // component="main"
+                        sx={{ width: '100%', overflow: 'hidden' }}
+                    // component="main"
                     // style={{backgroundColor:"grey"}}
                     // sx={{
                     //     backgroundColor: (theme) =>
@@ -123,18 +124,11 @@ export default function Dashboard() {
 
                         <Toolbar />
 
-                        <div style={{ margin: 20 }} >
+                        <div style={{ margin: 10,padding:20}} className='container   bg-white'>
 
-                            {/* <div class="content">
-                                <div class="row">
-                                    <div class="col-md-12 col-lg-12 col-12" > */}
+                                <Content
 
-                                        <Content
-
-                                        />
-                                    {/* </div>
-                                </div>
-                            </div> */}
+                                />
                         </div>
 
 
@@ -226,6 +220,9 @@ function Content(props) {
             return <Employee
                 path={path}
             />
+        // return <CustomTable
+        // path={path}
+        // />
         case "attendance":
             return <Attendance />
         case "collector":
