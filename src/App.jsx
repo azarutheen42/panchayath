@@ -1,17 +1,17 @@
 import { useState, useEffect, useContext } from 'react'
 import { React, Component } from 'react';
 // import './App.css'
-import Routers from "./route"
+import Routers from "./route.jsx"
 import axios from 'axios'
-import Config from './Config'
-import UserContext from './Context';
+import Config from './Config.jsx'
+import UserContext from './Context.jsx';
 import { useDispatch } from "react-redux";
-import { setCollector } from './features/CollectorSlice';
-import { setDistrict } from './features/DistrictSlice';
-import { setPanchayath } from './features/PanchayathSlice';
-import { setWard } from './features/WardSlice';
-import { setCity } from './features/CitiySlice';
-import { setUser } from './features/UserSlice';
+import { setCollector } from './features/CollectorSlice.jsx';
+import { setDistrict } from './features/DistrictSlice.jsx';
+import { setPanchayath } from './features/PanchayathSlice.jsx';
+import { setWard } from './features/WardSlice.jsx';
+import { setCity } from './features/CitiySlice.jsx';
+import { setUser } from './features/UserSlice.jsx';
 
 // css
 import "./assets/css/app.min.css"
@@ -25,7 +25,7 @@ import "./assets/css/dataTables.bootstrap4.min.css"
 import "./assets/css/animate.css"
 import "./assets/css/responsive.css"
 
-// import "./assets/css/bootstrap.min.css"                         
+import "./assets/css/bootstrap.min.css"                         
 // #responsive issue
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -42,6 +42,8 @@ import "./assets/js/jquery.dataTables.min.js"
 import "./assets/js/dataTables.bootstrap4.min.js"
 import "./assets/js/bootstrap.bundle.min.js"
 import "./assets/js/layout.js"
+
+
 // import "./assets/js/script.js"
 
 

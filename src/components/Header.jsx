@@ -538,7 +538,7 @@ function SubHeader() {
                     <a href="javascript:void(0);" class="dropdown-toggle nav-link userset" data-bs-toggle="dropdown">
                         <span class="user-info">
                             <span class="user-letter">
-                                <img src={userName?.employee?.image ? (Config.MEDIA_URL + userName?.employee?.image) : "assets/img/profiles/avator1.jpg"} alt class="img-fluid" />
+                                <img src={userName?.employee?.image ? (Config.MEDIA_URL + userName?.employee_info?.image) : Config.HOST_URL+"assets/img/profiles/avator1.jpg"} alt class="img-fluid" />
                             </span>
                             <span class="user-detail">
                                 <span class="user-name">{userName?.name}</span>
