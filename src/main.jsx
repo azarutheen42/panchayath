@@ -11,7 +11,7 @@ import CityReducer from "./features/CitiySlice.jsx"
 import { configureStore } from '@reduxjs/toolkit'
 import UserReducer from "./features/UserSlice.jsx"
 import { Provider } from 'react-redux';
-import App  from "./App1.jsx"
+import App  from "./App.jsx"
 
 
 

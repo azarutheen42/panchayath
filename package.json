@@ -19,6 +19,7 @@
     "axios": "^1.6.7",
     "bootstrap": "^5.3.3",
     "chart.js": "^4.4.2",
+    "feather-icons": "^4.29.1",
     "js-cookie": "^3.0.5",
     "js-cookies": "^1.0.4",
     "moment-timezone": "^0.5.45",

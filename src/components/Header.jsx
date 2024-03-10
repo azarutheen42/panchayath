@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import UserContext from "../Context"
-import { useContext } from "react";
+import { useContext,useEffect } from "react";
 import Config from "../Config";
+import feather from 'feather-icons';
 
 function Header1() {
 
@@ -252,6 +253,11 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 function Header(props) {
+
+
+    useEffect(() => {
+        feather.replace();
+      }, []);
 
     const { open, setOpen, toggleDrawer, drawerWidth } = props
 
