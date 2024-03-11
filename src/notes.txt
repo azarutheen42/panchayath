@@ -1,0 +1,64 @@
+    <CustomTable
+                    headers={headersToShow}
+                    data={tableData}
+                    fieldsToShow={fieldsToShow}
+                    fields={fields}
+                    getInstanceData={getInstanceData}
+                    loader={loader}
+                    setLoader={setLoader}
+                />
+
+
+
+
+
+    // META DATA
+    const headersToShow = ["Image", "Name", "Position", "Contact No", "Joined"]
+    const tableData = listInstanceData
+    const fieldsToShow = []
+    const fields = {
+        'image': (value) => value,
+        'name': (value) => value,
+        'role': (role) => getRoleLabel(role),
+        'phone_number': (value) => value,
+        'start_date': (value) => value,
+    }
+    const [listInstanceData, setListInstanceData] = useState([])
+    const [instanceData, setInstanceData] = useState({})
+
+      const [isOpen, setIsOpen] = useState();
+  const [isedit, setisEdit] = useState();
+  const [isAdd, setisAdd] = useState();
+  const [error, setError] = useState(false);
+  const [image, setImage] = useState();
+
+
+
+   
+
+ {
+                (isOpen || isAdd) && (
+
+                    <CustomizedDialogs
+                        setIsOpen={setIsOpen}
+                        isAdd={isAdd}
+                        error={error}
+
+                        setListData={tableData}
+                        instanceData={instanceData}
+                        setInstanceData={setInstanceData}
+                        handleClose={handleClose}
+
+                        // functions
+                        addInstance={addNewInstance}
+                        updateInstance={updateInstance}
+                        deleteInstance={deleteInstance}
+                        handleChange={handleChange}
+
+                    // setImage={setImage}
+                    // image={image}
+
+
+                    />
+                )
+            }

@@ -50,7 +50,8 @@ export default function CustomTable(props) {
     // const [loader,setLoader]=useState(false);
 
     const {
-        headers, data, fieldsToShow, fields,getInstanceData,loader
+        headers, data, fieldsToShow, fields, getInstanceData,
+        loader, setLoader
     } = props
 
 
@@ -150,21 +151,26 @@ export default function CustomTable(props) {
 
 
 
-    const fetchData=(id,bool,text,rowIndex) =>{
-        // setLoader(rowIndex)
+    const fetchData = async (id, bool, text, rowIndex) => {
+        setLoader(rowIndex)
         try {
-             getInstanceData(id,bool,text);
+            // setLoader(rowIndex);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const data = await getInstanceData(id, bool, text);
+            return { success: true };
+
         } catch (error) {
             console.error('Error occurred:', error);
         } finally {
-            // setLoader()
+            setLoader()
             // setLoading(false);
         }
 
     }
 
 
-    const handleNavigate = (id,k) => {
+
+    const handleNavigate = (id, k) => {
         navigate(`loan-form/${id}`)
     }
 
@@ -176,7 +182,7 @@ export default function CustomTable(props) {
 
             {/* <div className='container mt-5  bg-white p-5'> */}
 
-                {/* <div className="row">
+            {/* <div className="row">
 
                     <div className="col text-end">
                         <Button variant="contained"
@@ -192,174 +198,190 @@ export default function CustomTable(props) {
                 </div> */}
 
 
-                {mui && (
-                    <TableContainer
-                    // component={Paper}
-                    >
-                        <Table
-                            //      sx={{ minWidth: 700 }} 
-                            // aria-label="customized table" 
-                            className='mt-2'>
-                            <TableHead>
-                                <TableRow>
-                                    <StyledTableCell>Si.No</StyledTableCell>
-                                    {headers?.map((header, index) => (
+            {mui && (
+                <TableContainer
+                // component={Paper}
+                >
+                    <Table
+                        //      sx={{ minWidth: 700 }} 
+                        // aria-label="customized table" 
+                        className='mt-2'>
+                        <TableHead>
+                            <TableRow>
+                                <StyledTableCell>Si.No</StyledTableCell>
 
-                                        <StyledTableCell key={index}>{header}</StyledTableCell>
-                                    ))}
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
+                                {headers?.map((header, index) => (
 
+                                    <StyledTableCell key={index}>{header}</StyledTableCell>
+                                ))}
 
-                                {(!data || data.length === 0) ?
-                                    <>
-                                        <p>No data available</p>
-                                    </> :
-                                    <>
-                                        {data?.map((row, rowIndex) => (
-                                            <TableRow key={rowIndex}>
-                                                <StyledTableCell>{rowIndex + 1}</StyledTableCell>
+                                <StyledTableCell>Action</StyledTableCell>
+
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
 
 
-                                                {hide &&
-                                                    (
-                                                        fieldsToShow?.map((field, fieldIndex) => (
-                                                            <StyledTableCell key={`${rowIndex}-${fieldIndex}`}>
-                                                                {/* Handle nested fields */}
-                                                                {field.includes('.') ?
+                            {(!data || data.length === 0) ?
+                                <>
+                                    <p>No data available</p>
+                                </> :
+                                <>
+                                    {data?.map((row, rowIndex) => (
+                                        <TableRow key={rowIndex}>
+                                            <StyledTableCell>{rowIndex + 1}</StyledTableCell>
 
-                                                                    nestedFieldExtractor(row, field)
+
+                                            {hide &&
+                                                (
+                                                    fieldsToShow?.map((field, fieldIndex) => (
+                                                        <StyledTableCell key={`${rowIndex}-${fieldIndex}`}>
+                                                            {/* Handle nested fields */}
+                                                            {field.includes('.') ?
+
+                                                                nestedFieldExtractor(row, field)
+                                                                :
+                                                                isImageUrl(row[field])
+                                                                    ?
+                                                                    (<img src={row[field]} alt={row[field]} style={{ width: '100px', height: 'auto' }} />)
+
                                                                     :
-                                                                    isImageUrl(row[field])
-                                                                        ?
-                                                                        (<img src={row[field]} alt={row[field]} style={{ width: '100px', height: 'auto' }} />)
+                                                                    (
+                                                                        row[field]
+                                                                    )}
+                                                            {/* Render image if field is an image URL */}
 
-                                                                        :
-                                                                        (
-                                                                            row[field]
-                                                                        )}
-                                                                {/* Render image if field is an image URL */}
+                                                            {renderField(row, field)}
 
-                                                                {renderField(row, field)}
+                                                        </StyledTableCell>
+                                                    ))
+                                                )
+                                            }
 
-                                                            </StyledTableCell>
-                                                        ))
-                                                    )
-                                                }
-
-                                                {Object.entries(fields).map(([fieldName, getValue]) => (
-                                                    <StyledTableCell key={`${rowIndex}-${fieldName}`}>
-                                                        {getValue(renderField(row, fieldName))}
-                                                        {/* {renderField(row, fieldName)} */}
-                                                    </StyledTableCell>
-                                                ))}
-
-                                                <StyledTableCell>
-                                                    <ButtonWithLoader
-                                                        itemId={row?.id}
-                                                        onClick={fetchData}
-                                                        class_name="btn btn-success"
-                                                        text="View"
-                                                        span_class="glyphicon glyphicon-pencil"
-                                                        loader={loader}
-                                                        index={rowIndex}
-                                                    // key = {employee?.id}
-                                                    />
+                                            {Object.entries(fields).map(([fieldName, getValue]) => (
+                                                <StyledTableCell key={`${rowIndex}-${fieldName}`}>
+                                                    {getValue(renderField(row, fieldName))}
+                                                    {/* {renderField(row, fieldName)} */}
                                                 </StyledTableCell>
+                                            ))}
 
-                                            </TableRow>
-                                        ))}
+                                            <StyledTableCell>
 
-                                    </>}
-
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-
-                )}
-
-
-                {!mui && (
-                    <div className="table-responsive mt-2">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr class="table-info">
-                                    <th>Si.No</th>
-                                    {headers?.map((header) => (
-                                        <th key={header}>{header}</th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-
-                                {(!data || data.length === 0) ?
-                                    <>
-                                        <p>No data available</p>
-                                    </>
-                                    :
-                                    <>
-                                        {data?.map((row, rowIndex) => (
-                                            <tr key={rowIndex}>
-                                                <td>{rowIndex + 1}</td>
-                                                {hide &&
-                                                    (
-                                                        fieldsToShow?.map((field, fieldIndex) => (
-                                                            <td key={`${rowIndex}-${fieldIndex}`}>
-                                                                {/* Handle nested fields */}
-                                                                {field.includes('.') ?
-
-                                                                    nestedFieldExtractor(row, field)
-                                                                    :
-                                                                    isImageUrl(row[field])
-                                                                        ?
-                                                                        (<img src={row[field]} alt={row[field]} style={{ width: '100px', height: 'auto' }} />)
-
-                                                                        :
-                                                                        (
-                                                                            row[field]
-                                                                        )}
-                                                                {/* Render image if field is an image URL */}
-
-                                                                {renderField(row, field)}
-
-                                                            </td>
-                                                        ))
-                                                    )
-                                                }
-                                                {Object.entries(fields).map(([fieldName, getValue]) => (
-                                                    <td key={`${rowIndex}-${fieldName}`}>
-                                                        {getValue(renderField(row, fieldName))}
-                                                        {/* {renderField(row, fieldName)} */}
-                                                    </td>
-                                                ))}
-
-                                                <td>
-                                                    <ButtonWithLoader
-                                                        itemId={row?.id}
-                                                        onClick={() => fetchData(row?.id, false, "view",rowIndex)}
-                                                        class_name="btn btn-success"
-                                                        text="View"
-                                                        span_class="glyphicon glyphicon-pencil"
+                                                <ButtonWithLoader
+                                                    itemId={row?.id}
+                                                    onClick={() => fetchData(row?.id, false, "view", rowIndex)}
+                                                    class_name="btn btn-success"
+                                                    text="View"
+                                                    span_class="glyphicon glyphicon-pencil"
                                                     loader={loader}
                                                     index={rowIndex}
-                                                    // setLoader={setLoader}
-                                                    // key = {employee?.id}
-                                                    />
+                                                // setLoader={setLoader}
+                                                // key = {employee?.id}
+                                                />
 
+                                            </StyledTableCell>
+
+                                        </TableRow>
+                                    ))}
+
+                                </>}
+
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+
+            )}
+
+
+            {!mui && (
+                <div className="table-responsive mt-2">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr class="table-info">
+
+                                <th>Si.No</th>
+
+                                {headers?.map((header) => (
+                                    <th key={header}>{header}</th>
+                                ))}
+
+                                <th>Action</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            {(!data || data.length === 0) ?
+                                <>
+                                    <p>No data available</p>
+                                </>
+                                :
+                                <>
+                                    {data?.map((row, rowIndex) => (
+                                        <tr key={rowIndex}>
+                                            <td>{rowIndex + 1}</td>
+                                            {hide &&
+                                                (
+                                                    fieldsToShow?.map((field, fieldIndex) => (
+                                                        <td key={`${rowIndex}-${fieldIndex}`}>
+                                                            {/* Handle nested fields */}
+                                                            {field.includes('.') ?
+
+                                                                nestedFieldExtractor(row, field)
+                                                                :
+                                                                isImageUrl(row[field])
+                                                                    ?
+                                                                    (<img src={row[field]} alt={row[field]} style={{ width: '100px', height: 'auto' }} />)
+
+                                                                    :
+                                                                    (
+                                                                        row[field]
+                                                                    )}
+                                                            {/* Render image if field is an image URL */}
+
+                                                            {renderField(row, field)}
+
+                                                        </td>
+                                                    ))
+                                                )
+                                            }
+                                            {Object.entries(fields).map(([fieldName, getValue]) => (
+                                                <td key={`${rowIndex}-${fieldName}`}>
+                                                    {getValue(renderField(row, fieldName))}
+                                                    {/* {renderField(row, fieldName)} */}
                                                 </td>
-                                            </tr>
-                                        ))}
-                                    </>
-                                }
+                                            ))}
+
+                                            <td>
+
+                                                {/* <button class="buttontn btn-edit"  onClick={() => fetchData(row?.id, false, "view",rowIndex)}>
+                                                        {(loader ===rowIndex ) ? Config.loader : <span class="glyphicon glyphicon-pencil"></span>} View
+                                                    </button> */}
+                                                <ButtonWithLoader
+                                                    itemId={row?.id}
+                                                    onClick={() => fetchData(row?.id, false, "view", rowIndex)}
+                                                    class_name="btn btn-success"
+                                                    text="View"
+                                                    span_class="glyphicon glyphicon-pencil"
+                                                    loader={loader}
+                                                    index={rowIndex}
+                                                // setLoader={setLoader}
+                                                // key = {employee?.id}
+                                                />
+
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </>
+                            }
 
 
 
-                            </tbody>
-                        </table>
-                    </div>
+                        </tbody>
+                    </table>
+                </div>
 
-                )}
+            )}
 
 
             {/* </div> */}
@@ -410,7 +432,8 @@ const renderImageOrText = (value) => {
             src={Config?.MEDIA_URL + value}
             alt={alt_name}
             className="emp-thumb"
-            style={{ width: '100px', height: 'auto' }} />;
+        // style={{ width: '100px', height: 'auto' }}
+        />;
     } else {
         return value;
     }

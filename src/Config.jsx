@@ -50,7 +50,16 @@ const Config = {
         ariaLabel="rotating-lines-loading"
         wrapperStyle={{}}
         wrapperClass=""
-    />
+    />,
+
+    modelStyle :{
+          // position: 'absolute',
+  // top: '50%',
+  // left: '50%',
+  // transform: 'translate(-50%, -50%)',
+    },
+    // avatar : `${Config?.HOST_URL}assets/img/profiles/avator1.jpg`,
+    avatar:"assets/img/profiles/avator1.jpg"
 
 
 

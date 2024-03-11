@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import UserContext from "../Context"
-import { useContext,useEffect } from "react";
+import { useContext, useEffect } from "react";
 import Config from "../Config";
 import feather from 'feather-icons';
 
@@ -309,10 +309,10 @@ function Header(props) {
         >
 
             {/* <ResponsiveAppBar /> */}
-                        
+
             <Container maxWidth="xl">
 
-            {/* <Toolbar
+                {/* <Toolbar
                     sx={{
                         display: 'flex',
                         alignItems: 'center',
@@ -406,7 +406,7 @@ function Header(props) {
 
 
 
-       
+
 
         </AppBar>
 
@@ -544,7 +544,7 @@ function SubHeader() {
                     <a href="javascript:void(0);" class="dropdown-toggle nav-link userset" data-bs-toggle="dropdown">
                         <span class="user-info">
                             <span class="user-letter">
-                                <img src={userName?.employee?.image ? (Config.MEDIA_URL + userName?.employee_info?.image) : Config.HOST_URL+"assets/img/profiles/avator1.jpg"} alt class="img-fluid" />
+                                <img src={userName?.employee_info?.image ? (Config.MEDIA_URL + userName?.employee_info?.image) : Config?.avatar} alt class="img-fluid" />
                             </span>
                             <span class="user-detail">
                                 <span class="user-name">{userName?.name}</span>
