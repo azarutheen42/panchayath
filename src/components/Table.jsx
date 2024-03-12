@@ -428,6 +428,7 @@ const renderImageOrText = (value) => {
     // Check if the value is an image URL
     if (isImageUrl(value)) {
         var alt_name = getImageName(value);
+        alt_name=Config.truncateText(alt_name,7)
         return <img
             src={Config?.MEDIA_URL + value}
             alt={alt_name}
@@ -435,8 +436,16 @@ const renderImageOrText = (value) => {
         // style={{ width: '100px', height: 'auto' }}
         />;
     } else {
-        return value;
+        // return value;
+        if (typeof value !== 'string') {
+            return value ?? "Nill"
+        
     }
+    else{
+        return Config?.truncateText(value?(value):"",15)
+    }   
+}
+  
 };
 
 

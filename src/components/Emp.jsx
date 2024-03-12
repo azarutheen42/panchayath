@@ -769,6 +769,8 @@ function CustomizedDialogs(props) {
                 <AlertDialog
                     handleClose={handleClickClose}
                     onClick={() => deleteInstance(instanceData?.id)}
+                    loading={loading}
+                    setLoading={setLoading}
 
                 />
             )}

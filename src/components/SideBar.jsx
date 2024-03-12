@@ -493,9 +493,19 @@ function SideBar(props) {
 
                     {/* COMPLAINTS */}
 
-                    <ListItemButton onClick={() => handleClick("complaint")}>
+
+                    <ListItemButton onClick={() => handlenavigate("m=complaint&s=list")} >
                         <ListItemIcon>
-                            {/* <BarChartIcon /> */}
+                            
+                            <AssignmentIcon/>
+                           
+                        </ListItemIcon>
+                        <ListItemText primary="Complaints" />
+                    </ListItemButton>
+
+                    {/* <ListItemButton onClick={() => handleClick("complaint")}>
+                        <ListItemIcon>
+                           
                             <AssignmentIcon/>
                         </ListItemIcon>
                         <ListItemText primary="Complaints" />
@@ -553,7 +563,7 @@ function SideBar(props) {
                             </ListItemButton>
 
                         </List>
-                    </Collapse>
+                    </Collapse> */}
 
 
 

@@ -41,9 +41,9 @@ function Attendance() {
     'date': (value) => today,
     'emp_id': (value) => value,
     'name': (value) => value,
-    'clock_in': (value) => value,
-    'clock_out': (value) => value,
-    'status': (value) => value,
+    'clock_in': (value) => value?value:"Nill",
+    'clock_out': (value) => value?value:"Nill",
+    'status': (value) =>value?"Present":"Absent",
     'role_name': (value) => value,
     'image': (value) => value,
 
@@ -478,6 +478,8 @@ function CustomizedDialogs(props) {
         <AlertDialog
           handleClose={handleClickClose}
           onClick={() => deleteInstance(instanceData?.id)}
+          loading={loading}
+                    setLoading={setLoading}
 
         />
       )}

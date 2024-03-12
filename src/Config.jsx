@@ -16,7 +16,7 @@ const Config = {
     HOST_URL: "../../../",
     BASE_URL: import.meta.env.VITE_APP_BASE_URL,
     LOGIN_URL: import.meta.env.VITE_APP_LOGIN_URL,
-    MEDIA_URL:import.meta.env.VITE_APP_MEDIA_URL,
+    MEDIA_URL: import.meta.env.VITE_APP_MEDIA_URL,
 
     config: {
         headers: { Authorization: `Bearer ${userState?.token}` }
@@ -52,14 +52,61 @@ const Config = {
         wrapperClass=""
     />,
 
-    modelStyle :{
-          // position: 'absolute',
-  // top: '50%',
-  // left: '50%',
-  // transform: 'translate(-50%, -50%)',
+    modelStyle: {
+        // position: 'absolute',
+        // top: '50%',
+        // left: '50%',
+        // transform: 'translate(-50%, -50%)',
     },
     // avatar : `${Config?.HOST_URL}assets/img/profiles/avator1.jpg`,
-    avatar:"assets/img/profiles/avator1.jpg"
+    avatar: "assets/img/profiles/avator1.jpg",
+
+    truncateText: (text, maxLength) => {
+        if (text.length <= maxLength) {
+            return text;
+        } else {
+            return text.substring(0, maxLength);
+        }
+    },
+    dateTime: (isoDatetimeString) => {
+        // console.log(isoDatetimeString)
+        // const dateTimeParts = isoDatetimeString.split(/[T\+-]/);
+        // const datePart = dateTimeParts[0];
+        // const timePart = dateTimeParts[1].split('.')[0];
+        // const offset = dateTimeParts[2];
+
+        // const [year, month, day] = datePart.split('-');
+        // const [hour, minute, second] = timePart.split(':');
+
+        // const dateTime = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
+
+        // // Adjust for the timezone offset
+        // const offsetHours = parseInt(offset.substring(0, 3));
+        // const offsetMinutes = parseInt(offset.substring(3));
+        // const offsetMilliseconds = (offsetHours * 60 + offsetMinutes) * 60 * 1000;
+        // dateTime.setTime(dateTime.getTime() - offsetMilliseconds);
+
+        // console.log(dateTime.toString()); // Output the datetime as a string
+        // // return dateTime.toString()
+        // return isoDatetimeString
+
+
+
+
+        const dateTime = new Date(isoDatetimeString);
+
+        const options = {
+            timeZone: 'Asia/Kolkata', // Replace 'Asia/Kolkata' with the desired timezone
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        };
+
+        const dateString = dateTime.toLocaleDateString('en-US', options);
+        console.log(dateString);
+        return dateString
+
+    }
 
 
 

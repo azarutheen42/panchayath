@@ -12,6 +12,8 @@ import { setPanchayath } from './features/PanchayathSlice';
 import { setWard } from './features/WardSlice';
 import { setCity } from './features/CitiySlice';
 import { setUser } from './features/UserSlice';
+import {setRequest} from "./features/RequestType.jsx"
+import {setComplaint} from "./features/ComplaintType.jsx"
 
 
 import "./assets/css/style.css"
@@ -41,6 +43,8 @@ function App() {
     getWards()
     getCities()
     getPanchayaths()
+    getRequestType()
+    getCompalintType()
 
   }, [])
 
@@ -169,6 +173,51 @@ console.log(Config.config)
         if (response.status === 200) {
           // console.log(response.data);
           dispatch(setWard(response.data));
+
+        }
+
+      })
+      .catch(function (error) {
+        console.log(error);
+
+      });
+
+
+  }
+
+
+
+// get request type
+  const getRequestType = () => {
+    axios.get(`${Config.BASE_URL}request-type`,
+      Config?.config
+    )
+      .then(function (response) {
+        if (response.status === 200) {
+          // console.log(response.data);
+          dispatch(setRequest(response.data));
+
+        }
+
+      })
+      .catch(function (error) {
+        console.log(error);
+
+      });
+
+
+  }
+
+
+  // get request type
+  const getCompalintType = () => {
+    axios.get(`${Config.BASE_URL}complainttype`,
+      Config?.config
+    )
+      .then(function (response) {
+        if (response.status === 200) {
+          // console.log(response.data);
+          dispatch(setComplaint(response.data));
 
         }
 

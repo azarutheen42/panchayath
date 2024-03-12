@@ -10,6 +10,8 @@ import WardReducer from "./features/WardSlice.jsx"
 import CityReducer from "./features/CitiySlice.jsx"
 import { configureStore } from '@reduxjs/toolkit'
 import UserReducer from "./features/UserSlice.jsx"
+import RequestTypeReducer from "./features/RequestType.jsx"
+import ComplaintTypeReducer from "./features/ComplaintType.jsx"
 import { Provider } from 'react-redux';
 import App  from "./App.jsx"
 
@@ -23,7 +25,9 @@ const store = configureStore({
       panchayath:PanchayathReducer,
       ward:WardReducer,
       city:CityReducer,
-      user:UserReducer
+      user:UserReducer,
+      requesttype:RequestTypeReducer,
+      complainttype:ComplaintTypeReducer,
   }
 })
 

@@ -8,7 +8,24 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Config from '../Config';
 
-export default function AlertDialog({ handleClose, onClick,loading }) {
+export default function AlertDialog({ handleClose, onClick,loading,setLoading }) {
+
+
+
+    const handleClick = async () => {
+        setLoading(true); // Show loader
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            const data = await onClick();
+            return { success: true };
+
+        } catch (error) {
+
+            console.error('API call failed:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
    
     return (
         <React.Fragment>
@@ -30,7 +47,7 @@ export default function AlertDialog({ handleClose, onClick,loading }) {
                     <Button onClick={handleClose}>cancel</Button>
 
                     <Button variant="contained"
-                    onClick={onClick}
+                    onClick={handleClick}
                         // style= {{backgroundColor:"#c62828",color:"white"}}  
                         size="small" >
                        {loading ? Config.loader : <span ></span>} Confirm

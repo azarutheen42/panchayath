@@ -152,7 +152,7 @@ export function DeleteButton({ onClick, loading, setLoading }) {
         //     {loading ? Config.loader : <span ></span>} Delete
         // </button>
 
-        <Button variant="outlined" style={{ backgroundColor: "#c62828", color: "white" }} size="small" onClick={handleClick} startIcon={<DeleteIcon />}>
+        <Button variant="outlined" style={{ backgroundColor: "#c62828", color: "white" }} size="small" onClick={onClick} startIcon={<DeleteIcon />}>
             Delete
         </Button>
 

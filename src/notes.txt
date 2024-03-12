@@ -62,3 +62,25 @@
                     />
                 )
             }
+
+
+
+            disabled={!isedit && !isAdd}
+
+
+
+    // Check form field validation
+    const checkValidation = () => {
+
+        if (!employee?.name || !employee?.phone_number || !employee?.start_date || !employee?.role) {
+            console.log("please fill required fields")
+            setError(true)
+            return false
+
+        }
+        else {
+            setError(false)
+            return true
+        }
+
+    }

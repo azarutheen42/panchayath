@@ -164,8 +164,8 @@ function House() {
 function Street() {
 
     const [wardReportList, setWardReportList] = useState([]);
-    const [ward, setWard] = useState();
-    const [startDate, setStartDate] = useState();
+    const [ward, setWard] = useState("");
+    const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState();
 
     const wards = useSelector((state) => state?.ward?.value);

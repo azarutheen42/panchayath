@@ -56,22 +56,26 @@ function UserRegister() {
     }
 
 
-    const formatAddress = (data) => {
-        const addressData = data;
-        return `${addressData.door_no || ''} ${addressData.line1 || ''} ${addressData.line2 || ''} 
-        ${getWardLabel(addressData?.ward )|| ''} ${getStreetLabel(addressData.street) || ''}`.replace(/, +/g, ', ').trim();
+    const formatAddress = (addressData) => {
+        const data =`${addressData.door_no || ''} ${addressData.line1 || ''} ${addressData.line2 || ''} `.replace(/, +/g, ', ').trim();
+        if (!data){
+            return ""
+        }
+        return data
       };
 
 
     // META DATA
-    const headersToShow = ["Ward No", "Name", "Contact No", "Address",]
+    const headersToShow = ["Name", "Contact No", "Address","Ward", "Street"]
     const tableData = listInstanceData
     const fieldsToShow = []
     const fields = {
-        'ward_name': (value) => value,
+       
         'name': (value) => value,
         'phone': (value) => value,
         'get_user_address': (value) =>formatAddress(value),
+        'ward_name': (value) => value,
+        'get_user_address.street': (value) =>value?value : 'Nill',
     }
 
 
@@ -684,6 +688,8 @@ function CustomizedDialogs(props) {
                 <AlertDialog
                     handleClose={handleClickClose}
                     onClick={() => deleteInstance(instanceData?.id)}
+                    loading={loading}
+                    setLoading={setLoading}
 
                 />
             )}
