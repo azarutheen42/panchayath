@@ -84,3 +84,9 @@
         }
 
     }
+
+
+
+  {(!instanceData?.date && error) && (
+                                        <span className="req-text">This field is required</span>
+                                    )}

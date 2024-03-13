@@ -842,6 +842,7 @@ function Events(props) {
                                             </h3>
                                             <div className="modal-body">
                                                 <div className="card">
+
                                                     <div className="card-body">
                                                         <div className="row">
                                                             <div className="col-lg-6 col-md-6 col-sm-12 col-12">
@@ -963,6 +964,7 @@ function Events(props) {
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    
                                                 </div>
                                             </div>
                                             <div class="modal-footer">

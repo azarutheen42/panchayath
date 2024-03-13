@@ -39,7 +39,7 @@ import { useContext, createContext } from 'react';
 import Config from "../Config"
 import UserContext from "../Context"
 import CustomTable from "./Table"
-
+import Activity from './Activities';
 
 import Copyright from './copywright';
 
@@ -237,9 +237,13 @@ function Content(props) {
             />
 
         case "activity":
-            return <Events
-                path={path}
-            />
+            // return <Events
+            //     path={path}
+            // />
+
+            return <Activity
+            path={path}
+        />
 
         case "request":
             return <Requests
