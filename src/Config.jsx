@@ -51,6 +51,7 @@ const Config = {
         wrapperStyle={{}}
         wrapperClass=""
     />,
+    errString :"This Field is Required",
 
     modelStyle: {
         // position: 'absolute',

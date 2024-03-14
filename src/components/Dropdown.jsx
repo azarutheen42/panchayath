@@ -2,12 +2,12 @@
 
 export default function SelectDropdown(props) {
 
-    const { list, onchange, selected, name, showname, disabled, error } = props
+    const { list, onchange, selected, name, showname, disabled, error ,report} = props
     return (
         <>
             <select name={name} className="custom-dropdown" required value={selected} onChange={onchange} disabled={disabled}>
 
-                <option > -------------  </option>
+                {report && <option value={""} > -------------  </option> }
                 {list?.map((e) => (
                     <option value={e?.id}>{e[showname]} </option>
                 ))}

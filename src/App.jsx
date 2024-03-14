@@ -10,6 +10,7 @@ import { setCollector } from './features/CollectorSlice.jsx';
 import { setDistrict } from './features/DistrictSlice.jsx';
 import { setPanchayath } from './features/PanchayathSlice.jsx';
 import { setWard } from './features/WardSlice.jsx';
+import { setStreet } from './features/StreetSlice.jsx';
 import { setCity } from './features/CitiySlice.jsx';
 import { setUser } from './features/UserSlice.jsx';
 import {setRequest} from "./features/RequestType.jsx";
@@ -64,13 +65,14 @@ function App() {
     if (Config?.userState) {
       getUser()
     }
-    getCollectorRoles()
-    getDistricts()
-    getWards()
-    getCities()
-    getPanchayaths()
-    getRequestType()
-    getCompalintType()
+    getCollectorRoles();
+    getDistricts();
+    getWards();
+    getCities();
+    getPanchayaths();
+    getRequestType();
+    getCompalintType();
+    getStreet();
 
   }, [])
 
@@ -209,6 +211,27 @@ console.log(Config.config)
 
   }
 
+
+
+  const  getStreet = () => {
+    axios.get(`${Config.BASE_URL}street`,
+      Config?.config
+    )
+      .then(function (response) {
+        if (response.status === 200) {
+          // console.log(response.data);
+          dispatch(setStreet(response.data));
+
+        }
+
+      })
+      .catch(function (error) {
+        console.log(error);
+
+      });
+
+
+  }
 
 
 

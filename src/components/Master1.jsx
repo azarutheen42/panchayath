@@ -22,6 +22,9 @@ import React from "react";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SelectDropdown from "./Dropdown"
+import { useDispatch } from "react-redux";
+import { setWard } from "../features/WardSlice"
+import { setStreet } from "../features/StreetSlice";
 
 
 
@@ -35,49 +38,52 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 
-export default function Activity(props) {
+function Content(props) {
 
-
-    useEffect(() => {
-
-    }, [])
-
-    function Content() {
-
-        switch (props.path) {
-            case "minutes-of-meeting":
-                return <MinutesOfMeeting />
-            case "scheme":
-                return <Scheme />
-            case "events":
-                return <Events />
-            case "staff-notice":
-                return <StaffNoticeBoard />
-            case "announcements":
-                return <Announcement />
-
-            default:
-                return <MinutesOfMeeting />
-
-        }
-
-
+    switch (props?.path) {
+        case "districts":
+            return <District />
+        case "cities":
+            return <City />
+        case "panchayath":
+            return <Panchayat />
+        case "ward":
+            return <Ward />
+        case "house":
+            return < House />
+        // case "shops":
+        //     return <Shop/>
+        case "streets":
+            return <Street />
+        default:
+            return <Ward />
     }
-
-
-    return (
-        <>
-            <Content />
-        </>
-    )
 
 }
 
 
 
+
+function Masters(props) {
+
+    return (
+        <>
+
+            <Content
+                path={props?.path}
+            />
+        </>
+
+    )
+}
+
+
+export default Masters;
+
+
 // -------------------------------------------------------------------------------------------------------------------------------
 
-function MinutesOfMeeting() {
+function District() {
 
 
 
@@ -426,7 +432,7 @@ function MinutesOfMeeting() {
 
 
 
-function MinutesOfMeetingDialogs(props) {
+function DistrictDialogs(props) {
 
     const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader,
         deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, requestTypeList
@@ -723,7 +729,7 @@ function MinutesOfMeetingDialogs(props) {
 // -------------------------------------------------------------------------------------------------------------------------------
 
 
-function Scheme() {
+function City() {
 
 
 
@@ -1066,7 +1072,7 @@ function Scheme() {
 
 
 
-function SchemeDialogs(props) {
+function CityDialogs(props) {
 
     const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader,
         deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, requestTypeList
@@ -1337,7 +1343,7 @@ function SchemeDialogs(props) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------
 
-function Events() {
+function Panchayat() {
 
 
 
@@ -1452,7 +1458,7 @@ function Events() {
 
         console.log(instanceData, "fdj")
 
-        if (!instanceData?.date || !instanceData?.time || !instanceData?.event_name || !instanceData?.Place || !instanceData?.details) {
+        if (!instanceData?.ward_no || !instanceData?.name) {
             console.log("please fill required fields")
             setError(true)
             return false
@@ -1475,11 +1481,9 @@ function Events() {
         }
 
         const data = new FormData();
-        data.append('date', instanceData?.date)
-        data.append('time', instanceData?.time)
-        data.append('event_name', instanceData?.event_name)
-        data.append('Place', instanceData?.Place)
-        data.append('details', instanceData?.details)
+        data.append('name', instanceData?.name)
+        data.append('ward_no', instanceData?.ward_no)
+
         try {
             const response = await axios.post(`${Config.BASE_URL}${postUrl}/`, data, Config.config);
             console.log(response.data);
@@ -1508,11 +1512,8 @@ function Events() {
         }
 
         const data = new FormData()
-        data.append('date', instanceData?.date)
-        data.append('time', instanceData?.time)
-        data.append('event_name', instanceData?.event_name)
-        data.append('Place', instanceData?.Place)
-        data.append('details', instanceData?.details)
+        data.append('name', instanceData?.name)
+        data.append('ward_no', instanceData?.ward_no)
 
         axios
             .put(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
@@ -1680,7 +1681,7 @@ function Events() {
 
 
 
-function EventsDialogs(props) {
+function PanchayatDialogs(props) {
 
     const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader,
         deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, requestTypeList
@@ -1945,24 +1946,21 @@ function EventsDialogs(props) {
     );
 }
 
-const getUrl = "staffnotice";
-const getListUrl = "staffnotice";
-const postUrl = "staffnotice";
-const updateUrl = "staffnotice";
-const deleteUrl = "staffnotice";
 // -------------------------------------------------------------------------------------------------------------------------------
 
 
-function StaffNoticeBoard() {
+function Ward() {
 
 
+    const dispatch = useDispatch()
 
-
-    const modalHeader = "Staff Notice";
+    const modalHeader = "Ward";
 
     const user = useSelector((state) => state?.user?.value);
     const wardlist = useSelector((state) => state?.ward?.value);
-    const complaintTypeList = useSelector((state) => state?.complainttype?.value);
+    const panchayatList = useSelector((state) => state?.panchayat?.value);
+    const districtList = useSelector((state) => state?.district?.value);
+    const cityList = useSelector((state) => state?.city?.value);
 
     // meta StATE
     const [listInstanceData, setListInstanceData] = useState([])
@@ -1984,24 +1982,22 @@ function StaffNoticeBoard() {
     }
 
 
-    const getUrl = "staffnotice";
-    const getListUrl = "staffnotice";
-    const postUrl = "staffnotice";
-    const updateUrl = "staffnotice";
-    const deleteUrl = "staffnotice";
+    const getUrl = "get-ward";
+    const getListUrl = "get-ward";
+    const postUrl = "get-ward";
+    const updateUrl = "get-ward";
+    const deleteUrl = "get-ward";
 
 
 
     // META DATA
-    const headersToShow = ["Date", "Subject", "Details"]
+    const headersToShow = ["Ward Name", "Houses", "Streets"]
     const tableData = listInstanceData
     const fieldsToShow = []
     const fields = {
-        'date': (value) => value,
-        'subject': (value) => value,
-        'details': (value) => value,
-
-
+        'name': (value) => value,
+        'house_count': (value) => value,
+        'street_count': (value) => value,
     }
 
 
@@ -2030,7 +2026,23 @@ function StaffNoticeBoard() {
             const response = await fetch(Config.BASE_URL + getListUrl, Config?.config)
             const data = await response.json()
             console.log(data)
-            setListInstanceData(data)
+            setListInstanceData(data);
+            // dispatch(setWard(data));
+
+        } catch (error) {
+            console.error('Error fetching data:', error)
+        }
+    }
+
+
+    // redux
+    const updateListData = async () => {
+        try {
+
+            const response = await fetch(Config.BASE_URL + getListUrl, Config?.config)
+            const data = await response.json()
+            console.log(data)
+            dispatch(setWard(data));
 
         } catch (error) {
             console.error('Error fetching data:', error)
@@ -2063,7 +2075,7 @@ function StaffNoticeBoard() {
 
         console.log(instanceData, "fdj")
 
-        if (!instanceData?.date || !instanceData?.subject || !instanceData?.details) {
+        if (!instanceData?.name || !instanceData?.ward_no) {
             console.log("please fill required fields")
             setError(true)
             return false
@@ -2077,6 +2089,7 @@ function StaffNoticeBoard() {
     }
 
 
+    console.log(instanceData, "fdj")
     const addNewInstance = async (e) => {
 
         const check = checkValidation()
@@ -2086,12 +2099,10 @@ function StaffNoticeBoard() {
         }
 
         const data = new FormData();
-        data.append('date', instanceData?.date)
-        data.append('subject', instanceData?.subject)
-
-        data.append('details', instanceData?.details)
+        data.append('name', instanceData?.name)
+        data.append('ward_no', instanceData?.ward_no)
         try {
-            const response = await axios.post(`${Config.BASE_URL}${postUrl}/`, data, Config.config);
+            const response = await axios.post(`${Config.BASE_URL}${postUrl}`, data, Config.config);
             console.log(response.data);
             toast.success('Successfully submitted!');
 
@@ -2100,10 +2111,13 @@ function StaffNoticeBoard() {
             })
 
             handleClose();
+            updateListData();
         } catch (error) {
             console.error('Error occurred:', error);
-            toast.error('Submission failed. Please try again.');
+            toast.error(error?.response?.data?.msg);
         }
+
+
     };
 
 
@@ -2118,13 +2132,11 @@ function StaffNoticeBoard() {
         }
 
         const data = new FormData()
-        data.append('date', instanceData?.date)
-        data.append('subject', instanceData?.subject)
-
-        data.append('details', instanceData?.details)
+        data.append('name', instanceData?.name)
+        data.append('ward_no', instanceData?.ward_no)
 
         axios
-            .put(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
+            .patch(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response)
@@ -2147,6 +2159,7 @@ function StaffNoticeBoard() {
                 }
             })
             .catch(function (error) {
+                toast.error(error?.response?.data?.msg);
                 console.log(error)
             })
     }
@@ -2162,6 +2175,7 @@ function StaffNoticeBoard() {
                     console.log(response)
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
                     handleClose();
+                    updateListData();
                 }
             })
             .catch(function (error) {
@@ -2174,7 +2188,9 @@ function StaffNoticeBoard() {
 
 
     // handle new instance
+
     const handleChange = (e) => {
+        console.log("trigger")
         const { name, value } = e.target;
         if (name === "image") {
             const check = Config?.fileType(e.target.files[0].name)
@@ -2224,7 +2240,7 @@ function StaffNoticeBoard() {
                     {
                         (isOpen || isAdd) && (
 
-                            <StaffNoticeBoardDialogs
+                            <WardDialogs
                                 setIsOpen={setIsOpen}
                                 isAdd={isAdd}
                                 error={error}
@@ -2240,7 +2256,10 @@ function StaffNoticeBoard() {
                                 deleteInstance={deleteInstance}
                                 handleChange={handleChange}
                                 wardlist={wardlist}
-                                requestTypeList={complaintTypeList}
+                                panchayatList={panchayatList}
+                                districtList={districtList}
+
+                                // requestTypeList={complaintTypeList}
                                 modalHeader={modalHeader}
 
                             // setImage={setImage}
@@ -2289,10 +2308,10 @@ function StaffNoticeBoard() {
 
 
 
-function StaffNoticeBoardDialogs(props) {
+function WardDialogs(props) {
 
     const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader,
-        deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, requestTypeList
+        deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, districtList, panchayatList
         // setError, setImage, image 
     } = props
 
@@ -2392,86 +2411,74 @@ function StaffNoticeBoardDialogs(props) {
 
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-lg-6 col-md-6 col-sm-12 col-12">
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Date : <span class="form-required">*</span>
-                                    </label>
-                                    <input
-                                        type="date"
-                                        class="form-control"
-                                        name="date"
-                                        onChange={handleChange}
-                                        defaultValue={instanceData?.date || ''}
-                                        disabled={!isedit && !isAdd}
-                                        required
-                                    />
-                                    {(!instanceData?.date && error) && (
-                                        <span className="req-text">This field is required</span>
-                                    )}
 
+                            {/* for zonal officers */}
+
+                            {/* <div class="col-lg-6 col-sm-12 col-12">
+
+                                <div class="form-group">
+                                    <label class="form-label">Select District : <span class="form-required">*</span></label>
+                                    <SelectDropdown
+                                        list={districtList}
+                                        onchange={handleChange}
+                                        selected={instanceData?.panchayath_info.district}
+                                        showname={"name"}
+                                        name={"type"}
+                                        disabled={!isedit && !isAdd}
+                                        error={error}
+                                    />
                                 </div>
                             </div>
 
-                            <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+                            <div class="col-lg-6 col-sm-12 col-12">
                                 <div class="form-group">
-                                    <label class="form-label">
-                                        Event Name :{' '}
-                                        <span class="form-required">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        name="subject"
-                                        onChange={handleChange}
-                                        defaultValue={instanceData?.subject || ''}
-                                        disabled={!isedit && !isAdd}
-                                        required
-                                    />
-                                    {(!instanceData?.subject && error) && (
-                                        <span className="req-text">This field is required</span>
-                                    )}
+                                    <label class="form-label">Select Panchayth : <span class="form-required">*</span></label>
 
-                                </div>
-                            </div>
-                            {/* <div class="col-lg-6 col-md-6 col-sm-12 col-12">
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Place : <span class="form-required">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        name="Place"
-                                        onChange={handleChange}
-                                        defaultValue={instanceData?.Place || ''}
+                                    <SelectDropdown
+                                        list={panchayatList}
+                                        onchange={handleChange}
+                                        selected={instanceData?.panchayat}
+                                        showname={"name"}
+                                        name={"type"}
                                         disabled={!isedit && !isAdd}
-                                        required
+                                        error={error}
                                     />
-                                     {(!instanceData?.Place && error) && (
-                                        <span className="req-text">This field is required</span>
-                                    )}
-
                                 </div>
                             </div> */}
 
-                            <div class="col-lg-6 col-md-6 col-sm-12 col-12">
-                                <div class="form-group">
-                                    <label class="form-label"> Details :</label>
-                                    <textarea
-                                        cols="30"
-                                        rows="1"
-                                        name="details"
-                                        onChange={handleChange}
-                                        defaultValue={instanceData?.details || ''}
-                                        disabled={!isedit && !isAdd}
-                                    ></textarea>
-                                    {(!instanceData?.details && error) && (
-                                        <span className="req-text">This field is required</span>
-                                    )}
 
-                                </div>
+
+                            {/* <div class="col-lg-6 col-sm-12 col-12"> */}
+                            <div class="form-group">
+                                <label class="form-label">Ward Name : <span class="form-required">*</span></label>
+                                <input type="text" class="form-control" name="name"
+
+                                    onChange={handleChange}
+                                    defaultValue={instanceData?.name || ""}
+                                    disabled={!isedit && !isAdd}
+                                    required />
+
+                                {(error && !instanceData?.name) && (
+                                    <span className="req-text">{Config?.errString}</span>
+                                )}
                             </div>
+                            {/* </div> */}
+
+                            {/* <div class="col-lg-6 col-sm-12 col-12"> */}
+                            <div class="form-group">
+                                <label class="form-label">Ward Number : <span class="form-required">*</span></label>
+                                <input type="text" class="form-control" name="ward_no"
+                                    defaultValue={instanceData?.ward_no || ""}
+                                    onChange={handleChange}
+                                    disabled={!isedit && !isAdd}
+                                    required />
+
+                                {(error && !instanceData?.ward_no) && (
+                                    <span className="req-text">{Config?.errString}</span>
+                                )}
+                            </div>
+                            {/* </div> */}
+
                         </div>
                     </div>
                     {/* </div>
@@ -2536,24 +2543,20 @@ function StaffNoticeBoardDialogs(props) {
 }
 
 
-
-
-
 // -------------------------------------------------------------------------------------------------------------------------------
 
 
+function Street() {
 
+    const modalHeader = "Street";
 
-function Announcement() {
-
-
-
-
-    const modalHeader = "Announcement";
+    const dispatch = useDispatch()
 
     const user = useSelector((state) => state?.user?.value);
     const wardlist = useSelector((state) => state?.ward?.value);
-    const complaintTypeList = useSelector((state) => state?.complainttype?.value);
+    const panchayatList = useSelector((state) => state?.panchayat?.value);
+    const districtList = useSelector((state) => state?.district?.value);
+    const cityList = useSelector((state) => state?.city?.value);
 
     // meta StATE
     const [listInstanceData, setListInstanceData] = useState([])
@@ -2575,38 +2578,22 @@ function Announcement() {
     }
 
 
-    function getWardNames(ids, objects) {
-        return ids
-            .map(id => objects.find(obj => obj.id === id)) 
-            .filter(obj => obj) 
-            .map(obj => obj.name) 
-            .join(', '); 
-    }
-
-
-
-    const getUrl = "get-announcement";
-    const getListUrl = "announcement";
-    const postUrl = "announcement";
-    const updateUrl = "get-announcement";
-    const deleteUrl = "get-announcement";
+    const getUrl = "street";
+    const getListUrl = "street";
+    const postUrl = "street/";
+    const updateUrl = "street";
+    const deleteUrl = "street";
 
 
 
     // META DATA
-    const headersToShow = ["Date", "Time", "Name", "Place", "Details", "Ward"]
+    const headersToShow = ["Street Name", "Street No", "Ward Name"]
     const tableData = listInstanceData
     const fieldsToShow = []
     const fields = {
-
-        'date': (value) => value,
-        'time': (value) => value,
         'name': (value) => value,
-        // 'place': (value) => value,
-        'place': (value) => value,
-        'details': (value) => value,
-        "ward": (value) => getWardNames(value,wardlist)
-
+        'street_no': (value) => value,
+        'ward': (value) => getWardLabel(value),
     }
 
 
@@ -2644,6 +2631,21 @@ function Announcement() {
 
 
 
+    const updateListData = async () => {
+        try {
+
+            const response = await fetch(Config.BASE_URL + getListUrl, Config?.config)
+            const data = await response.json()
+            console.log(data)
+            dispatch(setStreet(data));
+
+        } catch (error) {
+            console.error('Error fetching data:', error)
+        }
+    }
+
+
+
 
     const getInstanceData = (id, edit) => {
         axios
@@ -2665,9 +2667,10 @@ function Announcement() {
     //add new
     // Check form field validation
     const checkValidation = () => {
-        console.log(instanceData)
 
-        if (!instanceData?.date || !instanceData?.time || !instanceData?.name || !instanceData?.place || !instanceData?.details) {
+        console.log(instanceData, "fdj")
+
+        if (!instanceData?.street_no || !instanceData?.ward || !instanceData?.name) {
             console.log("please fill required fields")
             setError(true)
             return false
@@ -2681,6 +2684,7 @@ function Announcement() {
     }
 
 
+    console.log(instanceData, "fdj")
     const addNewInstance = async (e) => {
 
         const check = checkValidation()
@@ -2690,14 +2694,11 @@ function Announcement() {
         }
 
         const data = new FormData();
-        data.append('date', instanceData?.date)
-        data.append('time', instanceData?.time)
         data.append('name', instanceData?.name)
-        data.append('place', instanceData?.place)
+        data.append('street_no', instanceData?.street_no)
         data.append('ward', instanceData?.ward)
-        data.append('details', instanceData?.details)
         try {
-            const response = await axios.post(`${Config.BASE_URL}${postUrl}/`, data, Config.config);
+            const response = await axios.post(`${Config.BASE_URL}${postUrl}`, data, Config.config);
             console.log(response.data);
             toast.success('Successfully submitted!');
 
@@ -2706,6 +2707,7 @@ function Announcement() {
             })
 
             handleClose();
+            updateListData();
         } catch (error) {
             console.error('Error occurred:', error);
             toast.error('Submission failed. Please try again.');
@@ -2724,15 +2726,12 @@ function Announcement() {
         }
 
         const data = new FormData()
-        data.append('date', instanceData?.date)
-        data.append('time', instanceData?.time)
         data.append('name', instanceData?.name)
-        data.append('place', instanceData?.place)
+        data.append('street_no', instanceData?.street_no)
         data.append('ward', instanceData?.ward)
-        data.append('details', instanceData?.details)
 
         axios
-            .put(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
+            .patch(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response)
@@ -2770,6 +2769,8 @@ function Announcement() {
                     console.log(response)
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
                     handleClose();
+                    updateListData();
+
                 }
             })
             .catch(function (error) {
@@ -2782,7 +2783,9 @@ function Announcement() {
 
 
     // handle new instance
+
     const handleChange = (e) => {
+        console.log("trigger")
         const { name, value } = e.target;
         if (name === "image") {
             const check = Config?.fileType(e.target.files[0].name)
@@ -2832,7 +2835,7 @@ function Announcement() {
                     {
                         (isOpen || isAdd) && (
 
-                            <AnnouncmentDialogs
+                            <StreetDialogs
                                 setIsOpen={setIsOpen}
                                 isAdd={isAdd}
                                 error={error}
@@ -2848,7 +2851,10 @@ function Announcement() {
                                 deleteInstance={deleteInstance}
                                 handleChange={handleChange}
                                 wardlist={wardlist}
-                                requestTypeList={complaintTypeList}
+                                panchayatList={panchayatList}
+                                districtList={districtList}
+
+                                // requestTypeList={complaintTypeList}
                                 modalHeader={modalHeader}
 
                             // setImage={setImage}
@@ -2896,10 +2902,11 @@ function Announcement() {
 }
 
 
-function AnnouncmentDialogs(props) {
+
+function StreetDialogs(props) {
 
     const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader,
-        deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, requestTypeList
+        deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, districtList, panchayatList
         // setError, setImage, image 
     } = props
 
@@ -2997,167 +3004,798 @@ function AnnouncmentDialogs(props) {
 
                     {/* ----------------modal data */}
 
-                    <div className="card-body">
-                        <div className="row">
-                            <div className="col-lg-6 col-md-6 col-sm-12 col-12">
-                                <div className="form-group">
-                                    <label className="form-label">
-                                        Date : <span className="form-required">*</span>
-                                    </label>
-                                    <input type="date" className="form-control" name="date" onChange={handleChange}
-                                        defaultValue={instanceData?.date || ''}
-                                        disabled={!isedit && !isAdd}
-                                        required
-                                    />
-                                    {error && !instanceData?.date && (
-                                        <span className="req-text">
-                                            This field is required
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="col-lg-6 col-md-6 col-sm-12 col-12">
-                                <div className="form-group">
-                                    <label className="form-label">
-                                        Time : <span className="form-required">*</span>
-                                    </label>
-                                    <input
-                                        type="time"
-                                        className="form-control"
-                                        name="time"
-                                        onChange={handleChange}
-                                        defaultValue={instanceData?.time || ''}
-                                        disabled={!isedit && !isAdd}
-                                        required
-                                    />
-                                    {error && !instanceData?.time && (
-                                        <span className="req-text">
-                                            This field is required
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="col-lg-6 col-sm-6 col-12">
-                                <div className="form-group">
-                                    <label style={{ color: 'grey' }}>Ward <span className="form-required">*</span></label>
+                    <div class="card-body">
+                        <div class="row">
 
+                            {/* for zonal officers */}
+
+                            {/* <div class="col-lg-6 col-sm-12 col-12">
+
+                                <div class="form-group">
+                                    <label class="form-label">Select District : <span class="form-required">*</span></label>
                                     <SelectDropdown
-                                        list={wardlist}
+                                        list={districtList}
                                         onchange={handleChange}
-                                        selected={instanceData?.ward}
+                                        selected={instanceData?.panchayath_info.district}
                                         showname={"name"}
-                                        name={"ward"}
+                                        name={"type"}
                                         disabled={!isedit && !isAdd}
                                         error={error}
                                     />
-                                    {/* {(!instanceData?.type && error) && (
-                                        <span className="req-text">This field is required</span>
-                                    )} */}
-
-
-
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-12 col-12">
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Name :{' '}
-                                        <span class="form-required">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        name="name"
-                                        onChange={handleChange}
-                                        defaultValue={instanceData?.name}
-                                        disabled={!isedit && !isAdd}
-                                        required
-                                    />
-                                    {error && !instanceData?.name && (
-                                        <span className="req-text">
-                                            This field is required
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-12 col-12">
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Place : <span class="form-required">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        name="place"
-                                        onChange={handleChange}
-                                        defaultValue={instanceData?.place}
-                                        disabled={!isedit && !isAdd}
-                                        required
-                                    />
-                                    {error && !instanceData?.place && (
-                                        <span className="req-text">
-                                            This field is required
-                                        </span>
-                                    )}
                                 </div>
                             </div>
 
-
-                            {/* <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+                            <div class="col-lg-6 col-sm-12 col-12">
                                 <div class="form-group">
-                                    <label class="form-label">
-                                        Held By :{' '}
-                                        <span class="form-required">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        name="held_by"
-                                        onChange={handleChange}
-                                        defaultValue={instanceData?.held_by || ''}
+                                    <label class="form-label">Select Panchayth : <span class="form-required">*</span></label>
+
+                                    <SelectDropdown
+                                        list={panchayatList}
+                                        onchange={handleChange}
+                                        selected={instanceData?.panchayat}
+                                        showname={"name"}
+                                        name={"type"}
                                         disabled={!isedit && !isAdd}
-                                        required
+                                        error={error}
                                     />
-                                    {error && !instanceData?.held_by && (
-                                        <span className="req-text">
-                                            This field is required
-                                        </span>
-                                    )}
                                 </div>
                             </div> */}
-                            <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+
+                            <div class="form-group">
+                                <label class="form-label">Ward : <span class="form-required">*</span></label>
+
+                                <SelectDropdown
+                                    list={wardlist}
+                                    onchange={handleChange}
+                                    selected={instanceData?.ward}
+                                    showname={"name"}
+                                    name={"ward"}
+                                    disabled={!isedit && !isAdd}
+                                    error={error}
+                                />
+
+                            </div>
+
+                            {/* <div class="col-lg-6 col-sm-12 col-12"> */}
+                            <div class="form-group">
+                                <label class="form-label">Name : <span class="form-required">*</span></label>
+                                <input type="text" class="form-control" name="name"
+
+                                    onChange={handleChange}
+                                    defaultValue={instanceData?.name || ""}
+                                    disabled={!isedit && !isAdd}
+                                    required />
+
+                                {(error && !instanceData?.name) && (
+                                    <span className="req-text">{Config?.errString}</span>
+                                )}
+                            </div>
+                            {/* </div> */}
+
+                            {/* <div class="col-lg-6 col-sm-12 col-12"> */}
+                            <div class="form-group">
+                                <label class="form-label">Number : <span class="form-required">*</span></label>
+                                <input type="text" class="form-control" name="street_no"
+                                    defaultValue={instanceData?.street_no || ""}
+                                    onChange={handleChange}
+                                    disabled={!isedit && !isAdd}
+                                    required />
+
+                                {(error && !instanceData?.street_no) && (
+                                    <span className="req-text">{Config?.errString}</span>
+                                )}
+                            </div>
+                            {/* </div> */}
+
+                        </div>
+                    </div>
+                    {/* </div>
+                    </div> */}
+                    <Typography gutterBottom>
+
+                    </Typography>
+
+                </DialogContent>
+
+
+
+                <DialogActions  >
+                    {/* <Button autoFocus onClick={handleClose}>
+            Save changes
+          </Button> */}
+
+
+                    <div class="col-md-12">
+                        {
+                            !isAdd && (
+
+                                <div className="col">
+                                    <DeleteButton
+                                        loading={loading}
+                                        setLoading={setLoading}
+                                        onClick={handleClickOpen}
+                                    />
+                                </div>
+
+                            )
+                        }
+
+
+                        <div className="text-end">
+
+                            {isedit && (
+                                <UpdateButton
+                                    loading={loading}
+                                    setLoading={setLoading}
+                                    onClick={() => updateInstance(instanceData?.id)}
+                                />
+                            )}
+                            {isAdd && (
+                                <SaveButton
+                                    loading={loading}
+                                    setLoading={setLoading}
+                                    onClick={addInstance}
+                                />
+                            )}
+
+                            <CloseButton
+                                onClick={handleClose}
+                            />
+
+                        </div>
+                    </div>
+                </DialogActions>
+            </BootstrapDialog>
+        </React.Fragment>
+    );
+}
+
+
+
+
+
+// -------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+function House() {
+
+    const modalHeader = "Building";
+
+    const dispatch = useDispatch()
+
+    const user = useSelector((state) => state?.user?.value);
+    const wardlist = useSelector((state) => state?.ward?.value);
+    const panchayatList = useSelector((state) => state?.panchayat?.value);
+    const districtList = useSelector((state) => state?.district?.value);
+    const streetList = useSelector((state) => state?.street?.value);
+
+    // meta StATE
+    const [listInstanceData, setListInstanceData] = useState([])
+    const [instanceData, setInstanceData] = useState({})
+
+    const [isOpen, setIsOpen] = useState();
+    const [isedit, setisEdit] = useState();
+    const [isAdd, setisAdd] = useState();
+    const [error, setError] = useState(false);
+    const [image, setImage] = useState();
+    const [loader, setLoader] = useState();
+
+    const [hide, setHide] = useState(true);
+
+    const [buildingType, setBuildingType] = useState([]);
+
+
+    const getWardLabel = (id) => {
+        const label = wardlist?.find((e) => e?.id === id)?.name
+        return label
+    }
+
+    const getBuildingLabel = (id) => {
+        const label = buildingType?.find((e) => e?.id === id)?.name
+        return label
+    }
+
+
+    const getUrl = "buildingregister";
+    const getListUrl = "buildingregister";
+    const postUrl = "buildingregister";
+    const updateUrl = "buildingregister";
+    const deleteUrl = "buildingregister";
+
+
+
+    // META DATA
+    const headersToShow = ["Ward No", "Type", "Name", "Contact No", "Door No", "Address", "QR code"]
+    const tableData = listInstanceData
+    const fieldsToShow = []
+    const fields = {
+        'ward': (value) => getWardLabel(value),
+        'building_type': (value) => getBuildingLabel(value),
+        'name': (value) => value,
+        'phone_num': (value) => value,
+        'door_no': (value) => value,
+        'line1': (value) => value,
+        'qr_code': (value) => value,
+    }
+
+
+    const handleClose = () => {
+        setIsOpen();
+        setisAdd();
+        setInstanceData();
+        setError();
+
+
+    }
+
+
+    useEffect(() => {
+
+        fetchListData();
+        fetchBuildingType();
+    }, [])
+
+
+
+
+
+    const fetchBuildingType = async () => {
+        try {
+            // Make an API call to fetch data from the backend
+            const response = await fetch(
+                Config.BASE_URL + 'building-type',
+                Config?.config,
+            )
+            const data = await response.json()
+
+            console.log(data)
+            setBuildingType(data)
+
+        } catch (error) {
+            console.error('Error fetching data:', error)
+        }
+    }
+
+
+
+
+    const fetchListData = async () => {
+        try {
+
+            const response = await fetch(Config.BASE_URL + getListUrl, Config?.config)
+            const data = await response.json()
+            console.log(data)
+            setListInstanceData(data)
+
+
+        } catch (error) {
+            console.error('Error fetching data:', error)
+        }
+    }
+
+
+
+
+    const getInstanceData = (id, edit) => {
+        axios
+            .get(`${Config.BASE_URL}${getUrl}/${id}/`, Config.config)
+            .then(function (response) {
+                if (response.status === 200) {
+                    setInstanceData(response?.data)
+                    setIsOpen(true);
+                }
+            })
+            .catch(function (error) {
+                console.log(error)
+            })
+    }
+
+
+
+
+    //add new
+    // Check form field validation
+    const checkValidation = () => {
+
+        console.log(instanceData)
+        if (!instanceData?.ward || !instanceData?.street || !instanceData?.building_type || !instanceData?.name || !instanceData?.phone_num || !instanceData?.door_no || !instanceData?.line1) {
+            console.log("please fill required fields")
+            setError(true)
+            return false
+
+        }
+        else {
+            setError(false)
+            return true
+        }
+
+    }
+
+
+    console.log(instanceData, "fdj")
+    const addNewInstance = async (e) => {
+
+        const check = checkValidation()
+
+        if (!check) {
+            return
+        }
+
+        const data = new FormData();
+        data.append("ward", instanceData?.ward)
+        data.append("building_type", instanceData?.building_type)
+        data.append("name", instanceData?.name)
+        data.append("phone_num", instanceData?.phone_num)
+        data.append("door_no", instanceData?.door_no)
+        data.append("line1", instanceData?.line1)
+
+
+        try {
+            const response = await axios.post(`${Config.BASE_URL}${postUrl}`, data, Config.config);
+            console.log(response.data);
+            toast.success('Successfully submitted!');
+
+            setListInstanceData((prevstate) => {
+                return [...prevstate, response?.data]
+            })
+
+            handleClose();
+            fetchListData();
+        } catch (error) {
+            console.error('Error occurred:', error);
+            toast.error('Submission failed. Please try again.');
+        }
+    };
+
+
+
+    //UPDATE REQUESTS
+
+    const updateInstance = (id) => {
+        const check = checkValidation()
+
+        if (!check) {
+            return
+        }
+
+        const data = new FormData()
+        data.append("ward", instanceData?.ward)
+        data.append("building_type", instanceData?.building_type)
+        data.append("name", instanceData?.name)
+        data.append("phone_num", instanceData?.phone_num)
+        data.append("door_no", instanceData?.door_no)
+        data.append("line1", instanceData?.line1)
+
+        axios
+            .patch(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
+            .then(function (response) {
+                if (response.status === 200) {
+                    console.log(response)
+
+                    setListInstanceData((prevArray) => {
+                        const index = prevArray.findIndex((obj) => obj.id === id)
+                        if (index !== -1) {
+                            return [
+                                ...prevArray.slice(0, index),
+                                { ...prevArray[index], ...response.data },
+                                ...prevArray.slice(index + 1),
+                            ]
+                        }
+                        return prevArray
+                    })
+
+                    handleClose()
+
+
+                }
+            })
+            .catch(function (error) {
+                console.log(error)
+            })
+    }
+
+    //DELETE REQUESTS
+
+    const deleteInstance = (id) => {
+        console.log('deleting')
+
+        axios.delete(`${Config.BASE_URL}${deleteUrl}/${id}/`, Config.config)
+            .then(function (response) {
+                if (response.status === 204) {
+                    console.log(response)
+                    setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
+                    handleClose();
+                    fetchListData();
+
+                }
+            })
+            .catch(function (error) {
+                console.log(error)
+                handleClose();
+            })
+    }
+
+
+
+
+    // handle new instance
+
+    const handleChange = (e) => {
+        console.log("trigger")
+        const { name, value } = e.target;
+        if (name === "image") {
+            const check = Config?.fileType(e.target.files[0].name)
+
+            if (!check) {
+                console.log("not supported")
+                return
+            }
+            console.log(e.target.files[0].name)
+            let value = e.target.files[0]
+            // setImage(value)
+            setInstanceData((prevstate) => {
+                return {
+                    ...prevstate, [name]: value
+                }
+
+            })
+        }
+        else {
+
+            // const { value } = e.target
+            setInstanceData((prevstate) => {
+                return {
+                    ...prevstate, [name]: value
+                }
+
+            })
+
+        }
+
+    }
+
+
+
+
+    return (
+
+
+
+        <>
+
+            <ToastContainer />
+
+            {hide && (
+                <>
+
+                    {
+                        (isOpen || isAdd) && (
+
+                            <HouseDialogs
+                                setIsOpen={setIsOpen}
+                                isAdd={isAdd}
+                                error={error}
+
+                                setListData={tableData}
+                                instanceData={instanceData}
+                                setInstanceData={setInstanceData}
+                                handleClose={handleClose}
+
+                                // functions
+                                addInstance={addNewInstance}
+                                updateInstance={updateInstance}
+                                deleteInstance={deleteInstance}
+                                handleChange={handleChange}
+
+                                wardlist={wardlist}
+                                panchayatList={panchayatList}
+                                districtList={districtList}
+                                streetList={streetList}
+                                buildingType={buildingType}
+
+                                modalHeader={modalHeader}
+
+                            // setImage={setImage}
+                            // image={image}
+
+
+                            />
+                        )
+                    }
+                    <div className="content">
+                        <div className="page-header">
+                            <div className="page-title">
+                                <h4>{modalHeader}s Details</h4>
+                            </div>
+                            <div className="page-btn">
+                                <AddButton
+                                    onClick={() => setisAdd(true)}
+                                    text={" Create"}
+                                />
+
+
+                            </div>
+                        </div>
+
+
+                        <CustomTable
+                            headers={headersToShow}
+                            data={tableData}
+                            fieldsToShow={fieldsToShow}
+                            fields={fields}
+                            getInstanceData={getInstanceData}
+                            loader={loader}
+                            setLoader={setLoader}
+                        />
+                    </div>
+                </>
+            )}
+
+
+
+        </>
+    )
+
+
+}
+
+
+
+function HouseDialogs(props) {
+
+    const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader,
+        deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, districtList, panchayatList, streetList,buildingType
+        // setError, setImage, image 
+    } = props
+
+
+    const [isedit, setIsedit] = useState(false);
+    const [isdelete, setisDelete] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+
+    const handleClickOpen = () => {
+        setisDelete(true);
+    };
+
+    const handleClickClose = () => {
+        setisDelete(false);
+    };
+
+
+    return (
+        <React.Fragment>
+            {/* <Button variant="outlined" >
+        Open dialog
+      </Button> */}
+
+            {isdelete && (
+                <AlertDialog
+                    handleClose={handleClickClose}
+                    onClick={() => deleteInstance(instanceData?.id)}
+                    loading={loading}
+                    setLoading={setLoading}
+
+                />
+            )}
+
+
+
+            <BootstrapDialog
+                onClose={handleClose}
+                aria-labelledby="customized-dialog-title"
+                open={open}
+
+            >
+                <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title" >
+                    <h6>{modalHeader + "s"} Details
+
+                        {!isAdd && (
+                            // <EditIcon 
+                            // onClick={() => setIsedit(!isedit)}
+                            // />
+                            <button className="btn btn-sm" onClick={() => setIsedit(!isedit)}>  <EditIcon
+                                style={{ color: "blue" }}
+                            // onClick={() => setIsedit(!isedit)}
+                            />  </button>
+                        )}
+
+                    </h6>
+                </DialogTitle>
+
+                {/* {!isAdd && (<div>
+
+                    <button className="button btn-edit" onClick={() => setIsedit(!isedit)}>  Edit  </button>
+
+                </div>
+                )} */}
+
+                <IconButton
+                    aria-label="close"
+                    onClick={handleClose}
+                    sx={{
+                        position: 'absolute',
+                        right: 8,
+                        top: 8,
+                        color: (theme) => theme.palette.grey[500],
+                    }}
+                >
+                    <CloseIcon />
+                </IconButton>
+
+
+
+
+                <DialogContent dividers
+
+                    sx={Config.style}
+                >
+
+
+                    {/* <Typography gutterBottom>
+
+                    </Typography> */}
+
+                    {/* <div class="modal-body">
+                        <div class="card"> */}
+
+
+                    {/* ----------------modal data */}
+
+                    <div class="card-body">
+                        <div class="row">
+
+                            {/* for zonal officers */}
+
+                            {/* <div class="form-group">
+                                <label class="form-label">Select District : <span class="form-required">*</span></label>
+                                <SelectDropdown
+                                    list={districtList}
+                                    onchange={handleChange}
+                                    // selected={instanceData?.panchayath_info.district}
+                                    showname={"name"}
+                                    name={"type"}
+                                    disabled={!isedit && !isAdd}
+                                    error={error}
+                                />
+                            </div>
+
+
+
+                            <div class="form-group">
+                                <label class="form-label">Select Panchayth : <span class="form-required">*</span></label>
+
+                                <SelectDropdown
+                                    list={panchayatList}
+                                    onchange={handleChange}
+                                    // selected={instanceData?.panchayat}
+                                    showname={"name"}
+                                    name={"type"}
+                                    disabled={!isedit && !isAdd}
+                                    error={error}
+                                />
+                            </div> */}
+{/* ---------------------------------------------------------------------------------- */}
+
+                            <div class="form-group">
+                                <label class="form-label">Ward <span class="form-required">*</span></label>
+
+                                <SelectDropdown
+                                    list={wardlist}
+                                    onchange={handleChange}
+                                    selected={instanceData?.ward}
+                                    showname={"name"}
+                                    name={"ward"}
+                                    disabled={!isedit && !isAdd}
+                                    error={error}
+                                />
+
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Select Street: <span class="form-required">*</span></label>
+
+                                <SelectDropdown
+                                    list={streetList}
+                                    onchange={handleChange}
+                                    selected={instanceData?.street}
+                                    showname={"name"}
+                                    name={"street"}
+                                    disabled={!isedit && !isAdd}
+                                    error={error}
+                                />
+                            </div>
+
+
+                            <div class="form-group">
+                                <label class="form-label">Select Building Type : <span class="form-required">*</span></label>
+
+                                <SelectDropdown
+                                    list={buildingType}
+                                    onchange={handleChange}
+                                    selected={instanceData?.building_type}
+                                    showname={"name"}
+                                    name={"building_type"}
+                                    disabled={!isedit && !isAdd}
+                                    error={error}
+                                />
+                            </div>
+
+                   
+                            <div class="form-group">
+                                <label class="form-label">Name<span class="form-required">*</span></label>
+                                <input type="text" class="form-control" name="name"
+
+                                    onChange={handleChange}
+                                    defaultValue={instanceData?.name || ""}
+                                    disabled={!isedit && !isAdd}
+                                    required />
+
+                                {(error && !instanceData?.name) && (
+                                    <span className="req-text">{Config?.errString}</span>
+                                )}
+                            </div>
+                          
+
+                           
+                            <div class="form-group">
+                                <label class="form-label">Contact No<span class="form-required">*</span></label>
+                                <input type="text" class="form-control" name="phone_num"
+                                    defaultValue={instanceData?.phone_num || ""}
+                                    onChange={handleChange}
+                                    disabled={!isedit && !isAdd}
+                                    required />
+
+                                {(error && !instanceData?.phone_num) && (
+                                    <span className="req-text">{Config?.errString}</span>
+                                )}
+                            </div>
+
+
+                            <div class="form-group">
+                                <label class="form-label">Door No<span class="form-required">*</span></label>
+                                <input type="text" class="form-control" name="door_no"
+                                    defaultValue={instanceData?.door_no || ""}
+                                    onChange={handleChange}
+                                    disabled={!isedit && !isAdd}
+                                    required />
+
+                                {(error && !instanceData?.door_no) && (
+                                    <span className="req-text">{Config?.errString}</span>
+                                )}
+                            </div>
+
+
+                     
                                 <div class="form-group">
                                     <label class="form-label">
-                                        Details :
+                                        Address :
                                     </label>
                                     <textarea
                                         cols="30"
                                         rows="1"
-                                        name="details"
+                                        name="line1"
                                         onChange={handleChange}
-                                        defaultValue={instanceData?.details || ''}
+                                        defaultValue={instanceData?.line1 || ''}
                                         disabled={!isedit && !isAdd}
                                     ></textarea>
-                                    {error && !instanceData?.details && (
+                                    {error && !instanceData?.line1 && (
                                         <span className="req-text">
                                             This field is required
                                         </span>
                                     )}
                                 </div>
-                            </div>
+          
 
 
-                            <div className="row">
-                                <div className="col-lg-12 col-sm-12 col-12">
-                                    <div className="form-group">
-                                        <label style={{ color: 'grey' }}>Image : <span className="form-required">*</span></label>
-                                        <input type="file" className="form-control" id="fileInput" onChange={handleChange}  required multiple accept="image/*" />
-                                    </div>
-                                </div>
-                            </div>
+
+
+                            {/* </div> */}
+
                         </div>
                     </div>
-
                     {/* </div>
                     </div> */}
                     <Typography gutterBottom>

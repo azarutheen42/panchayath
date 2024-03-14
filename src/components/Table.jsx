@@ -51,7 +51,7 @@ export default function CustomTable(props) {
 
     const {
         headers, data, fieldsToShow, fields, getInstanceData,
-        loader, setLoader
+        loader, setLoader, actionShow
     } = props
 
 
@@ -215,7 +215,8 @@ export default function CustomTable(props) {
                                     <StyledTableCell key={index}>{header}</StyledTableCell>
                                 ))}
 
-                                <StyledTableCell>Action</StyledTableCell>
+                                {!actionShow && <StyledTableCell>Action</StyledTableCell>}
+
 
                             </TableRow>
                         </TableHead>
@@ -267,7 +268,7 @@ export default function CustomTable(props) {
 
                                             <StyledTableCell>
 
-                                                <ButtonWithLoader
+                                                {!actionShow && <ButtonWithLoader
                                                     itemId={row?.id}
                                                     onClick={() => fetchData(row?.id, false, "view", rowIndex)}
                                                     class_name="btn btn-success"
@@ -278,6 +279,7 @@ export default function CustomTable(props) {
                                                 // setLoader={setLoader}
                                                 // key = {employee?.id}
                                                 />
+                                                }
 
                                             </StyledTableCell>
 
@@ -305,7 +307,8 @@ export default function CustomTable(props) {
                                     <th key={header}>{header}</th>
                                 ))}
 
-                                <th>Action</th>
+
+                                {!actionShow && <th>Action</th>}
 
                             </tr>
                         </thead>
@@ -352,7 +355,7 @@ export default function CustomTable(props) {
                                                 </td>
                                             ))}
 
-                                            <td>
+                                            {!actionShow && <td>
 
                                                 {/* <button class="buttontn btn-edit"  onClick={() => fetchData(row?.id, false, "view",rowIndex)}>
                                                         {(loader ===rowIndex ) ? Config.loader : <span class="glyphicon glyphicon-pencil"></span>} View
@@ -370,6 +373,7 @@ export default function CustomTable(props) {
                                                 />
 
                                             </td>
+                                            }
                                         </tr>
                                     ))}
                                 </>
@@ -428,7 +432,7 @@ const renderImageOrText = (value) => {
     // Check if the value is an image URL
     if (isImageUrl(value)) {
         var alt_name = getImageName(value);
-        alt_name=Config.truncateText(alt_name,7)
+        alt_name = Config.truncateText(alt_name, 7)
         return <img
             src={Config?.MEDIA_URL + value}
             alt={alt_name}
@@ -439,13 +443,13 @@ const renderImageOrText = (value) => {
         // return value;
         if (typeof value !== 'string') {
             return value ?? "Nill"
-        
+
+        }
+        else {
+            return Config?.truncateText(value ? (value) : "", 15)
+        }
     }
-    else{
-        return Config?.truncateText(value?(value):"",15)
-    }   
-}
-  
+
 };
 
 

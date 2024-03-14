@@ -5,6 +5,8 @@ import axios from "axios";
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
+import CustomTable from "./Table";
+import SelectDropdown from "./Dropdown";
 
 
 
@@ -163,13 +165,17 @@ function House() {
 
 function Street() {
 
-    const [wardReportList, setWardReportList] = useState([]);
+    const [listInstanceData, setlistInstanceData] = useState([]);
     const [ward, setWard] = useState("");
     const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState();
+    const [endDate, setEndDate] = useState("");
 
-    const wards = useSelector((state) => state?.ward?.value);
+    const wardlist = useSelector((state) => state?.ward?.value);
 
+    const [loader, setLoader] = useState(false);
+    const [trigger,setTrigger] =useState();
+
+    const actionShow = true;
 
     useEffect(() => {
 
@@ -177,18 +183,37 @@ function Street() {
 
         // gettempemployee()
 
-    }, [ward,startDate])
+    }, [ward, startDate, endDate,trigger])
+
+    const getWardLabel = (id) => {
+        const label = wardlist?.find((e) => e?.id === id)?.name
+        return label
+    }
+
+
+    console.log(ward)
+
+    const headersToShow = ["Date", "Ward No", "	Bio (kg)", "Non-Bio (Kg)", "Hazard (kg)"]
+    const tableData = listInstanceData
+    const fieldsToShow = []
+    const fields = {
+        'date': (value) => value,
+        'ward': (value) => getWardLabel(value),
+        'bio': (value) => value,
+        'non_bio': (value) => value,
+        'hazard': (value) => value,
+    }
 
 
 
     const getWardReports = () => {
-        axios.get(`${Config.BASE_URL}collect-ward-garbage?ward=${ward}&&date=${startDate}`,
+        axios.get(`${Config.BASE_URL}collect-ward-garbage?ward=${ward}&start_date=${startDate}&end_date=${endDate}`,
             Config?.config
         )
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response);
-                    setWardReportList(response?.data)
+                    setlistInstanceData(response?.data)
 
                 }
 
@@ -252,7 +277,7 @@ function Street() {
                             </select>
                         </div>
                     </div> */}
-                        <div class="col-md-3 col-lg-3 col-xs-3 col-sm-6">
+                        {/* <div class="col-md-3 col-lg-3 col-xs-3 col-sm-6">
                             <div class="form-group">
                                 <label style={{ fontWeight: "bold" }}>Ward No :</label>
                                 <select name="WARD" id=""
@@ -261,12 +286,36 @@ function Street() {
                                 >
 
                                     <option disabled selected value >-----------</option>
-                                    {wards?.map((e) => (
+                                    {wardlist?.map((e) => (
                                         <option value={e?.id}>{e?.ward_no}</option>
                                     ))}
 
 
                                 </select>
+                            </div>
+                        </div> */}
+
+
+                        <div className="col-lg-6 col-sm-6 col-12">
+                            <div className="form-group">
+                                <label style={{ color: 'grey' }}>Ward <span className="form-required">*</span></label>
+
+                                <SelectDropdown
+                                    list={wardlist}
+                                    onchange={(e) => setWard(e?.target?.value)}
+                                    // selected={instanceData?.ward}
+                                    showname={"name"}
+                                    report={true}
+                                // name={"ward"}
+                                // disabled={!isedit && !isAdd}
+                                // error={error}
+                                />
+                                {/* {(!instanceData?.type && error) && (
+                                        <span className="req-text">This field is required</span>
+                                    )} */}
+
+
+
                             </div>
                         </div>
 
@@ -275,19 +324,19 @@ function Street() {
                         <div class="col-md-2 col-lg-2 col-xs-3">
                             <div class="form-group">
                                 <label for="fromDate" style={{ fontWeight: "bold" }}>From Date :</label>
-                                <input type="date" class="form-control" id="fromDate"  onChange={(e)=>setStartDate(e.target.value)}/>
+                                <input type="date" class="form-control" id="fromDate" onChange={(e) => setStartDate(e.target.value)} />
                             </div>
                         </div>
                         <div class="col-md-2 col-lg-2 col-xs-3">
                             <div class="form-group">
                                 <label for="toDate" style={{ fontWeight: "bold" }}>To Date :</label>
-                                <input type="date" class="form-control" id="toDate" />
+                                <input type="date" class="form-control" id="toDate" onChange={(e) => setEndDate(e.target.value)} />
                             </div>
                         </div>
                         <div class="col-md-2 col-lg-2 col-xs-3">
                             <div class="form-group">
                                 <label for="search" style={{ fontWeight: "bold" }}>Search :</label>
-                                <button class="btn btn-success" onclick="getReport()">Get Report</button>
+                                <button class="btn btn-success" onChange={(e) => setTrigger()}>Get Report</button>
                             </div>
                         </div>
 
@@ -319,62 +368,19 @@ function Street() {
                         <br /><input type="text" class="form-control" id="searchInput" placeholder="Type to search" />
                     </div> */}
                     </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr class="table-info">
-                                            <th>S.No</th>
-                                            {/* <th>District</th>
-                                            <th>City</th>
-                                            <th>Panchayatht</th> */}
-
-                                            <th>Date </th>
-                                            <th>Ward No </th>
-
-                                            <th>Bio in Kg </th>
-                                            <th>Non-Bio in Kg</th>
-                                            <th>Hazard in kg</th>
-                                            {/* <th>Action</th> */}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {wardReportList?.map((e, index) => (
-
-                                            <tr key={index}>
-                                                <td>{index + 1}.</td>
-
-                                                <th>{e?.date}</th>
-                                                <td>{e?.ward}</td>
-                                                <th>{e?.bio}</th>
-                                                <td>{e?.non_bio}</td>
-                                                <td>{e?.hazard}</td>
-
-                                                {/* <td>7</td>
-                                            <td>3</td>
-                                            <td>1</td> */}
-                                                {/* <td>
-                                                <button class="btn btn-success">
-                                                    <span class="glyphicon glyphicon-pencil"></span> Edit
-                                                </button>
-                                                <button class="btn btn-info">
-                                                    <span class="glyphicon glyphicon-eye-open"></span> View
-                                                </button>
-                                                <button class="btn btn-danger">
-                                                    <span class="glyphicon glyphicon-trash"></span> Delete
-                                                </button>
-                                            </td> */}
-                                            </tr>
-                                        )
-                                        )}
 
 
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+                    <CustomTable
+                        headers={headersToShow}
+                        data={tableData}
+                        fieldsToShow={fieldsToShow}
+                        fields={fields}
+                        // getInstanceData={getInstanceData}
+                        loader={loader}
+                        setLoader={setLoader}
+                        actionShow={actionShow}
+                    />
+
 
                 </div>
             </div>
@@ -539,6 +545,70 @@ function Shop() {
 
 function Overall() {
 
+    const [listInstanceData, setlistInstanceData] = useState([]);
+    const [panchayat, setPanchayath] = useState("");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+
+    const [trigger,setTrigger] =useState();
+
+    // const panchaytList = useSelector((state) => state?.panchayat?.value);
+
+    const [loader, setLoader] = useState(false);
+
+    const actionShow = true;
+
+    useEffect(() => {
+
+        getWardReports()
+
+        // gettempemployee()
+
+    }, [panchayat, startDate, endDate,trigger])
+
+    const getPanchayathLabel = (id) => {
+        const label = panchaytList?.find((e) => e?.id === id)?.name
+        return label
+    }
+
+
+
+
+    const headersToShow = ["Date","Vechile", "Bio (kg)", "Non-Bio (Kg)", "Hazard (kg)"]
+    const tableData = listInstanceData
+    const fieldsToShow = []
+    const fields = {
+        'date': (value) => value,
+        'Vechile': (value) => value,
+        // 'panchayat': (value) => getPanchayathLabel(value),
+        'bio': (value) => value,
+        'non_bio': (value) => value,
+        'hazard': (value) => value,
+    }
+
+
+
+    const getWardReports = () => {
+        axios.get(`${Config.BASE_URL}collect-truck-garbage?panchayat=${panchayat}&start_date=${startDate}&end_date=${endDate}`,
+            Config?.config
+        )
+            .then(function (response) {
+                if (response.status === 200) {
+                    console.log(response);
+                    setlistInstanceData(response?.data)
+
+                }
+
+            })
+            .catch(function (error) {
+                console.log(error);
+
+            });
+
+
+    }
+
+
 
     return (
         <div class="content">
@@ -550,142 +620,149 @@ function Overall() {
             <div class="card">
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-3 col-lg-3 col-xs-3 col-sm-6">
-                            <div class="form-group">
-                                <label
-                                    style={{ fontWeight: "bold" }}
-
-                                >District :</label>
-                                <select name="" id="" className="report-dropdown"
-
-                                >
-                                    <option value="">Tirunelveli</option>
-                                    <option value="">Tenkasi</option>
-                                    <option value="">Thoothukudi</option>
-                                </select>
-                            </div>
+                        {/* <div class="col-md-3 col-lg-3 col-xs-3 col-sm-6">
+                        <div class="form-group">
+                            <label 
+                            style={{fontWeight:"bold"}}
+                            
+                            >District :</label>
+                            <select name="" id=""   className="report-dropdown"
+                            
+                            >
+                                <option value="">Tirunelveli</option>
+                                <option value="">Tenkasi</option>
+                                <option value="">Thoothukudi</option>
+                            </select>
                         </div>
-                        <div class="col-md-3 col-lg-3 col-xs-3 col-sm-6">
-                            <div class="form-group">
-                                <label style={{ fontWeight: "bold" }}>City :</label>
-                                <select name="" id="" className="report-dropdown"
-
-                                >
-                                    <option value="">Ayikudy</option>
-                                    <option value="">Melagaram</option>
-                                    <option value="">Sengotai</option>
-                                </select>
-                            </div>
+                    </div> */}
+                        {/* <div class="col-md-3 col-lg-3 col-xs-3 col-sm-6">
+                        <div class="form-group">
+                            <label style={{fontWeight:"bold"}}>City :</label>
+                            <select name="" id=""   className="report-dropdown"
+                            
+                            >
+                                <option value="">Ayikudy</option>
+                                <option value="">Melagaram</option>
+                                <option value="">Sengotai</option>
+                            </select>
                         </div>
-                        <div class="col-md-3 col-lg-3 col-xs-3 col-sm-6">
-                            <div class="form-group">
-                                <label style={{ fontWeight: "bold" }}>Panchayat :</label>
-                                <select name="" id="" className="report-dropdown"
-
-                                >
-                                    <option value="">Ayikudy</option>
-                                    <option value="">Coutrallam</option>
-                                    <option value="">Melagaram</option>
-                                </select>
-                            </div>
+                    </div>
+                    <div class="col-md-3 col-lg-3 col-xs-3 col-sm-6">
+                        <div class="form-group">
+                            <label style={{fontWeight:"bold"}}>Panchayat :</label>
+                            <select name="" id=""  className="report-dropdown"
+                            
+                            >
+                                <option value="">Ayikudy</option>
+                                <option value="">Coutrallam</option>
+                                <option value="">Melagaram</option>
+                            </select>
                         </div>
-                        <div class="col-md-3 col-lg-3 col-xs-3 col-sm-6">
+                    </div> */}
+                        {/* <div class="col-md-3 col-lg-3 col-xs-3 col-sm-6">
                             <div class="form-group">
                                 <label style={{ fontWeight: "bold" }}>Ward No :</label>
-                                <select name="" id="" className="report-dropdown"
-
+                                <select name="WARD" id=""
+                                    className="custom-dropdown" onChange={(e) => setWard(e?.target?.value)}
+                                // defaultValue={ward || ""}
                                 >
-                                    <option value="">01</option>
-                                    <option value="">02</option>
-                                    <option value="">03</option>
+
+                                    <option disabled selected value >-----------</option>
+                                    {wardlist?.map((e) => (
+                                        <option value={e?.id}>{e?.ward_no}</option>
+                                    ))}
+
+
                                 </select>
                             </div>
-                        </div>
+                        </div> */}
 
-                    </div>
-                    <div class="row" style={{ marginTop: 5 }}>
+
+                        {/* <div className="col-lg-6 col-sm-6 col-12">
+                            <div className="form-group">
+                                <label style={{ color: 'grey' }}>Ward <span className="form-required">*</span></label>
+
+                                <SelectDropdown
+                                    list={panchaytList}
+                                    onchange={(e) => setPanchayat(e?.target?.value)}
+                                    // selected={instanceData?.ward}
+                                    showname={"name"}
+                                    report={true}
+                                // name={"ward"}
+                                // disabled={!isedit && !isAdd}
+                                // error={error}
+                                />
+                            </div>
+                        </div> */}
+
+
+                        {/* <div class="row" style={{ marginTop: 5 }}> */}
                         <div class="col-md-2 col-lg-2 col-xs-3">
                             <div class="form-group">
                                 <label for="fromDate" style={{ fontWeight: "bold" }}>From Date :</label>
-                                <input type="date" class="form-control" id="fromDate" />
+                                <input type="date" class="form-control" id="fromDate" onChange={(e) => setStartDate(e.target.value)} />
                             </div>
                         </div>
                         <div class="col-md-2 col-lg-2 col-xs-3">
                             <div class="form-group">
                                 <label for="toDate" style={{ fontWeight: "bold" }}>To Date :</label>
-                                <input type="date" class="form-control" id="toDate" />
+                                <input type="date" class="form-control" id="toDate" onChange={(e) => setEndDate(e.target.value)} />
                             </div>
                         </div>
                         <div class="col-md-2 col-lg-2 col-xs-3">
                             <div class="form-group">
                                 <label for="search" style={{ fontWeight: "bold" }}>Search :</label>
-                                <button class="btn btn-success" onclick="getReport()">Get Report</button>
+                                <button class="btn btn-success"  onChange={(e) => setTrigger()}>Get Report</button>
                             </div>
                         </div>
-                        <div class="col-md-4 col-lg-4 col-xs-6" style={{ marginTop: 5 }}>
-                            <br /><button class="btn btn-secondary" onclick="exportToExcel()">Export to Excel</button>
-                            <button class="btn btn-secondary" onclick="exportToCSV()">Export to CSV</button>
-                        </div>
-                        <div class="col-md-2 col-lg-2 col-xs-6" style={{ marginTop: 5 }}>
-                            <br /><input type="text" class="form-control" id="searchInput" placeholder="Type to search" />
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr class="table-info">
-                                            <th>S.No</th>
-                                            <th>District</th>
-                                            <th>City</th>
-                                            <th>Panchayatht</th>
-                                            <th>Ward No </th>
-                                            <th>Date </th>
 
-                                            <th>Bio in Kg </th>
-                                            <th>Non-Bio in Kg</th>
-                                            <th>Hazard in kg</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>1.</td>
-                                            <td>Tirunelveli</td>
-                                            <th>Palayankotai</th>
-                                            <th>Palayankotai</th>
-                                            <td>02</td>
-                                            <td>12-12-23</td>
-
-                                            <td>7</td>
-                                            <td>3</td>
-                                            <td>1</td>
-                                            <td>
-                                                <button class="btn btn-success">
-                                                    <span class="glyphicon glyphicon-pencil"></span> Edit
-                                                </button>
-                                                <button class="btn btn-info">
-                                                    <span class="glyphicon glyphicon-eye-open"></span> View
-                                                </button>
-                                                <button class="btn btn-danger">
-                                                    <span class="glyphicon glyphicon-trash"></span> Delete
-                                                </button>
-                                            </td>
-                                        </tr>
-
-                                    </tbody>
-                                </table>
-                            </div>
+                        {/* </div> */}
+                        {/* <div class="row" style={{marginTop:5}}>
+                    <div class="col-md-2 col-lg-2 col-xs-3">
+                        <div class="form-group">
+                            <label for="fromDate" style={{fontWeight:"bold"}}>From Date :</label>
+                            <input type="date" class="form-control" id="fromDate" />
                         </div>
                     </div>
+                    <div class="col-md-2 col-lg-2 col-xs-3">
+                        <div class="form-group">
+                            <label for="toDate" style={{fontWeight:"bold"}}>To Date :</label>
+                            <input type="date" class="form-control" id="toDate" />
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-lg-2 col-xs-3">
+                        <div class="form-group">
+                            <label for="search" style={{fontWeight:"bold"}}>Search :</label>
+                            <button class="btn btn-success" onclick="getReport()">Get Report</button>
+                        </div>
+                    </div> */}
+                        {/* <div class="col-md-4 col-lg-4 col-xs-6" style={{marginTop:5}}>
+                        <br /><button class="btn btn-secondary" onclick="exportToExcel()">Export to Excel</button>
+                        <button class="btn btn-secondary" onclick="exportToCSV()">Export to CSV</button>
+                    </div> */}
+                        {/* <div class="col-md-2 col-lg-2 col-xs-6" style={{marginTop:5}}>
+                        <br /><input type="text" class="form-control" id="searchInput" placeholder="Type to search" />
+                    </div> */}
+                    </div>
+
+
+                    <CustomTable
+                        headers={headersToShow}
+                        data={tableData}
+                        fieldsToShow={fieldsToShow}
+                        fields={fields}
+                        // getInstanceData={getInstanceData}
+                        loader={loader}
+                        setLoader={setLoader}
+                        actionShow={actionShow}
+                    />
+
 
                 </div>
             </div>
         </div>
     )
 }
-
 
 
 function Reports(props) {

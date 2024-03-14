@@ -7,6 +7,7 @@ import CollectorReducer from "./features/CollectorSlice.jsx"
 import DistrictReducer from "./features/DistrictSlice.jsx"
 import PanchayathReducer from "./features/PanchayathSlice.jsx"
 import WardReducer from "./features/WardSlice.jsx"
+import StreetReducer from "./features/StreetSlice.jsx"
 import CityReducer from "./features/CitiySlice.jsx"
 import { configureStore } from '@reduxjs/toolkit'
 import UserReducer from "./features/UserSlice.jsx"
@@ -28,6 +29,7 @@ const store = configureStore({
       user:UserReducer,
       requesttype:RequestTypeReducer,
       complainttype:ComplaintTypeReducer,
+      street:StreetReducer,
   }
 })
 
