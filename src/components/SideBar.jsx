@@ -25,6 +25,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { mainListItems, secondaryListItems } from './listItems';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 
 
 
@@ -484,7 +485,7 @@ function SideBar(props) {
                     <ListItemButton onClick={() => handlenavigate("m=user-register")}>
                         <ListItemIcon>
                             {/* <PeopleIcon /> */}
-                           < PersonAddTwoToneIcon/>
+                            < PersonAddTwoToneIcon />
                             {/* <ShoppingCartIcon /> */}
                         </ListItemIcon>
                         <ListItemText primary="User Registeration" />
@@ -496,9 +497,9 @@ function SideBar(props) {
 
                     <ListItemButton onClick={() => handlenavigate("m=complaint&s=list")} >
                         <ListItemIcon>
-                            
-                            <AssignmentIcon/>
-                           
+
+                            <AssignmentIcon />
+
                         </ListItemIcon>
                         <ListItemText primary="Complaints" />
                     </ListItemButton>
@@ -638,7 +639,7 @@ function SideBar(props) {
                     <ListItemButton onClick={() => handleClick("reports")}>
                         <ListItemIcon>
                             {/* <LayersIcon /> */}
-                            <ReceiptLongIcon/>
+                            <ReceiptLongIcon />
                         </ListItemIcon>
                         <ListItemText primary="Reports" />
                         {show?.reports ? <ExpandLess /> : <ExpandMore />}
@@ -711,11 +712,21 @@ function SideBar(props) {
 
 
                     {/* MENU */}
-                    <ListItemButton onClick={() => handleClick("menu")}>
+
+
+                    <ListItemButton onClick={() => handlenavigate("m=settings&s=roles")} >
+                        <ListItemIcon>
+                            <BarChartIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Permissions" />
+
+                    </ListItemButton>
+
+                    {/* <ListItemButton onClick={() => handleClick("menu")}>
                         <ListItemIcon>
                             <LayersIcon />
                         </ListItemIcon>
-                        <ListItemText primary="Menu" />
+                        <ListItemText primary="Permissions" />
                         {show?.menu ? <ExpandLess /> : <ExpandMore />}
                     </ListItemButton>
 
@@ -733,7 +744,7 @@ function SideBar(props) {
                                 <ListItemText primary="Role" />
                             </ListItemButton>
 
-                            {/* <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=masters&s=streets")}>
+                            <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=masters&s=streets")}>
                                 <ListItemIcon>
                                     <StarBorder />
                                 </ListItemIcon>
@@ -746,10 +757,10 @@ function SideBar(props) {
                                     <StarBorder />
                                 </ListItemIcon>
                                 <ListItemText primary="Building" />
-                            </ListItemButton> */}
+                            </ListItemButton>
 
                         </List>
-                    </Collapse>
+                    </Collapse> */}
 
 
 

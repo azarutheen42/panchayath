@@ -74,7 +74,6 @@ function Coll(props) {
 
 function HouseCollector(props) {
 
-
     const { type } = props
 
     const roles = useSelector((state) => state?.collector?.value);
@@ -657,6 +656,7 @@ function HouseCollector(props) {
                                                                     <option value={viewCollector?.ward}>{viewCollector?.ward}</option>
 
                                                                     <option disabled selected value >-----------</option>
+                                                                    
                                                                     {wards?.map((e) => (
                                                                         <option value={e?.id}>{e?.ward_no}</option>
                                                                     ))}
@@ -801,6 +801,13 @@ function HouseCollector(props) {
 
     )
 }
+
+
+
+
+
+
+
 
 function ShopCollector(props) {
 
