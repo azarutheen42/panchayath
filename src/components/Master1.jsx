@@ -88,7 +88,7 @@ function District() {
 
 
 
-    const modalHeader = "Minutes Of Meeting";
+    const modalHeader = "District";
 
     const user = useSelector((state) => state?.user?.value);
     const wardlist = useSelector((state) => state?.ward?.value);
@@ -734,7 +734,7 @@ function City() {
 
 
 
-    const modalHeader = "Scheme";
+    const modalHeader = "City";
 
     const user = useSelector((state) => state?.user?.value);
     const wardlist = useSelector((state) => state?.ward?.value);
@@ -1348,7 +1348,7 @@ function Panchayat() {
 
 
 
-    const modalHeader = "Event";
+    const modalHeader = "Panchayath";
 
     const user = useSelector((state) => state?.user?.value);
     const wardlist = useSelector((state) => state?.ward?.value);
