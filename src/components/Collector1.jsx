@@ -111,14 +111,14 @@ function HouseCollector() {
     const [instanceData, setInstanceData] = useState(
         {
 
-            "image": "",
-            "name": "",
-            "phone_number": "",
-            "collector": {
-                "ward": [
-
-                ]
-            },
+            "employee": {
+                "image": "",
+                "name": "",
+                "phone_number": "",
+                },
+                 "ward": [
+    
+                    ]
         }
 
     )
@@ -135,9 +135,27 @@ function HouseCollector() {
 
     const getWardLabel = (data) => {
         const listData = data ? data : []
+        console.log(listData, "pppppppppppppppppppppppp")
         const label = listData?.map((no) => (wardlist?.find((e) => e?.id === no)?.name)).join(',')
         return label
     }
+
+
+    const getWardLabe = (data) => {
+        const wardNames = [];
+        const listData = data ? data : []
+        console.log(listData, "pppppppppppppppppppppppp")
+        listData?.forEach(id => {
+            const ward = wardlist.find(item => item.id === id);
+            if (ward) {
+                wardNames.push(ward.name);
+            } else {
+                wardNames.push('Not Found');
+            }
+        });
+
+        return wardNames;
+    };
 
 
     const getUrl = "collector";
@@ -153,10 +171,10 @@ function HouseCollector() {
     const tableData = listInstanceData
     const fieldsToShow = []
     const fields = {
-        'image': (value) => value,
-        'name': (value) => value,
-        'phone_number': (value) => value,
-        'collector.ward': (value) => getWardLabel(value),
+        'em[ployee.image': (value) => value,
+        'employee.name': (value) => value,
+        'employee.phone_number': (value) => value,
+        'ward': (value) => getWardLabel(value),
     }
 
 
@@ -164,15 +182,15 @@ function HouseCollector() {
         setIsOpen();
         setisAdd();
         setInstanceData({
-
+            "employee": {
             "image": "",
             "name": "",
             "phone_number": "",
-            "collector": {
-                "ward": [
+            },
+             "ward": [
 
                 ]
-            },
+            
         });
         setError();
 
@@ -244,7 +262,8 @@ function HouseCollector() {
 
         console.log(instanceData, "fdj")
 
-        if (!instanceData?.name || !instanceData?.collector?.ward || !instanceData.phone_number || !instanceData?.start_date) {
+        if (!instanceData?.employee?.name || !instanceData?.ward 
+            || !instanceData?.employee?.phone_number || !instanceData?.employee?.start_date ) {
             console.log("please fill required fields")
             setError(true)
             return false
@@ -268,17 +287,58 @@ function HouseCollector() {
         }
 
         const data = new FormData();
-        data.append("name", instanceData?.name)
-        data.append("phone_number", instanceData?.phone_number)
-        data.append("start_date", instanceData?.start_date)
-        data.append("is_collector", true)
-        data.append("image", instanceData?.image)
+        // const employeeData=new FormData();
 
-        data.append("wardList", instanceData?.collector?.ward)
-        data.append("description", instanceData?.collector?.description)
-                // data.append("role", role?.id)
+        const  employeeData={
+            // image:instanceData?.image,
+            start_date:instanceData?.employee?.start_date,
+            phone_number:instanceData?.employee?.phone_number,
+            name:instanceData?.employee?.name,
+            is_collector:true,
+        }
+
+
+        // data.append("name", instanceData?.name)
+        // data.append("phone_number", instanceData?.phone_number)
+        // data.append("start_date", instanceData?.start_date)
+        // data.append("is_collector", true)
+        // data.append("image", instanceData?.image)
+
+        
+        const wardListdata=instanceData?.ward
+        // instanceData?.collector?.ward?.map((e)=>(
+            data.append("ward", wardListdata)
+        // ))
+        // data.append("ward", instanceData?.collector?.ward)
+        data.append("employee",JSON.stringify(employeeData))
+        data.append("description", instanceData?.description)
+
+
+        // data.append("role", role?.id)
         try {
-            const response = await axios.post(`${Config.BASE_URL}${postUrl}`, data, Config.config);
+            const response = await axios.post(`${Config.BASE_URL}${postUrl}`,
+            data,
+            // {
+            //     employee:{
+            //         // image:instanceData?.image??null,
+            //         start_date:instanceData?.start_date,
+            //         phone_number:instanceData?.phone_number,
+            //         name:instanceData?.name,
+            //         is_collector:true,
+            //         user: {
+            //             name: instanceData?.name,
+            //             phone: instanceData?.phone_number,
+                        
+            //           },
+        
+            //     },
+            //     ward:instanceData?.collector?.ward,
+            //     description:instanceData?.collector?.description
+
+            // },
+            Config.config,
+            
+            );
             console.log(response.data);
             toast.success('Successfully submitted!');
 
@@ -287,7 +347,7 @@ function HouseCollector() {
             })
 
             handleClose();
-            updateListData();
+            // updateListData();
         } catch (error) {
             console.error('Error occurred:', error);
             toast.error(error?.response?.data?.msg);
@@ -308,9 +368,29 @@ function HouseCollector() {
         }
 
         const data = new FormData()
-        data.append('name', instanceData?.name)
-        data.append('ward_no', instanceData?.ward_no)
+        const  employeeData={
+            // image:instanceData?.image,
+            start_date:instanceData?.employee?.start_date,
+            phone_number:instanceData?.employee?.phone_number,
+            name:instanceData?.employee?.name,
+            is_collector:true,
+        }
 
+
+        // data.append("name", instanceData?.name)
+        // data.append("phone_number", instanceData?.phone_number)
+        // data.append("start_date", instanceData?.start_date)
+        // data.append("is_collector", true)
+        // data.append("image", instanceData?.image)
+
+        
+        const wardListdata=instanceData?.ward
+        // instanceData?.collector?.ward?.map((e)=>(
+            data.append("ward", wardListdata)
+        // ))
+        // data.append("ward", instanceData?.collector?.ward)
+        data.append("employee",JSON.stringify(employeeData))
+        data.append("description", instanceData?.description)
         axios
             .patch(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
             .then(function (response) {
@@ -365,15 +445,9 @@ function HouseCollector() {
 
     // handle new instance
 
+console.log("trigger",instanceData)
     const handleChange = (e) => {
         console.log("trigger")
-
-        // setPersonName(
-        //     // On autofill we get a stringified value.
-        //     typeof value === 'string' ? value.split(',') : value,
-        // );
-
-
         const { name, value } = e.target;
         console.log(name, "nameeeeeeeee")
         if (name === "image") {
@@ -385,38 +459,40 @@ function HouseCollector() {
             }
             console.log(e.target.files[0].name)
             let value = e.target.files[0]
-            // setImage(value)
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
-
-            })
-        }
-        else if (name == "ward") {
 
             setInstanceData(prevState => ({
                 ...prevState,
-                collector: {
-                    ...prevState.collector,
-                    ward: value // Replace existing array with a new array containing the updated value
+                employee: {
+                    ...prevState.employee,
+                    [name]: value // Replace existing array with a new array containing the updated value
+                }
+            }));
+        }
+        else  {
+
+            setInstanceData(prevState => ({
+                ...prevState,
+                employee: {
+                    ...prevState.employee,
+                    [name]: value // Replace existing array with a new array containing the updated value
                 }
             }));
 
         }
 
-        else {
-            // const { value } = e.target
+    }
+
+    const handleMainChange = (e) => {
+        const { name, value } = e.target;
             setInstanceData((prevstate) => {
                 return {
                     ...prevstate, [name]: value
                 }
 
             })
-        }
+        
 
     }
-
 
 
 
@@ -449,6 +525,7 @@ function HouseCollector() {
                                 updateInstance={updateInstance}
                                 deleteInstance={deleteInstance}
                                 handleChange={handleChange}
+                                handleMainChange={handleMainChange}
                                 wardlist={wardlist}
                                 panchayatList={panchayatList}
                                 districtList={districtList}
@@ -505,7 +582,8 @@ function HouseCollector() {
 function WardDialogs(props) {
 
     const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader,
-        deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, districtList, panchayatList
+        deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, districtList, panchayatList,
+        handleMainChange
         // setError, setImage, image 
     } = props
 
@@ -609,12 +687,12 @@ function WardDialogs(props) {
                                     <label class="form-label">House collector Name :
                                         <span class="form-required">*</span></label>
                                     <input type="text" class="form-control" name="name"
-                                        onChange={handleChange} defaultValue={instanceData?.name || ""}
+                                        onChange={handleChange} defaultValue={instanceData?.employee?.name || ""}
                                         disabled={!isedit && !isAdd}
 
                                     />
 
-                                    {(error && !instanceData?.name) && (
+                                    {(error && !instanceData?.employee?.name) && (
                                         <span className="req-text">This field is required</span>
                                     )}
 
@@ -636,8 +714,8 @@ function WardDialogs(props) {
 
                                     <MultipleSelect
                                         data={wardlist}
-                                        onchange={handleChange}
-                                        value={instanceData?.collector?.ward}
+                                        onchange={handleMainChange}
+                                        value={instanceData?.ward}
                                         showname={"name"}
                                         name={"ward"}
                                         disabled={!isedit && !isAdd}
@@ -646,7 +724,7 @@ function WardDialogs(props) {
                                     />
 
 
-                                    {(error && !instanceData?.collector?.ward) && (
+                                    {(error && !instanceData?.ward) && (
                                         <span className="req-text">This field is required</span>
                                     )}
 
@@ -659,12 +737,12 @@ function WardDialogs(props) {
                                     <label class="form-label">Contact No : <span
                                         class="form-required">*</span></label>
                                     <input type="text" class="form-control" name="phone_number"
-                                        onChange={handleChange} defaultValue={instanceData?.phone_number || ""}
+                                        onChange={handleChange} defaultValue={instanceData?.employee?.phone_number || ""}
                                         disabled={!isedit && !isAdd}
 
                                     />
 
-                                    {(error && !instanceData?.phone_number) && (
+                                    {(error && !instanceData?.employee?.phone_number) && (
                                         <span className="req-text">This field is required</span>
                                     )}
 
@@ -675,7 +753,7 @@ function WardDialogs(props) {
                                 <div class="form-group">
                                     <label class="form-label">Image :
                                         <span class="form-required">*</span></label>
-                                    <input type="file" class="form-control"
+                                    <input type="file" class="form-control"  name="image"
                                         onChange={handleChange}
                                         disabled={!isedit && !isAdd}
                                     />
@@ -686,7 +764,7 @@ function WardDialogs(props) {
                                 <div class="form-group">
                                     <label class="form-label">Description :</label>
                                     <input type="text" class="form-control"
-                                        onChange={handleChange} defaultValue={instanceData?.collector?.description || ""}
+                                        onChange={handleMainChange} defaultValue={instanceData?.description || ""}
                                         disabled={!isedit && !isAdd}
 
                                         name="description" />
@@ -697,12 +775,12 @@ function WardDialogs(props) {
                                 <div class="form-group">
                                     <label class="form-label">Period of Time : <span class="form-required">*</span></label>
                                     <input type="Date" class="form-control" name="start_date"
-                                        onChange={handleChange} defaultValue={instanceData?.start_date || ""}
+                                        onChange={handleChange} defaultValue={instanceData?.employee?.start_date || ""}
                                         disabled={!isedit && !isAdd}
 
                                         required />
 
-                                    {(error && !instanceData?.start_date) && (
+                                    {(error && !instanceData?.employee?.start_date) && (
                                         <span className="req-text">This field is required</span>
                                     )}
                                 </div>
