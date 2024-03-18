@@ -68,7 +68,7 @@ function Coll(props) {
 
     const collector = useSelector((state) => state?.collector?.value)?.filter((e) => e?.code === "C1");
 
-    console.log(collector, "collector")
+
 
     const { path } = props;
 
@@ -91,12 +91,12 @@ function Coll(props) {
                 'employee.phone_number': (value) => value,
                 'ward': (value) => getWardLabel(value),
             }}
-            role={collector[0]}
+            // role={collector.find(item => item.name.toLowerCase() === modalHeader.toLowerCase())}
 
         />,
         "street": <HouseCollector
-            type="house"
-            modalHeader="street"
+            type="street"
+            modalHeader="Street Collector"
             headersToShow={["Image", "Name", "Contact No", "Ward No", "Tractor No"]}
             fields={{
                 'employee.image': (value) => value,
@@ -105,12 +105,12 @@ function Coll(props) {
                 'ward': (value) => getWardLabel(value),
                 "tractor_no": (value) => value
             }}
-            role={collector[1]}
+            // role={collector[1]}
 
         />,
         "shop": <HouseCollector
-            type="house"
-            modalHeader="shop"
+            type="shop"
+            modalHeader="Shop Collector"
             headersToShow={["Image", "Name", "Contact No", "Ward No"]}
             fields={{
                 'employee.image': (value) => value,
@@ -118,12 +118,12 @@ function Coll(props) {
                 'employee.phone_number': (value) => value,
                 'ward': (value) => getWardLabel(value),
             }}
-            role={collector[0]}
+            // role={collector[0]}
 
         />,
         "overall-weighing": <HouseCollector
 
-            type="overall"
+            type="Overall"
             modalHeader="Overall Collector"
             headersToShow={["Image", "Name", "Contact No",]}
             fields={{
@@ -132,7 +132,7 @@ function Coll(props) {
                 'employee.phone_number': (value) => value,
                 // 'ward': (value) => getWardLabel(value),
             }}
-            role={collector[0]}
+            // role={collector[0]}
 
         />,
 
@@ -165,7 +165,7 @@ function Coll(props) {
 
 function HouseCollector(props) {
 
-    const { modalHeader, headersToShow, fields, role } = props
+    const { modalHeader, headersToShow, fields } = props
 
     const dispatch = useDispatch()
 
@@ -177,6 +177,10 @@ function HouseCollector(props) {
     const districtList = useSelector((state) => state?.district?.value);
     const cityList = useSelector((state) => state?.city?.value);
 
+    const collector = useSelector((state) => state?.collector?.value)?.filter((e) => e?.code === "C1");
+    const role=collector?.find(item => item?.name.toLowerCase() === modalHeader?.toLowerCase())
+
+    console.log(role,"role")
     // meta StATE
     const [listInstanceData, setListInstanceData] = useState([])
     const [instanceData, setInstanceData] = useState(
@@ -279,7 +283,6 @@ function HouseCollector(props) {
 
             const response = await fetch(Config.BASE_URL + getListUrl + `?employee_role=${role?.id}`, Config?.config)
             const data = await response.json()
-            console.log(data)
             setListInstanceData(data);
             // dispatch(setWard(data));
 
@@ -295,7 +298,6 @@ function HouseCollector(props) {
 
             const response = await fetch(Config.BASE_URL + getListUrl, Config?.config)
             const data = await response.json()
-            console.log(data)
             dispatch(setWard(data));
 
         } catch (error) {
@@ -344,7 +346,6 @@ function HouseCollector(props) {
     }
 
 
-    console.log(instanceData?.collector?.ward, "rolee", role)
     const addNewInstance = async (e) => {
 
         const check = checkValidation()
@@ -384,7 +385,6 @@ function HouseCollector(props) {
                 Config.config,
 
             );
-            console.log(response.data);
             toast.success('Successfully submitted!');
 
             setListInstanceData((prevstate) => {
@@ -439,8 +439,7 @@ function HouseCollector(props) {
             .patch(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
             .then(function (response) {
                 if (response.status === 200) {
-                    console.log(response)
-
+               
                     setListInstanceData((prevArray) => {
                         const index = prevArray.findIndex((obj) => obj.id === id)
                         if (index !== -1) {
@@ -467,12 +466,12 @@ function HouseCollector(props) {
     //DELETE REQUESTS
 
     const deleteInstance = (id) => {
-        console.log('deleting')
+
 
         axios.delete(`${Config.BASE_URL}${deleteUrl}/${id}/`, Config.config)
             .then(function (response) {
                 if (response.status === 204) {
-                    console.log(response)
+               
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
                     handleClose();
                     updateListData();
@@ -489,11 +488,9 @@ function HouseCollector(props) {
 
     // handle new instance
 
-    console.log("trigger", instanceData)
     const handleChange = (e) => {
-        console.log("trigger")
+     
         const { name, value } = e.target;
-        console.log(name, "nameeeeeeeee")
         if (name === "image") {
             const check = Config?.fileType(e.target.files[0].name)
 

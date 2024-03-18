@@ -65,9 +65,12 @@ function MultipleSelect(props) {
                     disabled={disabled}
                 >
                     {data?.map((e, index) => (
-                        <MenuItem key={index} value={e.id}>
-                            <Checkbox checked={value?.indexOf(e) > -1} />
-                            <ListItemText primary={e?.name} />
+                        <MenuItem key={index} value={e.id}  size='small'>
+                            <Checkbox 
+                            // checked={value?.indexOf(e) > -1} 
+                            checked={value?.includes(e?.id)} 
+                            />
+                            <ListItemText primary={e?.name}   size='small' />
                         </MenuItem>
                     ))}
                 </Select>

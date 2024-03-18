@@ -189,7 +189,7 @@ function Content(props) {
 
     const userName = useContext(UserContext);
 
-    console.log(userName, "action")
+ 
 
     const [path, setpath] = useState();
 

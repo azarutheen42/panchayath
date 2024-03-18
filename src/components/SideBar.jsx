@@ -348,10 +348,9 @@ function SideBar(props) {
 
 
 
-
     const user = useContext(UserContext);
     // const user = useSelector((state) => state?.user?.value);
-    console.log(user?.admin)
+
 
     const navigate = useNavigate()
 
