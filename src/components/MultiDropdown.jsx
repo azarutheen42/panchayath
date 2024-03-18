@@ -62,6 +62,7 @@ function MultipleSelect(props) {
                     // renderValue={getWardLabel(selected)}
                     MenuProps={MenuProps}
                     size='small'
+                    disabled={disabled}
                 >
                     {data?.map((e, index) => (
                         <MenuItem key={index} value={e.id}>

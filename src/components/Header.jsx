@@ -371,7 +371,10 @@ function Header(props) {
                     <Box sx={{ flexGrow: 1 }} />
 
                     <SubHeader />
-                    {/* <Box sx={{ flexGrow: 0 }}>
+
+                    {/* <Box 
+                    sx={{ flexGrow: 0 }}
+                    >
                         <Tooltip title="Open settings">
                             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                                 <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
@@ -383,12 +386,12 @@ function Header(props) {
                             anchorEl={anchorElUser}
                             anchorOrigin={{
                                 vertical: 'top',
-                                horizontal: 'right',
+                                horizontal: 'left',
                             }}
                             keepMounted
                             transformOrigin={{
                                 vertical: 'top',
-                                horizontal: 'right'
+                                horizontal: 'left'
                             }}
                             open={Boolean(anchorElUser)}
                             onClose={handleCloseUserMenu}
@@ -432,7 +435,7 @@ function SubHeader() {
             {/* <div className="header"> */}
 
             <ul class="nav user-menu">
-                <li class="nav-item nav-searchinputs">
+                {/* <li class="nav-item nav-searchinputs">
 
                 </li>
                 <li class="nav-item dropdown has-arrow flag-nav nav-item-box">
@@ -539,7 +542,8 @@ function SubHeader() {
                     <a href="generalsettings.html">
                         <i data-feather="file-text"></i>
                     </a>
-                </li>
+                </li> */}
+
                 <li class="nav-item dropdown has-arrow main-drop">
                     <a href="javascript:void(0);" class="dropdown-toggle nav-link userset" data-bs-toggle="dropdown">
                         <span class="user-info">
@@ -558,13 +562,13 @@ function SubHeader() {
 
                             </div>
                             <hr class="m-0" />
-                            <a class="dropdown-item" href="#">
+                            {/* <a class="dropdown-item" href="#">
                                 <i class="me-2" data-feather="user"></i> My Profile
                             </a>
                             <a class="dropdown-item" href="#">
                                 <i class="me-2" data-feather="settings"></i> Settings
-                            </a>
-                            <hr class="m-0" />
+                            </a> */}
+                            {/* <hr class="m-0" /> */}
                             <a class="dropdown-item logout pb-0"
 
                                 onClick={() => {

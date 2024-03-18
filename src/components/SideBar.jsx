@@ -382,12 +382,12 @@ function SideBar(props) {
 
 
                     <div class="header-left active">
-                        <a href="#" class="logo logo-normal">
+                        {/* <a href="#" class="logo logo-normal"> */}
                             <img src="assets/img/logo.png" alt />
-                        </a>
-                        <a href="#" class="logo logo-white">
+                        {/* </a> */}
+                        {/* <a href="#" class="logo logo-white">
                             <img src="assets/img/logo.png" alt />
-                        </a>
+                        </a> */}
                     </div>
 
 

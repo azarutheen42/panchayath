@@ -42,7 +42,12 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 
 const emp_url = "contr-employees"
 
+
+
+
 function Collectors(props) {
+
+
     return (
         <>
             <Coll
@@ -60,12 +65,77 @@ export default Collectors
 
 function Coll(props) {
 
+
+    const collector = useSelector((state) => state?.collector?.value)?.filter((e) => e?.code === "C1");
+
+    console.log(collector, "collector")
+
     const { path } = props;
+
+    const wardlist = useSelector((state) => state?.ward?.value);
+
+    const getWardLabel = (data) => {
+        const listData = data ? data : []
+        const label = listData?.map((no) => (wardlist?.find((e) => e?.id === no)?.name)).join(',')
+        return label
+    }
 
     const component = {
         "house": <HouseCollector
             type="house"
+            modalHeader="House Collector"
+            headersToShow={["Image", "Name", "Contact No", "Ward No"]}
+            fields={{
+                'employee.image': (value) => value,
+                'employee.name': (value) => value,
+                'employee.phone_number': (value) => value,
+                'ward': (value) => getWardLabel(value),
+            }}
+            role={collector[0]}
+
         />,
+        "street": <HouseCollector
+            type="house"
+            modalHeader="street"
+            headersToShow={["Image", "Name", "Contact No", "Ward No", "Tractor No"]}
+            fields={{
+                'employee.image': (value) => value,
+                'employee.name': (value) => value,
+                'employee.phone_number': (value) => value,
+                'ward': (value) => getWardLabel(value),
+                "tractor_no": (value) => value
+            }}
+            role={collector[1]}
+
+        />,
+        "shop": <HouseCollector
+            type="house"
+            modalHeader="shop"
+            headersToShow={["Image", "Name", "Contact No", "Ward No"]}
+            fields={{
+                'employee.image': (value) => value,
+                'employee.name': (value) => value,
+                'employee.phone_number': (value) => value,
+                'ward': (value) => getWardLabel(value),
+            }}
+            role={collector[0]}
+
+        />,
+        "overall-weighing": <HouseCollector
+
+            type="overall"
+            modalHeader="Overall Collector"
+            headersToShow={["Image", "Name", "Contact No",]}
+            fields={{
+                'employee.image': (value) => value,
+                'employee.name': (value) => value,
+                'employee.phone_number': (value) => value,
+                // 'ward': (value) => getWardLabel(value),
+            }}
+            role={collector[0]}
+
+        />,
+
 
         // "street": <StreetCollector
         //     type="street"
@@ -93,12 +163,13 @@ function Coll(props) {
 // -------------------------------------------------------------------------------------------------------------------------------
 
 
-function HouseCollector() {
+function HouseCollector(props) {
 
+    const { modalHeader, headersToShow, fields, role } = props
 
     const dispatch = useDispatch()
 
-    const modalHeader = "House Collector";
+    // const modalHeader = "House Collector";
 
     const user = useSelector((state) => state?.user?.value);
     const wardlist = useSelector((state) => state?.ward?.value);
@@ -115,10 +186,10 @@ function HouseCollector() {
                 "image": "",
                 "name": "",
                 "phone_number": "",
-                },
-                 "ward": [
-    
-                    ]
+            },
+            "ward": [
+
+            ]
         }
 
     )
@@ -135,7 +206,6 @@ function HouseCollector() {
 
     const getWardLabel = (data) => {
         const listData = data ? data : []
-        console.log(listData, "pppppppppppppppppppppppp")
         const label = listData?.map((no) => (wardlist?.find((e) => e?.id === no)?.name)).join(',')
         return label
     }
@@ -144,7 +214,6 @@ function HouseCollector() {
     const getWardLabe = (data) => {
         const wardNames = [];
         const listData = data ? data : []
-        console.log(listData, "pppppppppppppppppppppppp")
         listData?.forEach(id => {
             const ward = wardlist.find(item => item.id === id);
             if (ward) {
@@ -167,15 +236,15 @@ function HouseCollector() {
 
 
     // META DATA
-    const headersToShow = ["Image", "Name", "Contact No", "Ward No"]
+    // const headersToShow = ["Image", "Name", "Contact No", "Ward No"]
     const tableData = listInstanceData
     const fieldsToShow = []
-    const fields = {
-        'em[ployee.image': (value) => value,
-        'employee.name': (value) => value,
-        'employee.phone_number': (value) => value,
-        'ward': (value) => getWardLabel(value),
-    }
+    // const fields = {
+    //     'employee.image': (value) => value,
+    //     'employee.name': (value) => value,
+    //     'employee.phone_number': (value) => value,
+    //     'ward': (value) => getWardLabel(value),
+    // }
 
 
     const handleClose = () => {
@@ -183,14 +252,14 @@ function HouseCollector() {
         setisAdd();
         setInstanceData({
             "employee": {
-            "image": "",
-            "name": "",
-            "phone_number": "",
+                "image": "",
+                "name": "",
+                "phone_number": "",
             },
-             "ward": [
+            "ward": [
 
-                ]
-            
+            ]
+
         });
         setError();
 
@@ -199,8 +268,6 @@ function HouseCollector() {
 
 
     useEffect(() => {
-
-
         fetchListData();
     }, [])
 
@@ -210,7 +277,7 @@ function HouseCollector() {
     const fetchListData = async () => {
         try {
 
-            const response = await fetch(Config.BASE_URL + getListUrl, Config?.config)
+            const response = await fetch(Config.BASE_URL + getListUrl + `?employee_role=${role?.id}`, Config?.config)
             const data = await response.json()
             console.log(data)
             setListInstanceData(data);
@@ -262,8 +329,8 @@ function HouseCollector() {
 
         console.log(instanceData, "fdj")
 
-        if (!instanceData?.employee?.name || !instanceData?.ward 
-            || !instanceData?.employee?.phone_number || !instanceData?.employee?.start_date ) {
+        if (!instanceData?.employee?.name || !instanceData?.ward
+            || !instanceData?.employee?.phone_number || !instanceData?.employee?.start_date) {
             console.log("please fill required fields")
             setError(true)
             return false
@@ -277,7 +344,7 @@ function HouseCollector() {
     }
 
 
-    console.log(instanceData?.collector?.ward, "fdj")
+    console.log(instanceData?.collector?.ward, "rolee", role)
     const addNewInstance = async (e) => {
 
         const check = checkValidation()
@@ -289,55 +356,33 @@ function HouseCollector() {
         const data = new FormData();
         // const employeeData=new FormData();
 
-        const  employeeData={
+        const employeeData = {
             // image:instanceData?.image,
-            start_date:instanceData?.employee?.start_date,
-            phone_number:instanceData?.employee?.phone_number,
-            name:instanceData?.employee?.name,
-            is_collector:true,
+            start_date: instanceData?.employee?.start_date,
+            phone_number: instanceData?.employee?.phone_number,
+            name: instanceData?.employee?.name,
+            is_collector: true,
+            role: role?.id,
         }
 
-
-        // data.append("name", instanceData?.name)
-        // data.append("phone_number", instanceData?.phone_number)
-        // data.append("start_date", instanceData?.start_date)
-        // data.append("is_collector", true)
-        // data.append("image", instanceData?.image)
-
-        
-        const wardListdata=instanceData?.ward
+        const wardListdata = instanceData?.ward
         // instanceData?.collector?.ward?.map((e)=>(
-            data.append("ward", wardListdata)
+        data.append("ward", wardListdata)
         // ))
         // data.append("ward", instanceData?.collector?.ward)
-        data.append("employee",JSON.stringify(employeeData))
+        data.append("employee", JSON.stringify(employeeData))
         data.append("description", instanceData?.description)
 
+        if (image) {
+            data.append("image", image)
+        }
 
         // data.append("role", role?.id)
         try {
             const response = await axios.post(`${Config.BASE_URL}${postUrl}`,
-            data,
-            // {
-            //     employee:{
-            //         // image:instanceData?.image??null,
-            //         start_date:instanceData?.start_date,
-            //         phone_number:instanceData?.phone_number,
-            //         name:instanceData?.name,
-            //         is_collector:true,
-            //         user: {
-            //             name: instanceData?.name,
-            //             phone: instanceData?.phone_number,
-                        
-            //           },
-        
-            //     },
-            //     ward:instanceData?.collector?.ward,
-            //     description:instanceData?.collector?.description
+                data,
+                Config.config,
 
-            // },
-            Config.config,
-            
             );
             console.log(response.data);
             toast.success('Successfully submitted!');
@@ -368,28 +413,27 @@ function HouseCollector() {
         }
 
         const data = new FormData()
-        const  employeeData={
+        const employeeData = {
             // image:instanceData?.image,
-            start_date:instanceData?.employee?.start_date,
-            phone_number:instanceData?.employee?.phone_number,
-            name:instanceData?.employee?.name,
-            is_collector:true,
+            start_date: instanceData?.employee?.start_date,
+            phone_number: instanceData?.employee?.phone_number,
+            name: instanceData?.employee?.name,
+            is_collector: true,
         }
 
+        if (instanceData?.employee?.image) {
+            employeeData["image"] = instanceData?.employee?.image
+        }
 
-        // data.append("name", instanceData?.name)
-        // data.append("phone_number", instanceData?.phone_number)
-        // data.append("start_date", instanceData?.start_date)
-        // data.append("is_collector", true)
-        // data.append("image", instanceData?.image)
-
-        
-        const wardListdata=instanceData?.ward
+        const wardListdata = instanceData?.ward
         // instanceData?.collector?.ward?.map((e)=>(
-            data.append("ward", wardListdata)
+        data.append("ward", wardListdata)
         // ))
-        // data.append("ward", instanceData?.collector?.ward)
-        data.append("employee",JSON.stringify(employeeData))
+        if (image) {
+            data.append("image", image)
+        }
+
+        data.append("employee", JSON.stringify(employeeData))
         data.append("description", instanceData?.description)
         axios
             .patch(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
@@ -445,7 +489,7 @@ function HouseCollector() {
 
     // handle new instance
 
-console.log("trigger",instanceData)
+    console.log("trigger", instanceData)
     const handleChange = (e) => {
         console.log("trigger")
         const { name, value } = e.target;
@@ -460,15 +504,17 @@ console.log("trigger",instanceData)
             console.log(e.target.files[0].name)
             let value = e.target.files[0]
 
-            setInstanceData(prevState => ({
-                ...prevState,
-                employee: {
-                    ...prevState.employee,
-                    [name]: value // Replace existing array with a new array containing the updated value
-                }
-            }));
+            setImage(value)
+
+            // setInstanceData(prevState => ({
+            //     ...prevState,
+            //     employee: {
+            //         ...prevState.employee,
+            //         [name]: value // Replace existing array with a new array containing the updated value
+            //     }
+            // }));
         }
-        else  {
+        else {
 
             setInstanceData(prevState => ({
                 ...prevState,
@@ -484,13 +530,13 @@ console.log("trigger",instanceData)
 
     const handleMainChange = (e) => {
         const { name, value } = e.target;
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
+        setInstanceData((prevstate) => {
+            return {
+                ...prevstate, [name]: value
+            }
 
-            })
-        
+        })
+
 
     }
 
@@ -753,7 +799,7 @@ function WardDialogs(props) {
                                 <div class="form-group">
                                     <label class="form-label">Image :
                                         <span class="form-required">*</span></label>
-                                    <input type="file" class="form-control"  name="image"
+                                    <input type="file" class="form-control" name="image"
                                         onChange={handleChange}
                                         disabled={!isedit && !isAdd}
                                     />
