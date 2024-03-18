@@ -273,7 +273,7 @@ function HouseCollector(props) {
 
     useEffect(() => {
         fetchListData();
-    }, [])
+    }, [role])
 
 
 
@@ -281,7 +281,7 @@ function HouseCollector(props) {
     const fetchListData = async () => {
         try {
 
-            const response = await fetch(Config.BASE_URL + getListUrl + `?employee_role=${role?.id}`, Config?.config)
+            const response = await fetch(Config.BASE_URL + getListUrl + `?employee__role=${role?.id??""}`, Config?.config)
             const data = await response.json()
             setListInstanceData(data);
             // dispatch(setWard(data));
