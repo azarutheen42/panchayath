@@ -14,42 +14,100 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from "react-redux";
 import ButtonWithLoader from "./Button";
 import { CircularProgress } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 
 
-
+// Define the styled component for the image thumbnail
+const StyledSmallImageThumbnail = styled('img')({
+    width: 50, // Adjust the width to make the thumbnail smaller
+    height: 'auto', // Maintain aspect ratio
+    borderRadius: 4, // Add rounded corners
+    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', // Add a shadow for depth
+    cursor: 'pointer', // Add cursor pointer for clickable behavior
+    // border: '1px solid #000',
+});
 
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-        // backgroundColor: theme.palette.common.black,
-        backgroundColor: "#cff4fc",
-        color: "#000",
-        // color: theme.palette.common.white,
-    },
+    // padding: "5px 15px", // Remove padding from the cell
+    // '&.noPadding': {
+    //     padding: 0, // Apply the global CSS class to remove padding
+    //   },
+    border: '.5px solid #ccc',
+
+    // [`&.${tableCellClasses.head}`]: {
+    //     // backgroundColor: theme.palette.common.black,
+    //     // color: theme.palette.common.white,
+    //     backgroundColor: "#cff4fc",
+    //     color: "#000",
+    //     fontWeight: "bold",
+    //     // padding: '15px'
+    // },
     [`&.${tableCellClasses.body}`]: {
         fontSize: 14,
+
+
     },
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
+
     '&:nth-of-type(odd)': {
         backgroundColor: theme.palette.action.hover,
     },
     // hide last border
     '&:last-child td, &:last-child th': {
-        border: 0,
+        // border: 0,
+    },
+    '&:hover': {
+        backgroundColor: '#f5f5f5', // Change background color on hover
     },
 }));
 
+const StyledTableHead = styled(TableHead)({
+    position: 'sticky', // Set the table head to sticky position
+    top: '0', // Stick to the top of the table
+    zIndex: '100', // Ensure the header stays above the content
+
+
+    // backgroundColor: theme.palette.common.black,
+    // color: theme.palette.common.white,
+    backgroundColor: "#cff4fc",
+    color: "#000",
+    fontWeight: "bold",
+    padding: "20px"
+
+});
+
+
+const StyledTable = styled(Table)(({ theme }) => ({
+    // borderCollapse: 'separate', // Separate borders for cells
+    borderSpacing: '0px', // No spacing between cells
+    borderRadius: '2px', // Curved border radius
+    minWidth: '100%', // Ensure the table takes full width of its container
+}));
+
+
+
+const StyledTableContainer = styled(TableContainer)({
+    maxHeight: "400px", // Set a max height for the table container
+    overflowY: 'auto', // Enable vertical scrolling for overflow
+
+});
 
 const siCell = {
-    width: "10px",
-
+    width: 60,
 }
 
 const ActionCell = {
-    width: "120px",
+    width: "130px"
 }
+
+
+
+
+
+
 
 function CustomTable(props) {
 
@@ -87,6 +145,10 @@ function CustomTable(props) {
 
     console.log(lazyLoading, "lazy loading true")
 
+
+
+
+
     return (
         <>
 
@@ -109,27 +171,30 @@ function CustomTable(props) {
 
 
             {mui && (
-                <TableContainer
-                // component={Paper}
+                <StyledTableContainer
+                    component={Paper}
                 >
-                    <Table
-                        //      sx={{ minWidth: 700 }} 
-                        // aria-label="customized table" 
-                        className='mt-2'>
-                        <TableHead>
-                            <StyledTableRow>
-                                <StyledTableCell style={siCell}>Si.No</StyledTableCell>
-
-                                {headers?.map((header, index) => (
-
-                                    <StyledTableCell key={index}>{header}</StyledTableCell>
-                                ))}
-
-                                {!actionShow && <StyledTableCell>Action</StyledTableCell>}
 
 
-                            </StyledTableRow>
-                        </TableHead>
+                    <StyledTable
+                    //      sx={{ minWidth: 700 }} 
+                    // aria-label="customized table" 
+                    // className='mt-2' 
+                    >
+                        <StyledTableHead >
+                            {/* <StyledTableRow> */}
+                            <StyledTableCell style={siCell}>Si.No</StyledTableCell>
+
+                            {headers?.map((header, index) => (
+
+                                <StyledTableCell key={index}>{header}</StyledTableCell>
+                            ))}
+
+                            {!actionShow && <StyledTableCell>Action</StyledTableCell>}
+
+
+                            {/* </StyledTableRow> */}
+                        </StyledTableHead>
                         <TableBody>
 
 
@@ -183,9 +248,9 @@ function CustomTable(props) {
                                                     </StyledTableCell>
                                                 ))}
 
-                                                <StyledTableCell style={ActionCell}>
+                                                {!actionShow && <StyledTableCell style={ActionCell}>
 
-                                                    {!actionShow && <ButtonWithLoader
+                                                    <ButtonWithLoader
                                                         itemId={row?.id}
                                                         onClick={() => fetchData(row?.id, false, "view", rowIndex)}
                                                         class_name="btn btn-success"
@@ -196,9 +261,11 @@ function CustomTable(props) {
                                                     // setLoader={setLoader}
                                                     // key = {employee?.id}
                                                     />
-                                                    }
+
 
                                                 </StyledTableCell>
+
+                                                }
 
                                             </StyledTableRow>
                                         ))}
@@ -206,9 +273,12 @@ function CustomTable(props) {
                                     </>}
 
                         </TableBody>
-                    </Table>
-                </TableContainer>
+                    </StyledTable>
 
+
+
+
+                </StyledTableContainer>
             )}
 
 
@@ -360,12 +430,18 @@ const renderImageOrText = (value) => {
     if (isImageUrl(value)) {
         var alt_name = getImageName(value);
         alt_name = Config.truncateText(alt_name, 7)
-        return <img
-            src={Config?.MEDIA_URL + value}
-            alt={alt_name}
-            className="emp-thumb"
-        // style={{ width: '100px', height: 'auto' }}
-        />;
+        // return <img
+        //     src={Config?.MEDIA_URL + value}
+        //     alt={alt_name}
+        //     // className="emp-thumb"
+        // // style={{ width: '100px', height: 'auto' }}
+        // />;
+
+
+        return <CustomTableCell imagePath={Config?.MEDIA_URL + value} altText={alt_name} />
+
+
+        return
     } else {
         // return value;
         if (typeof value !== 'string') {
@@ -408,3 +484,99 @@ const TableRowsLoader = ({ rowsNum, cellNo }) => {
 
 
 export default CustomTable;
+
+
+
+
+
+
+const CustomTableCell = ({ imagePath, altText }) => {
+    const [openModal, setOpenModal] = useState(false);
+
+    const handleOpenModal = () => {
+        setOpenModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setOpenModal(false);
+    };
+
+
+    const handleDownload = async () => {
+        try {
+            const response = await fetch(imagePath);
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+
+            const downloadLink = document.createElement('a');
+            downloadLink.href = url;
+            downloadLink.download = altText;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading image:', error);
+        }
+    };
+
+    return (
+        <>
+
+            <StyledSmallImageThumbnail src={imagePath} alt={altText} onClick={handleOpenModal} />
+
+            {/* Modal for displaying the image and download button */}
+            <Dialog
+                open={openModal}
+                onClose={handleCloseModal}
+                fullWidth
+                maxWidth="sm" // Set the maximum width to sm (small)
+                PaperProps={{
+                    style: {
+                        width: '50%', // Set the width to 50% of the screen
+                        margin: 'auto', // Center the modal horizontally
+                        padding: '20px', // Add padding on both sides
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    },
+                }}
+            >
+                <img
+                    src={imagePath}
+                    alt={altText}
+                    style={{
+                        maxWidth: '100%', // Ensure the image fits within the modal
+                        height: 'auto', // Maintain aspect ratio
+                        objectFit: 'contain', // Fit the image without stretching
+                    }}
+                />
+
+                <div style={{ textAlign: 'center', marginTop: 10 }}> {/* Add margin between image and button */}
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size="small" // Set the size of the download button to small
+                        onClick={handleDownload}
+                    >
+                        Download
+                    </Button>
+                </div>
+            </Dialog>
+
+        </>
+
+
+
+    );
+};
+
+
+
+
+
+
+
+
+

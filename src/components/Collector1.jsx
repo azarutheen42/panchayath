@@ -178,8 +178,8 @@ function HouseCollector(props) {
     const cityList = useSelector((state) => state?.city?.value);
 
     const collector = useSelector((state) => state?.collector?.value)?.filter((e) => e?.code === "C1");
-    const role=collector?.find(item => item?.name.toLowerCase() === modalHeader?.toLowerCase())
-
+    // const role=collector?.find(item => item?.name.toLowerCase() === modalHeader?.toLowerCase())
+    const role=""
     console.log(role,"role")
     // meta StATE
     const [listInstanceData, setListInstanceData] = useState([])
