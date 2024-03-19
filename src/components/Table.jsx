@@ -30,24 +30,25 @@ const StyledSmallImageThumbnail = styled('img')({
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     // padding: "5px 15px", // Remove padding from the cell
+    padding: '8px',
     // '&.noPadding': {
     //     padding: 0, // Apply the global CSS class to remove padding
     //   },
     border: '.5px solid #ccc',
 
-    // [`&.${tableCellClasses.head}`]: {
-    //     // backgroundColor: theme.palette.common.black,
-    //     // color: theme.palette.common.white,
-    //     backgroundColor: "#cff4fc",
-    //     color: "#000",
-    //     fontWeight: "bold",
-    //     // padding: '15px'
-    // },
-    [`&.${tableCellClasses.body}`]: {
-        fontSize: 14,
-
-
+    [`&.${tableCellClasses.head}`]: {
+        // backgroundColor: theme.palette.common.black,
+        // color: theme.palette.common.white,
+        backgroundColor: "#cff4fc",
+        color: "#000",
+        fontWeight: "bold",
+        // padding: '15px'
     },
+    // [`&.${tableCellClasses.body}`]: {
+    //     fontSize: 14,
+
+
+    // },
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
@@ -69,7 +70,6 @@ const StyledTableHead = styled(TableHead)({
     top: '0', // Stick to the top of the table
     zIndex: '100', // Ensure the header stays above the content
 
-
     // backgroundColor: theme.palette.common.black,
     // color: theme.palette.common.white,
     backgroundColor: "#cff4fc",
@@ -83,17 +83,10 @@ const StyledTableHead = styled(TableHead)({
 const StyledTable = styled(Table)(({ theme }) => ({
     // borderCollapse: 'separate', // Separate borders for cells
     borderSpacing: '0px', // No spacing between cells
-    borderRadius: '2px', // Curved border radius
+    borderRadius: '5px', // Curved border radius
     minWidth: '100%', // Ensure the table takes full width of its container
 }));
 
-
-
-const StyledTableContainer = styled(TableContainer)({
-    maxHeight: "400px", // Set a max height for the table container
-    overflowY: 'auto', // Enable vertical scrolling for overflow
-
-});
 
 const siCell = {
     width: 60,
@@ -104,10 +97,11 @@ const ActionCell = {
 }
 
 
-
-
-
-
+const StyledTableContainer = styled(TableContainer)({
+    maxHeight: '100%', // Ensure the container takes full height of its parent
+    overflow: 'auto', // Enable scrollable overflow for the container
+  });
+  
 
 function CustomTable(props) {
 
@@ -152,27 +146,9 @@ function CustomTable(props) {
     return (
         <>
 
-            {/* <div className='container mt-5  bg-white p-5'> */}
-
-            {/* <div className="row">
-
-                    <div className="col text-end">
-                        <Button variant="contained"
-                        // onClick={handleCreateForm}
-                        >+ New </Button>
-
-                    </div>
-                    <Button className='button btn-edit'>
-                        Back
-                    </Button>
-
-                    <button className='button btn-edit' >edit</button>
-                </div> */}
-
-
             {mui && (
                 <StyledTableContainer
-                    component={Paper}
+                    // component={Paper}
                 >
 
 
@@ -215,32 +191,6 @@ function CustomTable(props) {
                                                 <StyledTableCell style={siCell}>{rowIndex + 1}</StyledTableCell>
 
 
-                                                {hide &&
-                                                    (
-                                                        fieldsToShow?.map((field, fieldIndex) => (
-                                                            <StyledTableCell key={`${rowIndex}-${fieldIndex}`}>
-                                                                {/* Handle nested fields */}
-                                                                {field.includes('.') ?
-
-                                                                    nestedFieldExtractor(row, field)
-                                                                    :
-                                                                    isImageUrl(row[field])
-                                                                        ?
-                                                                        (<img src={row[field]} alt={row[field]} style={{ width: '100px', height: 'auto' }} />)
-
-                                                                        :
-                                                                        (
-                                                                            row[field]
-                                                                        )}
-                                                                {/* Render image if field is an image URL */}
-
-                                                                {renderField(row, field)}
-
-                                                            </StyledTableCell>
-                                                        ))
-                                                    )
-                                                }
-
                                                 {Object.entries(fields).map(([fieldName, getValue]) => (
                                                     <StyledTableCell key={`${rowIndex}-${fieldName}`}>
                                                         {getValue(renderField(row, fieldName))}
@@ -282,110 +232,7 @@ function CustomTable(props) {
             )}
 
 
-            {!mui && (
-                <div className="table-responsive mt-2">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr class="table-info">
 
-                                <th style={siCell}>Si.No</th>
-
-                                {headers?.map((header) => (
-                                    <th key={header}>{header}</th>
-                                ))}
-
-
-                                {!actionShow && <th>Action</th>}
-
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                            {
-                                (!data || lazyLoading) ? (
-                                    <TableRowsLoader rowsNum={10} cellNo={headers?.length + 2} />
-                                )
-
-                                    :
-                                    (data.length === 0) ?
-                                        <>
-                                            <TableRowsLoader rowsNum={10} cellNo={headers?.length + 2} />
-                                        </>
-
-
-                                        :
-                                        <>
-                                            {data?.map((row, rowIndex) => (
-                                                <tr key={rowIndex}>
-                                                    <td style={siCell}>{rowIndex + 1}</td>
-                                                    {hide &&
-                                                        (
-                                                            fieldsToShow?.map((field, fieldIndex) => (
-                                                                <td key={`${rowIndex}-${fieldIndex}`}>
-                                                                    {/* Handle nested fields */}
-                                                                    {field.includes('.') ?
-
-                                                                        nestedFieldExtractor(row, field)
-                                                                        :
-                                                                        isImageUrl(row[field])
-                                                                            ?
-                                                                            (<img src={row[field]} alt={row[field]} style={{ width: '100px', height: 'auto' }} />)
-
-                                                                            :
-                                                                            (
-                                                                                row[field]
-                                                                            )}
-                                                                    {/* Render image if field is an image URL */}
-
-                                                                    {renderField(row, field)}
-
-                                                                </td>
-                                                            ))
-                                                        )
-                                                    }
-                                                    {Object.entries(fields).map(([fieldName, getValue]) => (
-                                                        <td key={`${rowIndex}-${fieldName}`}>
-                                                            {getValue(renderField(row, fieldName))}
-                                                            {/* {renderField(row, fieldName)} */}
-                                                        </td>
-                                                    ))}
-
-                                                    {!actionShow &&
-                                                        <td style={ActionCell}>
-
-                                                            {/* <button class="buttontn btn-edit"  onClick={() => fetchData(row?.id, false, "view",rowIndex)}>
-                                                        {(loader ===rowIndex ) ? Config.loader : <span class="glyphicon glyphicon-pencil"></span>} View
-                                                    </button> */}
-                                                            <ButtonWithLoader
-                                                                itemId={row?.id}
-                                                                onClick={() => fetchData(row?.id, false, "view", rowIndex)}
-                                                                class_name="btn btn-success"
-                                                                text="View"
-                                                                span_class="glyphicon glyphicon-pencil"
-                                                                loader={loader}
-                                                                index={rowIndex}
-                                                            // setLoader={setLoader}
-                                                            // key = {employee?.id}
-                                                            />
-
-                                                        </td>
-                                                    }
-                                                </tr>
-                                            ))}
-                                        </>
-                            }
-
-
-
-                        </tbody>
-                    </table>
-                </div >
-
-            )
-            }
-
-
-            {/* </div> */}
 
         </>
     );
