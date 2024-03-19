@@ -59,6 +59,122 @@ const Config = {
         // left: '50%',
         // transform: 'translate(-50%, -50%)',
     },
+
+
+    toast: function (alertText = "", type = "success", dismiss = false) {
+
+
+        // console.log("triggered")
+      
+        //Toast alert depricated
+        // toast?.configure();
+        toast.clearWaitingQueue();
+    
+    
+        // dismiss/remove all toast
+        if (dismiss) {  
+          toast.dismiss();
+          return;
+        }
+    
+        console.log("triggered",type)
+        let AlertContent = () => (
+          <div className="toast-align">
+            <span className="toast-img">
+            </span>
+            <div className="classWithFontStyleOrWhatever">{alertText}</div>
+          </div>
+        );
+        switch (type) {
+          case "warning": {
+            // To show warnings
+            AlertContent = () => (
+              <div className="toast-align">
+                <span className="toast-img">
+                </span>
+                <div className="classWithFontStyleOrWhatever">{alertText}</div>
+              </div>
+            );
+            console.log(type)
+    
+            return toast(<AlertContent />, {
+              position: "top-center",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light",
+              // transition: Bounce,
+              });
+            // return toast(<AlertContent />, {
+            //   transition: Slide,
+            //   position: "top-center",
+            //   autoClose: 3000,
+            //   hideProgressBar: true,
+            //   closeOnClick: true,
+            //   pauseOnHover: true,
+            //   draggable: true,
+            //   progress: undefined,
+            // });
+          }
+          case "info": {
+            //To show information
+            AlertContent = () => (
+              <div className="toast-align">
+                <span className="toast-img">
+                </span>
+                <div className="classWithFontStyleOrWhatever">{alertText}</div>
+              </div>
+            );
+            return toast.info(<AlertContent />, {
+              transition: Slide,
+              position: "top-center",
+              autoClose: 3000,
+              hideProgressBar: true,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+            });
+          }
+          case "error": {
+            //To show error messages
+            AlertContent = () => (
+              <div className="toast-align">
+                <span className="toast-img">
+                </span>
+                <div className="classWithFontStyleOrWhatever">{alertText}</div>
+              </div>
+            );
+            return toast.error(<AlertContent />, {
+              transition: Slide,
+              position: "top-center",
+              // autoClose: 3000,
+              hideProgressBar: true,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              limit: 1,
+            });
+          }
+          default: {
+            // To show success alert
+            return toast.success(<AlertContent />, {
+              transition: Slide,
+              position: "top-center",
+              autoClose: 3000,
+              hideProgressBar: true,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+            });
+          }
+        }
+      },
     // avatar : `${Config?.HOST_URL}assets/img/profiles/avator1.jpg`,
     avatar: "assets/img/profiles/avator1.jpg",
 
