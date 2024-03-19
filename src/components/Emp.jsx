@@ -66,6 +66,7 @@ function Employee(props) {
     const [isAdd, setisAdd] = useState();
     const [error, setError] = useState(false);
     const [image, setImage] = useState();
+    const [lazyLoading,setLazyLoading] =useState(true);
 
 
     const handleClose = () => {
@@ -76,7 +77,9 @@ function Employee(props) {
         setisEdit();
         setEmployee();
         setViewEmployee();
-        setisAdd()
+        setisAdd();
+        
+
     }
 
 
@@ -112,7 +115,7 @@ function Employee(props) {
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response);
-                    setRoles(response?.data?.filter((e) => e.type === 1))
+                    setRoles(response?.data?.filter((e) => e.type === 1));
 
                 }
 
@@ -141,6 +144,7 @@ function Employee(props) {
                 if (response.status === 200) {
                     console.log(response);
                     setPermEmployee(response?.data)
+                    setLazyLoading(false);
 
                 }
 
@@ -369,7 +373,7 @@ function Employee(props) {
                 if (response.status === 204) {
                     console.log(response);
                     setPermEmployee(permEmployee?.filter((e) => e.id !== id))
-                    handleClose()
+                    handleClose();
                     // setLoader()
 
 
@@ -395,6 +399,7 @@ function Employee(props) {
                 (isOpen || isAdd) && (
 
                     <CustomizedDialogs
+                    lazyLoading={lazyLoading}
                         setIsOpen={setIsOpen}
                         isAdd={isAdd}
                         error={error}
@@ -439,7 +444,7 @@ function Employee(props) {
                             </button> */}
                             <AddButton
                                 onClick={() => setisAdd(true)}
-                                text={"Add Employee"}
+                                text={" Add Employee"}
                             />
 
                         </div>

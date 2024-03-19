@@ -7,7 +7,9 @@ export default function SelectDropdown(props) {
         <>
             <select name={name} className="custom-dropdown" required value={selected} onChange={onchange} disabled={disabled}>
 
-                {report && <option value={""} > -------------  </option> }
+                {/* {report && <option value={""} > -------------  </option> } */}
+                <option value={""} > -------------  </option> 
+                
                 {list?.map((e,index) => (
                     <option value={e?.id} key={index}>{e[showname]} </option>
                 ))}

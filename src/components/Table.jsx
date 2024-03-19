@@ -13,6 +13,8 @@ import Config from "../Config"
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from "react-redux";
 import ButtonWithLoader from "./Button";
+import { CircularProgress } from '@mui/material';
+
 
 
 
@@ -40,115 +42,30 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 
+const siCell = {
+    width: "10px",
 
-export default function CustomTable(props) {
+}
+
+const ActionCell = {
+    width: "120px",
+}
+
+function CustomTable(props) {
 
 
     const [hide, setIsHide] = useState(false);
-    const [mui, setMui] = useState(false);
+    const [mui, setMui] = useState(true);
 
     // const [loader,setLoader]=useState(false);
 
     const {
         headers, data, fieldsToShow, fields, getInstanceData,
-        loader, setLoader, actionShow
+        loader, setLoader, actionShow, lazyLoading
     } = props
 
 
     const navigate = useNavigate();
-
-    // const WardList = useSelector((state) => state?.ward?.value);
-
-    // const getWardName = (id) => {
-    //     const label = WardList?.find((e) => e.id === id)?.name
-    //     return label
-    // }
-
-
-    // const headers = ['S.no', 'Name', 'Panchayath', "Ward"]
-    // const fieldsToShow = ['id', 'employee_info.name', 'employee_info.image']
-
-
-    // const fields = {
-    //     'id': (value) => value,
-    //     'employee_info.name': (value) => value,
-    //     'employee_info.image': (value) => value,
-    //     'ward': (wardId) => getWardName(wardId),
-    //     // Add more fields as needed
-    // };
-
-    // const data =
-    //     [
-    //         {
-    //             "id": 7,
-    //             "ward": 11,
-    //             "employee": 70,
-    //             "employee_info": {
-    //                 "id": 70,
-    //                 "image": "/media/employee/70/manisha_images_1.jpg",
-    //                 "emp_id": "EMP240229701c60",
-    //                 "name": "manisha",
-    //                 "phone_number": "7339539660",
-    //                 "is_contract": false,
-    //                 "is_collector": true,
-    //                 "is_permenant": false,
-    //                 "start_date": "2024-02-29",
-    //                 "user": 138,
-    //                 "role": 38,
-    //                 "ward": 11,
-    //                 "panchayat": 7
-    //             },
-    //             "ward_info": {
-    //                 "id": 11,
-    //                 "panchayath_info": {
-    //                     "id": 7,
-    //                     "city_name": "spg street2",
-    //                     "district_name": "Tenkasi",
-    //                     "name": "Demo",
-    //                     "city": 9,
-    //                     "district": 14
-    //                 },
-    //                 "ward_no": "10",
-    //                 "name": "ward-10",
-    //                 "panchayat": 7
-    //             }
-    //         },
-    //         {
-    //             "id": 8,
-    //             "ward": 11,
-    //             "employee": 71,
-    //             "employee_info": {
-    //                 "id": 71,
-    //                 "image": "/media/employee/None/vicky_image.png",
-    //                 "emp_id": "EMP24030771f6fa",
-    //                 "name": "vicky",
-    //                 "phone_number": "1234567894",
-    //                 "is_contract": false,
-    //                 "is_collector": true,
-    //                 "is_permenant": false,
-    //                 "start_date": "2024-03-07",
-    //                 "user": 166,
-    //                 "role": 38,
-    //                 "ward": null,
-    //                 "panchayat": 7
-    //             },
-    //             "ward_info": {
-    //                 "id": 11,
-    //                 "panchayath_info": {
-    //                     "id": 7,
-    //                     "city_name": "spg street2",
-    //                     "district_name": "Tenkasi",
-    //                     "name": "Demo",
-    //                     "city": 9,
-    //                     "district": 14
-    //                 },
-    //                 "ward_no": "10",
-    //                 "name": "ward-10",
-    //                 "panchayat": 7
-    //             }
-    //         }
-    //     ]
-
 
 
     const fetchData = async (id, bool, text, rowIndex) => {
@@ -168,14 +85,7 @@ export default function CustomTable(props) {
 
     }
 
-
-
-    const handleNavigate = (id, k) => {
-        navigate(`loan-form/${id}`)
-    }
-
-
-
+    console.log(lazyLoading, "lazy loading true")
 
     return (
         <>
@@ -207,8 +117,8 @@ export default function CustomTable(props) {
                         // aria-label="customized table" 
                         className='mt-2'>
                         <TableHead>
-                            <TableRow>
-                                <StyledTableCell>Si.No</StyledTableCell>
+                            <StyledTableRow>
+                                <StyledTableCell style={siCell}>Si.No</StyledTableCell>
 
                                 {headers?.map((header, index) => (
 
@@ -218,75 +128,82 @@ export default function CustomTable(props) {
                                 {!actionShow && <StyledTableCell>Action</StyledTableCell>}
 
 
-                            </TableRow>
+                            </StyledTableRow>
                         </TableHead>
                         <TableBody>
 
 
-                            {(!data || data.length === 0) ?
-                                <>
-                                    <p>No data available</p>
-                                </> :
-                                <>
-                                    {data?.map((row, rowIndex) => (
-                                        <TableRow key={rowIndex}>
-                                            <StyledTableCell>{rowIndex + 1}</StyledTableCell>
+                            {(lazyLoading || !data) ? (
+                                <TableRowsLoader rowsNum={5} cellNo={headers?.length + 2} />
+                            )
+
+                                :
+                                (data?.length === 0) ?
+                                    <>
+                                        <p>No Data</p>
+                                    </>
+
+                                    :
+                                    <>
+                                        {data?.map((row, rowIndex) => (
+                                            <StyledTableRow key={rowIndex}>
+                                                <StyledTableCell style={siCell}>{rowIndex + 1}</StyledTableCell>
 
 
-                                            {hide &&
-                                                (
-                                                    fieldsToShow?.map((field, fieldIndex) => (
-                                                        <StyledTableCell key={`${rowIndex}-${fieldIndex}`}>
-                                                            {/* Handle nested fields */}
-                                                            {field.includes('.') ?
+                                                {hide &&
+                                                    (
+                                                        fieldsToShow?.map((field, fieldIndex) => (
+                                                            <StyledTableCell key={`${rowIndex}-${fieldIndex}`}>
+                                                                {/* Handle nested fields */}
+                                                                {field.includes('.') ?
 
-                                                                nestedFieldExtractor(row, field)
-                                                                :
-                                                                isImageUrl(row[field])
-                                                                    ?
-                                                                    (<img src={row[field]} alt={row[field]} style={{ width: '100px', height: 'auto' }} />)
-
+                                                                    nestedFieldExtractor(row, field)
                                                                     :
-                                                                    (
-                                                                        row[field]
-                                                                    )}
-                                                            {/* Render image if field is an image URL */}
+                                                                    isImageUrl(row[field])
+                                                                        ?
+                                                                        (<img src={row[field]} alt={row[field]} style={{ width: '100px', height: 'auto' }} />)
 
-                                                            {renderField(row, field)}
+                                                                        :
+                                                                        (
+                                                                            row[field]
+                                                                        )}
+                                                                {/* Render image if field is an image URL */}
 
-                                                        </StyledTableCell>
-                                                    ))
-                                                )
-                                            }
+                                                                {renderField(row, field)}
 
-                                            {Object.entries(fields).map(([fieldName, getValue]) => (
-                                                <StyledTableCell key={`${rowIndex}-${fieldName}`}>
-                                                    {getValue(renderField(row, fieldName))}
-                                                    {/* {renderField(row, fieldName)} */}
-                                                </StyledTableCell>
-                                            ))}
-
-                                            <StyledTableCell>
-
-                                                {!actionShow && <ButtonWithLoader
-                                                    itemId={row?.id}
-                                                    onClick={() => fetchData(row?.id, false, "view", rowIndex)}
-                                                    class_name="btn btn-success"
-                                                    text="View"
-                                                    span_class="glyphicon glyphicon-pencil"
-                                                    loader={loader}
-                                                    index={rowIndex}
-                                                // setLoader={setLoader}
-                                                // key = {employee?.id}
-                                                />
+                                                            </StyledTableCell>
+                                                        ))
+                                                    )
                                                 }
 
-                                            </StyledTableCell>
+                                                {Object.entries(fields).map(([fieldName, getValue]) => (
+                                                    <StyledTableCell key={`${rowIndex}-${fieldName}`}>
+                                                        {getValue(renderField(row, fieldName))}
+                                                        {/* {renderField(row, fieldName)} */}
+                                                    </StyledTableCell>
+                                                ))}
 
-                                        </TableRow>
-                                    ))}
+                                                <StyledTableCell style={ActionCell}>
 
-                                </>}
+                                                    {!actionShow && <ButtonWithLoader
+                                                        itemId={row?.id}
+                                                        onClick={() => fetchData(row?.id, false, "view", rowIndex)}
+                                                        class_name="btn btn-success"
+                                                        text="View"
+                                                        span_class="glyphicon glyphicon-pencil"
+                                                        loader={loader}
+                                                        index={rowIndex}
+                                                    // setLoader={setLoader}
+                                                    // key = {employee?.id}
+                                                    />
+                                                    }
+
+                                                </StyledTableCell>
+
+                                            </StyledTableRow>
+                                        ))}
+
+                                    </>}
 
                         </TableBody>
                     </Table>
@@ -301,7 +218,7 @@ export default function CustomTable(props) {
                         <thead>
                             <tr class="table-info">
 
-                                <th>Si.No</th>
+                                <th style={siCell}>Si.No</th>
 
                                 {headers?.map((header) => (
                                     <th key={header}>{header}</th>
@@ -314,78 +231,88 @@ export default function CustomTable(props) {
                         </thead>
                         <tbody>
 
-                            {(!data || data.length === 0) ?
-                                <>
-                                    <p>No data available</p>
-                                </>
-                                :
-                                <>
-                                    {data?.map((row, rowIndex) => (
-                                        <tr key={rowIndex}>
-                                            <td>{rowIndex + 1}</td>
-                                            {hide &&
-                                                (
-                                                    fieldsToShow?.map((field, fieldIndex) => (
-                                                        <td key={`${rowIndex}-${fieldIndex}`}>
-                                                            {/* Handle nested fields */}
-                                                            {field.includes('.') ?
+                            {
+                                (!data || lazyLoading) ? (
+                                    <TableRowsLoader rowsNum={10} cellNo={headers?.length + 2} />
+                                )
 
-                                                                nestedFieldExtractor(row, field)
-                                                                :
-                                                                isImageUrl(row[field])
-                                                                    ?
-                                                                    (<img src={row[field]} alt={row[field]} style={{ width: '100px', height: 'auto' }} />)
+                                    :
+                                    (data.length === 0) ?
+                                        <>
+                                            <TableRowsLoader rowsNum={10} cellNo={headers?.length + 2} />
+                                        </>
 
-                                                                    :
-                                                                    (
-                                                                        row[field]
-                                                                    )}
-                                                            {/* Render image if field is an image URL */}
 
-                                                            {renderField(row, field)}
+                                        :
+                                        <>
+                                            {data?.map((row, rowIndex) => (
+                                                <tr key={rowIndex}>
+                                                    <td style={siCell}>{rowIndex + 1}</td>
+                                                    {hide &&
+                                                        (
+                                                            fieldsToShow?.map((field, fieldIndex) => (
+                                                                <td key={`${rowIndex}-${fieldIndex}`}>
+                                                                    {/* Handle nested fields */}
+                                                                    {field.includes('.') ?
 
+                                                                        nestedFieldExtractor(row, field)
+                                                                        :
+                                                                        isImageUrl(row[field])
+                                                                            ?
+                                                                            (<img src={row[field]} alt={row[field]} style={{ width: '100px', height: 'auto' }} />)
+
+                                                                            :
+                                                                            (
+                                                                                row[field]
+                                                                            )}
+                                                                    {/* Render image if field is an image URL */}
+
+                                                                    {renderField(row, field)}
+
+                                                                </td>
+                                                            ))
+                                                        )
+                                                    }
+                                                    {Object.entries(fields).map(([fieldName, getValue]) => (
+                                                        <td key={`${rowIndex}-${fieldName}`}>
+                                                            {getValue(renderField(row, fieldName))}
+                                                            {/* {renderField(row, fieldName)} */}
                                                         </td>
-                                                    ))
-                                                )
-                                            }
-                                            {Object.entries(fields).map(([fieldName, getValue]) => (
-                                                <td key={`${rowIndex}-${fieldName}`}>
-                                                    {getValue(renderField(row, fieldName))}
-                                                    {/* {renderField(row, fieldName)} */}
-                                                </td>
-                                            ))}
+                                                    ))}
 
-                                            {!actionShow && <td>
+                                                    {!actionShow &&
+                                                        <td style={ActionCell}>
 
-                                                {/* <button class="buttontn btn-edit"  onClick={() => fetchData(row?.id, false, "view",rowIndex)}>
+                                                            {/* <button class="buttontn btn-edit"  onClick={() => fetchData(row?.id, false, "view",rowIndex)}>
                                                         {(loader ===rowIndex ) ? Config.loader : <span class="glyphicon glyphicon-pencil"></span>} View
                                                     </button> */}
-                                                <ButtonWithLoader
-                                                    itemId={row?.id}
-                                                    onClick={() => fetchData(row?.id, false, "view", rowIndex)}
-                                                    class_name="btn btn-success"
-                                                    text="View"
-                                                    span_class="glyphicon glyphicon-pencil"
-                                                    loader={loader}
-                                                    index={rowIndex}
-                                                // setLoader={setLoader}
-                                                // key = {employee?.id}
-                                                />
+                                                            <ButtonWithLoader
+                                                                itemId={row?.id}
+                                                                onClick={() => fetchData(row?.id, false, "view", rowIndex)}
+                                                                class_name="btn btn-success"
+                                                                text="View"
+                                                                span_class="glyphicon glyphicon-pencil"
+                                                                loader={loader}
+                                                                index={rowIndex}
+                                                            // setLoader={setLoader}
+                                                            // key = {employee?.id}
+                                                            />
 
-                                            </td>
-                                            }
-                                        </tr>
-                                    ))}
-                                </>
+                                                        </td>
+                                                    }
+                                                </tr>
+                                            ))}
+                                        </>
                             }
 
 
 
                         </tbody>
                     </table>
-                </div>
+                </div >
 
-            )}
+            )
+            }
 
 
             {/* </div> */}
@@ -446,7 +373,7 @@ const renderImageOrText = (value) => {
 
         }
         else {
-            return Config?.truncateText(value ? (value) : "", 15)
+            return Config?.truncateText(value ? (value) : "", 20)
         }
     }
 
@@ -460,3 +387,24 @@ const getImageName = (imageUrl) => {
     parts.pop(); // Remove the last part (extension)
     return parts.join('.'); // Join the remaining parts back together
 };
+
+
+import { Skeleton } from "@mui/material";
+
+const TableRowsLoader = ({ rowsNum, cellNo }) => {
+    return [...Array(rowsNum)].map((row, index) => (
+        <StyledTableRow key={index}>
+
+            {[...Array(cellNo)]?.map((e, index) => (
+                <StyledTableCell component="th" scope="row">
+                    <Skeleton animation="wave" variant="text" />
+                </StyledTableCell>
+            ))}
+        </StyledTableRow>
+    ));
+};
+
+
+
+
+export default CustomTable;

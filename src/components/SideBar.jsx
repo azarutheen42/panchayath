@@ -417,7 +417,7 @@ function SideBar(props) {
                         <ListItemIcon>
                             <PeopleIcon />
                         </ListItemIcon>
-                        <ListItemText primary="Permanent Employee" />
+                        <ListItemText primary="Permanent Employees" />
                     </ListItemButton>
 
 

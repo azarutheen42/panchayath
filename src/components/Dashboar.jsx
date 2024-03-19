@@ -41,6 +41,7 @@ import Config from "../Config"
 import UserContext from "../Context"
 import CustomTable from "./Table"
 import Activity from './Activities';
+import MyTable from './Lazy LoadingTable';
 
 import Copyright from './copywright';
 
@@ -130,6 +131,7 @@ export default function Dashboard() {
                                 <Content
 
                                 />
+                                {/* <MyTable/> */}
                         </div>
 
 
