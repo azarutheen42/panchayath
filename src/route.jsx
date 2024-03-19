@@ -7,6 +7,7 @@ import PasswordReset from "./auth/password";
 import Config from "./Config";
 import { useEffect,useState } from "react";
 import Dashboard from "./dashboard/Dashboard"
+import { ToastContainer } from "react-toastify";
 
 
 
@@ -17,6 +18,21 @@ function Routers() {
 
     return (
         <>
+
+
+<ToastContainer
+                position="top-center"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+            // transition: Bounce
+            />
 
             {! Config?.userState  ?
 
