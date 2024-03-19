@@ -308,6 +308,17 @@ function SideBar(props) {
     });
 
     const handleClick = (e) => {
+        setShow(
+            {
+                "collector": false,
+                "complaint": false,
+                "activity": false,
+                "reports": false,
+                "masters": false,
+                "menu": false,
+        
+            }
+        )
         console.log(e)
         setShow((prevstate) => {
             return {

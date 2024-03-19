@@ -14,7 +14,7 @@ import UserReducer from "./features/UserSlice.jsx"
 import RequestTypeReducer from "./features/RequestType.jsx"
 import ComplaintTypeReducer from "./features/ComplaintType.jsx"
 import { Provider } from 'react-redux';
-import App  from "./App.jsx"
+import App  from "./App1.jsx"
 
 
 

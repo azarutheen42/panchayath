@@ -3,9 +3,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./auth/login";
 import SignUp from "./auth/Signup";
 import PasswordReset from "./auth/password";
-import Dashboard from "./components/Dashboar";
+// import Dashboard from "./components/Dashboar";
 import Config from "./Config";
 import { useEffect,useState } from "react";
+import Dashboard from "./dashboard/Dashboard"
 
 
 
