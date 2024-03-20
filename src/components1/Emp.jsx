@@ -12,32 +12,23 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import Typography from '@mui/material/Typography';
+
 import EditIcon from '@mui/icons-material/Edit';
 import CustomTable from "./Table";
 import AlertDialog from "./Alert"
 
 
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
+// import Container from '@mui/material/Container';
+// import Grid from '@mui/material/Grid';
+// import Paper from '@mui/material/Paper';
 import AddIcon from '@mui/icons-material/Add';
+import {Typography,Container,Grid,Paper} from '@mui/material';
 
 
 
-const style = {
-    // position: 'absolute',
-    // top: '50%',
-    // left: '50%',
-    // transform: 'translate(-50%, -50%)',
-    // width: 600,
-    // height: 600,
-    // // bgcolor: 'background.paper',
-    // // border: '2px solid #000',
-    // boxShadow: 24,
-    // p: 4,
+const style={
 
-};
+}
 
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -56,6 +47,9 @@ function Employee(props) {
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
     };
+
+
+    
 
     const handleChangeRowsPerPage = (event) => {
         setRowsPerPage(+event.target.value);
@@ -449,10 +443,10 @@ function Employee(props) {
 
                 <>
 
-                    <Grid item xs={6}>
+                    <Grid item  xs={12} sm={6}>
                         <Typography variant="h6">Permanent Employee Details</Typography>
                     </Grid>
-                    <Grid item xs={6} display="flex" justifyContent="flex-end">
+                    <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
                         <IconButton color="primary" aria-label="add">
                             <AddButton
                                 onClick={() => setisAdd(true)}
@@ -461,8 +455,9 @@ function Employee(props) {
                         </IconButton>
                     </Grid>
 
-                    
-                     
+
+
+
                     <Grid item xs={12}>
                         <CustomTable
                             headers={headersToShow}
@@ -475,181 +470,10 @@ function Employee(props) {
                         />
                     </Grid>
 
-
-
-
-                    {/* <div class="content">
-                        <div class="page-header">
-                            <div class="page-title">
-                                <h4>Permanent Employee Details</h4>
-                            </div>
-                            <div class="page-btn">
-                                <AddButton
-                                    onClick={() => setisAdd(true)}
-                                    text={" Add Employee"}
-                                />
-
-                            </div>
-                        </div>
-
-
-                        <CustomTable
-                            headers={headersToShow}
-                            data={tableData}
-                            fieldsToShow={fieldsToShow}
-                            fields={fields}
-                            getInstanceData={getEmployee}
-                            loader={loader}
-                            setLoader={setLoader}
-                        />
-
-
-
-                    </div> */}
-
-
-
-
                 </>
 
 
             )}
-
-            {props?.path === "contract" && (
-
-
-
-                <div class="content">
-                    <div class="page-header">
-                        <div class="page-title">
-                            <h4>Contract Employee Details</h4>
-                        </div>
-                        <div class="page-btn">
-                            <button class="btn btn-primary" data-toggle="modal" data-target="#myModal">
-                                <span class="glyphicon glyphicon-user"></span> Add Employee
-                            </button>
-                            <div id="myModal" class="modal fade" role="dialog">
-                                <div class="modal-dialog modal-lg modal-dialog-centered">
-
-                                    <div class="modal-content">
-
-                                        {/* <form action="" method="post" id=""> */}
-                                        <h3
-                                            style={{ marginLeft: 20 }}
-                                        >Contract Employee Details</h3>
-                                        <div class="modal-body">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <div class="row">
-
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Name : <span class="form-required">*</span></label>
-                                                                <input type="text" class="form-control" name="category_name" required />
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Role : <span class="form-required">*</span></label>
-                                                                <select name="" id="" class="form-control">
-                                                                    <option value="">Engineer</option>
-                                                                    <option value="">Supervisor</option>
-                                                                    <option value="">Member</option>
-                                                                </select>
-
-                                                                <input type="text" class="form-control" name="category_name" required />
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Contact No : <span class="form-required">*</span></label>
-                                                                <input type="text" class="form-control" name="category_name" required />
-                                                            </div>
-                                                        </div>
-
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-success">Sign up</button>
-                                            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                                        </div>
-                                        {/* </form> */}
-                                    </div>
-                                </div>
-                            </div>
-
-
-
-
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-body">
-
-                            <div class="table-responsive">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr class="table-info">
-                                            <th>S.No</th>
-                                            <th>Name</th>
-                                            <th>Role</th>
-                                            <th>Contact No</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>1.</td>
-                                            <td>jeeva</td>
-                                            <td>Worker</td>
-                                            <td>123456789</td>
-
-                                            <td>
-                                                <button class="btn btn-success">
-                                                    <span class="glyphicon glyphicon-pencil"></span> Edit
-                                                </button>
-                                                <button class="btn btn-info">
-                                                    <span class="glyphicon glyphicon-eye-open"></span> View
-                                                </button>
-                                                <button class="btn btn-danger">
-                                                    <span class="glyphicon glyphicon-trash"></span> Delete
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>1.</td>
-                                            <td>Siva</td>
-                                            <td>Worker</td>
-                                            <td>123456789</td>
-
-                                            <td>
-                                                <button class="btn btn-success">
-                                                    <span class="glyphicon glyphicon-pencil"></span> Edit
-                                                </button>
-                                                <button class="btn btn-info">
-                                                    <span class="glyphicon glyphicon-eye-open"></span> View
-                                                </button>
-                                                <button class="btn btn-danger">
-                                                    <span class="glyphicon glyphicon-trash"></span> Delete
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <br />
-                        </div>
-                    </div>
-                </div>
-            )}
-
-
-
-
-
-
 
         </>
     )

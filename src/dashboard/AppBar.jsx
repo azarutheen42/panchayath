@@ -15,6 +15,10 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import MailIcon from '@mui/icons-material/Mail';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import MoreIcon from '@mui/icons-material/MoreVert';
+import UserContext from "../Context"
+import { useContext, useEffect } from "react";
+import Config from '../Config';
+import { useNavigate } from "react-router-dom";
 
 
 import Container from '@mui/material/Container';
@@ -69,6 +73,12 @@ const settings = ['Profile', 'Logout'];
 export default function CustomAppBar(props) {
 
     const { position, open, toggleDrawer } = props
+
+
+    const user = useContext(UserContext);
+    const navigate = useNavigate()
+
+
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
 
@@ -180,6 +190,7 @@ export default function CustomAppBar(props) {
                     color="inherit"
                 >
                     <AccountCircle />
+
                 </IconButton>
                 <p>Profile</p>
             </MenuItem>
@@ -244,9 +255,10 @@ export default function CustomAppBar(props) {
                 <Box sx={{ flexGrow: 0 }}>
                     <Tooltip title="Open settings">
                         <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                            <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                            <Avatar alt="Remy Sharp" src={user?.employee_info?.image ? (Config.MEDIA_URL + user?.employee_info?.image) : Config?.avatar} />
                         </IconButton>
                     </Tooltip>
+
                     <Menu
                         sx={{ mt: '45px' }}
                         id="menu-appbar"
@@ -263,14 +275,28 @@ export default function CustomAppBar(props) {
                         open={Boolean(anchorElUser)}
                         onClose={handleCloseUserMenu}
                     >
-                        {settings.map((setting) => (
-                            <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                                <Typography textAlign="center">{setting}</Typography>
-                            </MenuItem>
-                        ))}
-                    </Menu>
-                </Box>
 
+                        <MenuItem onClick={handleCloseUserMenu}>
+                            <Typography textAlign="center">Profile</Typography>
+                        </MenuItem>
+
+                        <MenuItem
+
+                            onClick={() => {
+                                document.cookie = "access" + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+                                navigate("/login")
+                            }
+                            }
+                        >
+                            <Typography textAlign="center">Logout</Typography>
+                        </MenuItem>
+                    </Menu>
+
+                </Box>
+                {/* <Box  sx={{ paddingLeft:1 }}  >
+                    <Typography >{user?.name}</Typography>
+
+                </Box> */}
 
 
 

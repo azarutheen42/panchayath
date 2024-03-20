@@ -12,17 +12,13 @@ import IconButton from '@mui/material/IconButton';
 import Badge from '@mui/material/Badge';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
-import Link from '@mui/material/Link';
-import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import NotificationsIcon from '@mui/icons-material/Notifications';
+import { Paper } from '@mui/material';
 
 
 
 
 import OverView from "./OverView"
-
+import SideBar from "./SideBar"
 import Header from "./Header"
 import { useEffect, useState } from "react"
 // import Config from "../auth/login"
@@ -30,12 +26,12 @@ import Garbage from "./Garbage"
 import Complaint from "./Complaint"
 import Employee from "./Emp"
 import Attendance from "./Attendence"
-import Collectors from "./Collector1"
+import Collectors from "./Collector"
 import UserRegister from "./Register"
 import Requests from "./Requests"
 import Reports from "./Reports"
 import Settings from "./Settings"
-import Masters from "./Master1"
+import Masters from "./Master"
 // import Masters from "./Masters"
 import Qrhandler from "./QR"
 import { useLocation } from "react-router-dom"
@@ -55,74 +51,147 @@ import Copyright from './copywright';
 
 
 
-export default function Content() {
+// function Copyright(props) {
+//   return (
+//     <Typography variant="body2" color="text.secondary" align="center" {...props}>
+//       {'Copyright © '}
+//       <Link color="inherit" href="https://mui.com/">
+//         Your Website
+//       </Link>{' '}
+//       {new Date().getFullYear()}
+//       {'.'}
+//     </Typography>
+//   );
+// }
+
+const drawerWidth = 240;
 
 
+// TODO remove, this demo shouldn't need to reset the theme.
+const defaultTheme = createTheme();
 
+export default function Dashboard() {
+    const [open, setOpen] = React.useState(true);
+    const toggleDrawer = () => {
+        setOpen(!open);
+    };
 
     return (
+
+
         <>
-            <Box
-                component="main"
-                sx={{
-                    backgroundColor: (theme) =>
-                      theme.palette.mode === 'light'
-                        ? theme.palette.grey[100]
-                        : theme.palette.grey[900],
-                    flexGrow: 1,
-                    height: '100vh',
-                    overflow: 'auto',
-
-                    // backgroundColor: "white"s
-                }}
-            >
-                <Toolbar />
 
 
-                <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
 
-                    <Paper
-                        sx={{ p: 2, flexDirection: 'column' }}
+
+
+            <ThemeProvider theme={defaultTheme}>
+                <Box sx={{ display: 'flex' }}>
+                    <CssBaseline />
+
+
+
+                    <Header
+                        open={open}
+                        setOpen={setOpen}
+                        toggleDrawer={toggleDrawer}
+                        drawerWidth={drawerWidth}
+                    />
+
+                    <SideBar
+                        open={open}
+                        setOpen={setOpen}
+                        toggleDrawer={toggleDrawer}
+                        drawerWidth={drawerWidth}
+                    />
+
+
+
+
+                    <Box
+                        sx={{ width: '100%', overflow: 'hidden' }}
+                    // component="main"
+                    // style={{backgroundColor:"grey"}}
+                    // sx={{
+                    //     backgroundColor: (theme) =>
+                    //         theme.palette.mode === 'light'
+                    //             ? theme.palette.grey[100]
+                    //             : theme.palette.grey[900],
+                    //     flexGrow: 1,
+                    //     height: '100vh',
+                    //     overflow: 'auto',
+                    // }}
                     >
-                          <Grid container spacing={2} >
 
-                        <GridContent />
 
-                        </Grid>
+                        <Toolbar />
 
-                    </Paper>
+                        <div style={{ margin: 10,padding:20}} className='container   bg-white'>
+
+                                <Content
+
+                                />
+                                {/* <MyTable/> */}
+                        </div>
+
+
+
+
+
+
+
+                        {/* <Container
+                            //  maxWidth="lg"
+                            sx={{ mt: 4, mb: 4 }}
+
+
+
+                        >
+
+                            <Grid container spacing={3}>
+
+                                <Grid item xs={12} md={12} lg={12}>
+
+                                    <Content
+
+                                    />
+                                </Grid>
+
+                                <Grid item xs={12}>
+                                    <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+
+                                    </Paper>
+                                </Grid>
+
+                            </Grid>
+
+
+
+                        </Container> */}
+
+
+                    </Box>
+
 
                     {/* <Copyright sx={{ pt: 4 }} /> */}
-                </Container>
-            </Box>
 
+
+                </Box>
+            </ThemeProvider>
 
         </>
-    )
+    );
 }
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-function GridContent(props) {
+function Content(props) {
 
     const userName = useContext(UserContext);
 
-
+ 
 
     const [path, setpath] = useState();
 
@@ -176,8 +245,8 @@ function GridContent(props) {
             // />
 
             return <Activity
-                path={path}
-            />
+            path={path}
+        />
 
         case "request":
             return <Requests

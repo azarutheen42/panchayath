@@ -21,7 +21,7 @@ import SideBar from './listItems';
 import Chart from './Chart';
 import Deposits from './Deposits';
 import Orders from './Orders';
-import Content from "../components/Content"
+import Content from "../components1/Content"
 import CustomAppBar from './AppBar';
 
 
@@ -99,7 +99,7 @@ export default function Dashboard() {
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
         {/* headerjsx */}
-        <AppBar position="absolute" open={open}>
+        <AppBar position="absolute" open={open} style={{ backgroundColor: "white" }}>
 
           {/* <Toolbar
             sx={{
@@ -177,6 +177,7 @@ export default function Dashboard() {
 
 
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+
             <Grid container spacing={3}>
               Chart
               <Grid item xs={12} md={8} lg={9}>
@@ -205,12 +206,15 @@ export default function Dashboard() {
                 </Paper>
               </Grid>
               Recent Orders
+
               <Grid item xs={12}>
                 <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
                   <Orders />
                 </Paper>
               </Grid>
             </Grid>
+
+
             <Copyright sx={{ pt: 4 }} />
           </Container>
 

@@ -1,6 +1,7 @@
 
 import Cookies from "js-cookie";
 import { RotatingLines } from 'react-loader-spinner'
+import {useMediaQuery } from '@mui/material'
 
 export let userState = JSON.parse(
     typeof Cookies.get(import.meta.env.VITE_APP_USER_COOKIE_KEY_NAME) !=
@@ -32,7 +33,9 @@ const Config = {
             window.location.href = import.meta.env.VITE_APP_LOGIN_URL;
         }, 200);
     },
-
+    isMobile :()=>{
+     return useMediaQuery('(max-width:600px)');
+    } ,
     fileType: (e) => {
         const supported = ["jpg", "png"]
         let ext = e.split(".").pop()
