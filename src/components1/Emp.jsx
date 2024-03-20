@@ -23,6 +23,8 @@ import AlertDialog from "./Alert"
 // import Paper from '@mui/material/Paper';
 import AddIcon from '@mui/icons-material/Add';
 import { Typography, Container, Grid, Paper } from '@mui/material';
+import  SelectDropdown from "./Dropdown"
+import SelectDropDown from"../utils/SelectDropDown"
 
 import FormModal from "../utils/FormModal";
 
@@ -474,7 +476,7 @@ function Employee(props) {
                                 updateInstance={updateEmployee}
                                 deleteInstance={deleteEmployee}
                                 handleChange={handleChange}
-
+                               
 
 
                             />}
@@ -814,6 +816,8 @@ export default Employee;
 import InputBox from "../utils/NumberInput";
 import { TextField } from '@mui/material';
 import TextInput from "../utils/TextInput";
+import FileUploadComponent from "../utils/FileInput"
+import BasicDatePicker from "../utils/DatePicker";
 
 
 const Child = (props) => {
@@ -846,7 +850,7 @@ const Child = (props) => {
 
         <>
 
-            <Grid container spacing={2}>
+            <Grid container spacing={5}>
                 {/* First Name */}
                 <Grid item xs={12} md={6} sm={6}>
                     <Grid >
@@ -870,16 +874,14 @@ const Child = (props) => {
                 <Grid item xs={12} md={6} sm={6}>
 
 
-                    <TextInput
-
-                        label="Phone Number"
-                        placeholder="Name"
-                        name="phone_number"
-                        value={instanceData?.phone_number}
-                        required={true}
-                        handleChange={(e) => handleChange(e, "phone_number")}
+                    <SelectDropDown
+                        list={roles}
+                        onchange={handleChange}
+                        selected={instanceData?.role}
+                        showname={"name"}
+                        name={"role"}
                         disabled={!isedit && !isAdd}
-
+                        error={error}
                     />
 
 
@@ -898,26 +900,22 @@ const Child = (props) => {
                         disabled={!isedit && !isAdd}
 
                     />
-
-
                 </Grid>
+
                 <Grid item xs={12} md={6} sm={6}>
-
-
-                    <TextInput
-
-                        label="Phone Number"
-                        placeholder="Name"
-                        name="phone_number"
-                        value={instanceData?.phone_number}
-                        required={true}
-                        handleChange={(e) => handleChange(e, "phone_number")}
-                        disabled={!isedit && !isAdd}
-
-                    />
+                   
+                <FileUploadComponent />
 
 
                 </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                   
+                  <BasicDatePicker/>
+   
+   
+                   </Grid>
 
 
 
@@ -925,99 +923,7 @@ const Child = (props) => {
             </Grid>
 
 
-            <div class="card-body">
-
-                <div class="row">
-                    {/* <div class="col-lg-6 col-sm-12 col-12">
-                        <div class="form-group">
-                            <label
-                                class="form-label"
-                            >Name : <span
-                                class="form-required"
-                            >*</span></label>
-                            <input type="text" class="form-control" name="category_name"
-                                onChange={(e) => handleChange(e, "name")}
-                                defaultValue={instanceData?.name || ""}
-                                disabled={!isedit && !isAdd}
-                                required />
-
-                            {(error && !instanceData?.name) && (
-                                <span className="req-text">This field is required</span>
-                            )}
-
-                        </div>
-                    </div> */}
-                    <div class="col-lg-6 col-sm-12 col-12">
-                        <div class="form-group">
-                            <label class="form-label">Role : <span class="form-required">*</span></label>
-                            <select name="" id="" class="form-control"
-                                value={instanceData?.role}
-                                // defaultValue={instanceData?.role }
-                                disabled={!isedit && !isAdd}
-                                onChange={(e) => handleChange(e, "role")}>
-
-                                <option disabled selected value >-----------</option>
-
-                                {roles?.map((e, index) => (
-                                    <option value={e?.id}>{e.name}</option>
-                                )
-                                )}
-                            </select>
-
-                            {(error && !instanceData?.role) && (
-                                <span className="req-text">This field is required</span>
-                            )}
-                        </div>
-                    </div>
-
-                    <div class="col-lg-6 col-sm-12 col-12">
-                        <div class="form-group">
-                            <label class="form-label">Contact No : <span class="form-required">*</span></label>
-                            <input type="Number" class="form-control" name="category_name" maxLength="3"
-                                onChange={(e) => handleChange(e, "phone_number")}
-                                defaultValue={instanceData?.phone_number || ""}
-                                disabled={!isedit && !isAdd}
-                                required />
-
-                            {(error && !instanceData?.phone_number) && (
-                                <span className="req-text">This field is required</span>
-                            )}
-                        </div>
-                    </div>
-
-
-                    <div class="col-lg-6 col-sm-12 col-12">
-                        <div class="form-group">
-                            <label class="form-label">Image :
-                                <span class="form-required">*</span></label>
-                            <input type="file" class="form-control"
-                                defaultValue={image || ""}
-                                disabled={!isedit && !isAdd}
-                                onChange={(e) => handleChange(e, "image")}
-
-                            />
-                        </div>
-                    </div>
-
-                    <div class="col-lg-6 col-sm-12 col-12">
-                        <div class="form-group">
-                            <label class="form-label">Period of Time : <span class="form-required">*</span></label>
-                            <input type="Date" class="form-control" name="category_name"
-                                onChange={(e) => handleChange(e, "start_date")}
-                                defaultValue={instanceData?.start_date || ""}
-                                disabled={!isedit && !isAdd}
-                                required />
-
-                            {(error && !instanceData?.start_date) && (
-                                <span className="req-text">This field is required</span>
-                            )}
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
-
+      
 
         </>
 

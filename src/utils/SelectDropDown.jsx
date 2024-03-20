@@ -6,44 +6,55 @@ import Select from '@mui/material/Select';
 
 export default function SelectDropDown(props) {
 
-   const {value,setValue,lists,label,handleChange,empstatus,selectvalue}=props 
+  const { list, onchange, selected, name, showname, disabled, error, report, label } = props
 
 
   // const handleChange = (event) => {
   //   setValue(event.target.value);
   // };
 
-  console.log(value)
+
   return (
     <>
-    <InputLabel id="demo-select-small-label " className='input-label'>{label}</InputLabel>
-   
-    <FormControl fullWidth size="small">
-    {/* <InputLabel id="demo-select-small-label">select {label}</InputLabel> */}
-   
-      <Select
-        labelId="demo-select-small-label"
-        id="demo-select-small"
-        defaultValue={value}
-        value={value}
-        // label={label}
-        onChange={handleChange}
-        name={label}
+      <InputLabel id="demo-select-small-label " className='input-label'>{label}</InputLabel>
+
+      <FormControl fullWidth
+      // size="small"
       >
-        <MenuItem value="">
-          <em>None</em>
-        </MenuItem>
+        {/* <InputLabel id="demo-select-small-label">select {label}</InputLabel> */}
 
-        {empstatus?.map((each,index)=>
-           <MenuItem key={index} value={each?.id}>{each?.profession}</MenuItem>  
-        )}
+        <Select
+          // labelId="demo-select-small-label"
+          // id="demo-select-small"
+          defaultValue={selected}
+          // value={value}
+          name={name}
+          // className="custom-dropdown"
+          required
+          value={selected}
+          onChange={onchange}
+          disabled={disabled}
+        >
 
-        {lists?.map((each,index)=>
-           <MenuItem key={index} value={each?.id}>{each?.name}</MenuItem>  
-        )}
-       
-      </Select>
-    </FormControl>
+
+
+          <MenuItem value="">
+            <em>None</em>
+          </MenuItem>
+
+          {list?.map((each, index) =>
+            <MenuItem key={index} value={each?.id}>{each[showname]}</MenuItem>
+          )}
+
+          {(!selected && error) && (
+            <span className="req-text">This field is required</span>
+          )}
+
+
+        </Select>
+      </FormControl>
     </>
   );
 }
+
+

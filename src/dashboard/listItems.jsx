@@ -145,15 +145,15 @@ export default function SideBar(props) {
     <>
 
 
-      <Drawer variant="permanent" open={open} 
-      
-      // my custom 
-      sx={{
-        height: '100vh',
-        overflow: 'auto',
-        backgroundColor:"white"
-      }}
-      
+      <Drawer variant="permanent" open={open}
+
+        // my custom 
+        sx={{
+          height: '100vh',
+          overflow: 'auto',
+          backgroundColor: "white"
+        }}
+
       >
         <Toolbar
           sx={{
