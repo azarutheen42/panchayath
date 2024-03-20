@@ -212,7 +212,7 @@ export default function CustomAppBar(props) {
                         ...(open && { display: 'none' }),
                     }}
                 >
-                    <MenuIcon />
+                    <MenuIcon  sx={{color:"grey"}} />
                 </IconButton>
 
 

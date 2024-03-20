@@ -78,10 +78,10 @@ export default function Content() {
                 <Toolbar />
 
 
-                <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-
+                <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>   
+                    {/* widthg either "lg" or "xl" */}
                     <Paper
-                        sx={{ p: 2, flexDirection: 'column' }}
+                        sx={{ p: 5, flexDirection: 'column' }}
                     >
                           <Grid container spacing={2} >
 

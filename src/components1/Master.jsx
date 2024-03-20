@@ -3724,6 +3724,8 @@ function HouseDialogs(props) {
                 onClose={handleClose}
                 aria-labelledby="customized-dialog-title"
                 open={open}
+                fullWidth
+                maxWidth={"lg"}
 
             >
                 <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title" >

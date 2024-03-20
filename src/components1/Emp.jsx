@@ -22,22 +22,24 @@ import AlertDialog from "./Alert"
 // import Grid from '@mui/material/Grid';
 // import Paper from '@mui/material/Paper';
 import AddIcon from '@mui/icons-material/Add';
-import {Typography,Container,Grid,Paper} from '@mui/material';
+import { Typography, Container, Grid, Paper } from '@mui/material';
+
+import FormModal from "../utils/FormModal";
 
 
 
-const style={
+const style = {
 
 }
 
 
-const Item = styled(Paper)(({ theme }) => ({
-    backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-    ...theme.typography.body2,
-    padding: theme.spacing(1),
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-}));
+// const Item = styled(Paper)(({ theme }) => ({
+//     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+//     ...theme.typography.body2,
+//     padding: theme.spacing(1),
+//     textAlign: 'center',
+//     color: theme.palette.text.secondary,
+// }));
 
 
 function Employee(props) {
@@ -49,7 +51,7 @@ function Employee(props) {
     };
 
 
-    
+
 
     const handleChangeRowsPerPage = (event) => {
         setRowsPerPage(+event.target.value);
@@ -218,9 +220,7 @@ function Employee(props) {
                         return [...prevstate, response?.data]
                     })
 
-                    $('#myModal').hide();
-                    $('.modal-backdrop').hide();
-                    setEmployee()
+                    setEmployee();
                     handleClose();
 
                 }
@@ -405,8 +405,11 @@ function Employee(props) {
 
             {
                 (isOpen || isAdd) && (
+                    <>
 
-                    <CustomizedDialogs
+
+
+                        {/* <CustomizedDialogs
                         lazyLoading={lazyLoading}
                         setIsOpen={setIsOpen}
                         isAdd={isAdd}
@@ -430,7 +433,61 @@ function Employee(props) {
                     // image={image}
 
 
-                    />
+                    /> */}
+
+                        <FormModal
+                            lazyLoading={lazyLoading}
+                            setIsOpen={setIsOpen}
+                            isAdd={isAdd}
+                            error={error}
+
+                            getRoleLabel={getRoleLabel}
+                            roles={roles}
+
+                            setListData={setPermEmployee}
+                            instanceData={employee}
+                            setInstanceData={setEmployee}
+                            handleClose={handleClose}
+
+                            // functions
+                            addInstance={addEmployee}
+                            updateInstance={updateEmployee}
+                            deleteInstance={deleteEmployee}
+                            handleChange={handleChange}
+
+                            child={<Child
+                                lazyLoading={lazyLoading}
+                                setIsOpen={setIsOpen}
+                                isAdd={isAdd}
+                                error={error}
+
+                                getRoleLabel={getRoleLabel}
+                                roles={roles}
+
+                                setListData={setPermEmployee}
+                                instanceData={employee}
+                                setInstanceData={setEmployee}
+                                handleClose={handleClose}
+
+                                // functions
+                                addInstance={addEmployee}
+                                updateInstance={updateEmployee}
+                                deleteInstance={deleteEmployee}
+                                handleChange={handleChange}
+
+
+
+                            />}
+
+                        // setImage={setImage}
+                        // image={image}
+
+
+                        />
+
+
+
+                    </>
                 )
             }
 
@@ -443,7 +500,7 @@ function Employee(props) {
 
                 <>
 
-                    <Grid item  xs={12} sm={6}>
+                    <Grid item xs={12} sm={6}>
                         <Typography variant="h6">Permanent Employee Details</Typography>
                     </Grid>
                     <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
@@ -534,7 +591,7 @@ function CustomizedDialogs(props) {
 
 
 
-            <BootstrapDialog
+            <Dialog
                 onClose={handleClose}
                 aria-labelledby="customized-dialog-title"
                 open={open}
@@ -740,7 +797,7 @@ function CustomizedDialogs(props) {
                         </div>
                     </div>
                 </DialogActions>
-            </BootstrapDialog>
+            </Dialog>
         </React.Fragment>
     );
 }
@@ -752,3 +809,220 @@ function CustomizedDialogs(props) {
 
 
 export default Employee;
+
+
+import InputBox from "../utils/NumberInput";
+import { TextField } from '@mui/material';
+import TextInput from "../utils/TextInput";
+
+
+const Child = (props) => {
+
+    const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader,
+        deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, districtList, panchayatList, streetList, buildingType, child,
+        // setError, setImage, image 
+    } = props
+
+
+
+    const [isedit, setIsedit] = useState(false);
+    const [isdelete, setisDelete] = useState(false);
+    const [image, setImage] = useState();
+
+    const [loading, setLoading] = useState(false);
+
+
+    const handleClickOpen = () => {
+        setisDelete(true);
+    };
+
+    const handleClickClose = () => {
+        setOpen(false);
+    };
+
+
+    return (
+
+
+        <>
+
+            <Grid container spacing={2}>
+                {/* First Name */}
+                <Grid item xs={12} md={6} sm={6}>
+                    <Grid >
+
+                    </Grid>
+                    <TextInput
+
+                        label="name"
+                        placeholder="Name"
+                        name="name"
+                        value={instanceData?.name}
+                        required={true}
+                        handleChange={(e) => handleChange(e, "name")}
+                        disabled={!isedit && !isAdd}
+
+                    />
+
+
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+
+
+                    <TextInput
+
+                        label="Phone Number"
+                        placeholder="Name"
+                        name="phone_number"
+                        value={instanceData?.phone_number}
+                        required={true}
+                        handleChange={(e) => handleChange(e, "phone_number")}
+                        disabled={!isedit && !isAdd}
+
+                    />
+
+
+                </Grid>
+                <Grid item xs={12} md={6} sm={6}>
+
+
+                    <TextInput
+
+                        label="Phone Number"
+                        placeholder="Name"
+                        name="phone_number"
+                        value={instanceData?.phone_number}
+                        required={true}
+                        handleChange={(e) => handleChange(e, "phone_number")}
+                        disabled={!isedit && !isAdd}
+
+                    />
+
+
+                </Grid>
+                <Grid item xs={12} md={6} sm={6}>
+
+
+                    <TextInput
+
+                        label="Phone Number"
+                        placeholder="Name"
+                        name="phone_number"
+                        value={instanceData?.phone_number}
+                        required={true}
+                        handleChange={(e) => handleChange(e, "phone_number")}
+                        disabled={!isedit && !isAdd}
+
+                    />
+
+
+                </Grid>
+
+
+
+
+            </Grid>
+
+
+            <div class="card-body">
+
+                <div class="row">
+                    {/* <div class="col-lg-6 col-sm-12 col-12">
+                        <div class="form-group">
+                            <label
+                                class="form-label"
+                            >Name : <span
+                                class="form-required"
+                            >*</span></label>
+                            <input type="text" class="form-control" name="category_name"
+                                onChange={(e) => handleChange(e, "name")}
+                                defaultValue={instanceData?.name || ""}
+                                disabled={!isedit && !isAdd}
+                                required />
+
+                            {(error && !instanceData?.name) && (
+                                <span className="req-text">This field is required</span>
+                            )}
+
+                        </div>
+                    </div> */}
+                    <div class="col-lg-6 col-sm-12 col-12">
+                        <div class="form-group">
+                            <label class="form-label">Role : <span class="form-required">*</span></label>
+                            <select name="" id="" class="form-control"
+                                value={instanceData?.role}
+                                // defaultValue={instanceData?.role }
+                                disabled={!isedit && !isAdd}
+                                onChange={(e) => handleChange(e, "role")}>
+
+                                <option disabled selected value >-----------</option>
+
+                                {roles?.map((e, index) => (
+                                    <option value={e?.id}>{e.name}</option>
+                                )
+                                )}
+                            </select>
+
+                            {(error && !instanceData?.role) && (
+                                <span className="req-text">This field is required</span>
+                            )}
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 col-sm-12 col-12">
+                        <div class="form-group">
+                            <label class="form-label">Contact No : <span class="form-required">*</span></label>
+                            <input type="Number" class="form-control" name="category_name" maxLength="3"
+                                onChange={(e) => handleChange(e, "phone_number")}
+                                defaultValue={instanceData?.phone_number || ""}
+                                disabled={!isedit && !isAdd}
+                                required />
+
+                            {(error && !instanceData?.phone_number) && (
+                                <span className="req-text">This field is required</span>
+                            )}
+                        </div>
+                    </div>
+
+
+                    <div class="col-lg-6 col-sm-12 col-12">
+                        <div class="form-group">
+                            <label class="form-label">Image :
+                                <span class="form-required">*</span></label>
+                            <input type="file" class="form-control"
+                                defaultValue={image || ""}
+                                disabled={!isedit && !isAdd}
+                                onChange={(e) => handleChange(e, "image")}
+
+                            />
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 col-sm-12 col-12">
+                        <div class="form-group">
+                            <label class="form-label">Period of Time : <span class="form-required">*</span></label>
+                            <input type="Date" class="form-control" name="category_name"
+                                onChange={(e) => handleChange(e, "start_date")}
+                                defaultValue={instanceData?.start_date || ""}
+                                disabled={!isedit && !isAdd}
+                                required />
+
+                            {(error && !instanceData?.start_date) && (
+                                <span className="req-text">This field is required</span>
+                            )}
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </>
+
+    )
+}
+
+
+
