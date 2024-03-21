@@ -13,7 +13,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import Typography from '@mui/material/Typography';
+
 import EditIcon from '@mui/icons-material/Edit';
 import CustomTable from "./Table";
 import AlertDialog from "./Alert";
@@ -27,12 +27,16 @@ import { setWard } from "../features/WardSlice"
 import { setStreet } from "../features/StreetSlice";
 import MultipleSelect from "./MultiDropdown";
 
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
+
+
+
 import AddIcon from '@mui/icons-material/Add';
-
-
+import { Typography, Container, Grid, Paper } from '@mui/material';
+import SelectDropDown from "../utils/SelectDropDown"
+import FormModal from "../utils/FormModal";
+import TextInput from "../utils/TextInput";
+import FileUploadComponent from "../utils/FileInput"
+import BasicDatePicker from "../utils/DatePicker";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -89,40 +93,46 @@ function Coll(props) {
         "house": <HouseCollector
             type="house"
             modalHeader="House Collector"
-            headersToShow={["Image", "Name", "Contact No", "Ward No"]}
+            headersToShow={["Image", "Name","Employee Id", "Contact No", "Ward No"]}
             fields={{
                 'employee.image': (value) => value,
                 'employee.name': (value) => value,
+                'employee.emp_id': (value) => value,
                 'employee.phone_number': (value) => value,
                 'ward': (value) => getWardLabel(value),
             }}
+            path={path}
         // role={collector.find(item => item.name.toLowerCase() === modalHeader.toLowerCase())}
 
         />,
         "street": <HouseCollector
             type="street"
             modalHeader="Street Collector"
-            headersToShow={["Image", "Name", "Contact No", "Ward No", "Tractor No"]}
+            headersToShow={["Image", "Name","Employee Id", "Contact No", "Ward No", "Tractor No"]}
             fields={{
                 'employee.image': (value) => value,
                 'employee.name': (value) => value,
+                'employee.emp_id': (value) => value,
                 'employee.phone_number': (value) => value,
                 'ward': (value) => getWardLabel(value),
                 "tractor_no": (value) => value
             }}
+            path={path}
         // role={collector[1]}
 
         />,
         "shop": <HouseCollector
             type="shop"
             modalHeader="Shop Collector"
-            headersToShow={["Image", "Name", "Contact No", "Ward No"]}
+            headersToShow={["Image", "Name","Employee Id", "Contact No", "Ward No"]}
             fields={{
                 'employee.image': (value) => value,
                 'employee.name': (value) => value,
+                'employee.emp_id': (value) => value,
                 'employee.phone_number': (value) => value,
                 'ward': (value) => getWardLabel(value),
             }}
+            path={path}
         // role={collector[0]}
 
         />,
@@ -130,13 +140,15 @@ function Coll(props) {
 
             type="Overall"
             modalHeader="Overall Collector"
-            headersToShow={["Image", "Name", "Contact No",]}
+            headersToShow={["Image", "Name","Employee Id", "Contact No",]}
             fields={{
                 'employee.image': (value) => value,
                 'employee.name': (value) => value,
+                'employee.emp_id': (value) => value,
                 'employee.phone_number': (value) => value,
                 // 'ward': (value) => getWardLabel(value),
             }}
+            path={path}
         // role={collector[0]}
 
         />,
@@ -170,7 +182,7 @@ function Coll(props) {
 
 function HouseCollector(props) {
 
-    const { modalHeader, headersToShow, fields } = props
+    const { modalHeader, headersToShow, fields, path } = props
 
     const dispatch = useDispatch()
 
@@ -211,6 +223,11 @@ function HouseCollector(props) {
     const [loader, setLoader] = useState();
 
     const [hide, setHide] = useState(true);
+
+
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+    const [lazyLoading, setLazyLoading] = useState(true);
 
 
     const getWardLabel = (data) => {
@@ -257,8 +274,9 @@ function HouseCollector(props) {
 
 
     const handleClose = () => {
-        setIsOpen();
-        setisAdd();
+        setIsOpen(false);
+        setisAdd(false);
+        setisEdit(false);
         setInstanceData({
             "employee": {
                 "image": "",
@@ -270,7 +288,12 @@ function HouseCollector(props) {
             ]
 
         });
-        setError();
+        setError(false);
+
+        setErrorMsg({});
+        seterrString();
+        setImage();
+
 
 
     }
@@ -297,18 +320,6 @@ function HouseCollector(props) {
     }
 
 
-    // redux
-    const updateListData = async () => {
-        try {
-
-            const response = await fetch(Config.BASE_URL + getListUrl, Config?.config)
-            const data = await response.json()
-            dispatch(setWard(data));
-
-        } catch (error) {
-            console.error('Error fetching data:', error)
-        }
-    }
 
 
 
@@ -328,13 +339,13 @@ function HouseCollector(props) {
     }
 
 
-
+    console.log(instanceData, "fdj")
 
     //add new
     // Check form field validation
     const checkValidation = () => {
 
-        console.log(instanceData, "fdj")
+       
 
         if (!instanceData?.employee?.name || !instanceData?.ward
             || !instanceData?.employee?.phone_number || !instanceData?.employee?.start_date) {
@@ -344,8 +355,18 @@ function HouseCollector(props) {
 
         }
         else {
-            setError(false)
-            return true
+            if (instanceData?.employee?.phone_number.length != 10) {
+                seterrString("Phone Number Should be in 10 Characters")
+                setError(true)
+                return false
+            }
+
+            else {
+                setError(false)
+                seterrString();
+                return true
+            }
+
         }
 
     }
@@ -390,17 +411,24 @@ function HouseCollector(props) {
                 Config.config,
 
             );
-            toast.success('Successfully submitted!');
 
+            Config?.toastalert("Submitted Successfully", "success")
             setListInstanceData((prevstate) => {
                 return [...prevstate, response?.data]
             })
 
             handleClose();
-            // updateListData();
+
         } catch (error) {
-            console.error('Error occurred:', error);
-            toast.error(error?.response?.data?.msg);
+            if (error?.response?.status === 400) {
+                console.log(error);
+                setErrorMsg(error?.response?.data)
+                Config?.toastalert("Submission Failed", "warn")
+            }
+
+            else {
+                Config?.toastalert("Something Went Wrong", "error")
+            }
         }
 
 
@@ -426,9 +454,6 @@ function HouseCollector(props) {
             is_collector: true,
         }
 
-        if (instanceData?.employee?.image) {
-            employeeData["image"] = instanceData?.employee?.image
-        }
 
         const wardListdata = instanceData?.ward
         // instanceData?.collector?.ward?.map((e)=>(
@@ -440,10 +465,16 @@ function HouseCollector(props) {
 
         data.append("employee", JSON.stringify(employeeData))
         data.append("description", instanceData?.description)
+        if(instanceData?.tractor_no){
+            data.append("tractor_no", instanceData?.tractor_no)
+        }
+        
         axios
             .patch(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
             .then(function (response) {
                 if (response.status === 200) {
+
+                    Config?.toastalert("Updated Successfully", "success")
 
                     setListInstanceData((prevArray) => {
                         const index = prevArray.findIndex((obj) => obj.id === id)
@@ -463,8 +494,16 @@ function HouseCollector(props) {
                 }
             })
             .catch(function (error) {
-                toast.error(error?.response?.data?.msg);
-                console.log(error)
+
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
     }
 
@@ -476,15 +515,22 @@ function HouseCollector(props) {
         axios.delete(`${Config.BASE_URL}${deleteUrl}/${id}/`, Config.config)
             .then(function (response) {
                 if (response.status === 204) {
-
+                    Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
                     handleClose();
-                    updateListData();
+
                 }
             })
             .catch(function (error) {
-                console.log(error)
-                handleClose();
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
     }
 
@@ -552,10 +598,7 @@ function HouseCollector(props) {
 
             <ToastContainer />
 
-            {hide && (
-                <>
-
-                    {
+            {/* {
                         (isOpen || isAdd) && (
 
                             <WardDialogs
@@ -587,40 +630,95 @@ function HouseCollector(props) {
 
                             />
                         )
-                    }
+                    } */}
+
+
+            {
+                (isOpen || isAdd) && (
+
+                    <FormModal
+                        modalHeader={modalHeader}
+                        lazyLoading={lazyLoading}
+                        setIsOpen={setIsOpen}
+                        isAdd={isAdd}
+                        isedit={isedit}
+                        setisEdit={setisEdit}
+                        error={error}
+                        errorMsg={errorMsg}
+
+                        setListData={tableData}
+                        instanceData={instanceData}
+                        setInstanceData={setInstanceData}
+
+                        handleClose={handleClose}
+
+                        // functions
+                        addInstance={addNewInstance}
+                        updateInstance={updateInstance}
+                        deleteInstance={deleteInstance}
+                        handleChange={handleChange}
+                        handleMainChange={handleMainChange}
 
 
 
-                    <Grid item  xs={12} sm={6}>
-                        <Typography variant="h6">{modalHeader}s Details</Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
-                        <IconButton color="primary" aria-label="add">
-                            <AddButton
-                                onClick={() => setisAdd(true)}
-                                text={" Create"}
-                            />
-                        </IconButton>
-                    </Grid>
+                        child={<Child
+                            lazyLoading={lazyLoading}
+                            setIsOpen={setIsOpen}
+                            isAdd={isAdd}
+                            isedit={isedit}
+
+                            error={error}
+                            errorMsg={errorMsg}
+                            errString={errString}
+
+                            setListData={tableData}
+                            instanceData={instanceData}
+                            setInstanceData={setInstanceData}
+
+                            handleClose={handleClose}
+                            handleChange={handleChange}
+                            handleMainChange={handleMainChange}
+
+                            wardlist={wardlist}
+                            panchayatList={panchayatList}
+                            districtList={districtList}
+                            image={image}
+                            setImage={setImage}
+
+                            path={path}
+
+                        />}
+
+                    />
+
+                )
+            }
 
 
-                    <Grid item xs={12}>
-                        <CustomTable
-                            headers={headersToShow}
-                            data={tableData}
-                            fieldsToShow={fieldsToShow}
-                            fields={fields}
-                            getInstanceData={getInstanceData}
-                            loader={loader}
-                            setLoader={setLoader}
-                        />
-                    </Grid>
+            <Grid item xs={12} sm={6}>
+                <Typography variant="h6">{modalHeader}s Details</Typography>
+            </Grid>
+            <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+                <IconButton color="primary" aria-label="add">
+                    <AddButton
+                        onClick={() => setisAdd(true)}
+                        text={" Create"}
+                    />
+                </IconButton>
+            </Grid>
 
 
-
-                </>
-            )}
-
+            <Grid item xs={12}>
+                <CustomTable
+                    headers={headersToShow}
+                    data={tableData}
+                    fieldsToShow={fieldsToShow}
+                    fields={fields}
+                    getInstanceData={getInstanceData}
+                    loader={loader}
+                    setLoader={setLoader}
+                />
+            </Grid>
 
 
         </>
@@ -628,6 +726,184 @@ function HouseCollector(props) {
 
 
 }
+
+
+
+const Child = (props) => {
+
+    const { lazyLoading, setIsOpen, isAdd, isedit,
+        errorMsg, errString, error,
+        instanceData, setList, setInstanceData,
+        handleChange, handleClose, handleMainChange,
+        wardlist, districtList, panchayatList, streetList, image, setImage,
+        path
+       
+    } = props
+
+
+    return (
+
+        <>
+
+            <Grid container spacing={2}>
+                {/* First Name */}
+                <Grid item xs={12} md={6} sm={6}>
+                    <Grid >
+
+                    </Grid>
+                    <TextInput
+
+                        label="Name"
+                        placeholder="Name"
+                        name={"name"}
+                        value={instanceData?.employee?.name}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"name"}
+
+                    />
+
+
+                </Grid>
+
+       { path !="overall-weighing"   && (
+                        <Grid item xs={12} md={6} sm={6}>
+                        {/* <SelectDropDown
+                            list={roles}
+                            handleChange={handleChange}
+                            selected={instanceData?.role}
+                            showname={"name"}
+                            name={"role"}
+                            disabled={!isedit && !isAdd}
+                            error={error}
+                            errorMsg={errorMsg}
+                            errorField={"role"}
+                            label="Select Role"
+                        /> */}
+    
+                        <MultipleSelect
+                            data={wardlist}
+                            onchange={handleMainChange}
+                            value={instanceData?.ward}
+                            showname={"name"}
+                            name={"ward"}
+                            disabled={!isedit && !isAdd}
+                            error={error}
+                            label={"Select Ward "}
+    
+                        />
+                        {(error && !instanceData?.ward) && (
+                            <span className="req-text">This field is required</span>
+                        )}
+                    </Grid>
+
+       )}         
+
+
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <TextInput
+                        label="Phone Number"
+                        placeholder="Name"
+                        name="phone_number"
+                        value={instanceData?.employee?.phone_number}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"phone"}
+                        type={"Number"}
+
+                    />
+                    {errString && (
+                        <span className="req-text">{errString}</span>
+                    )}
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <FileUploadComponent
+                        filelabel="Image"
+                        name="image"
+                        value={instanceData?.employee?.image}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        image={image}
+                        setImage={setImage}
+                        errorMsg={errorMsg}
+                        errorField={"image"}
+                    />
+
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <BasicDatePicker
+                        label="Join Date"
+                        placeholder="Join Date"
+                        name="start_date"
+                        value={instanceData?.employee?.start_date}
+                        required={true}
+                        handleChange={handleChange}
+                        // handleDateChange={handleDateChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"start_date"}
+
+                    />
+                </Grid>
+
+
+
+                {path === "street" && (
+
+                    <Grid item xs={12} md={6} sm={6}>
+
+                        <TextInput
+                            label="Tractor No"
+                            placeholder="Tractor No"
+                            name="tractor_no"
+                            value={instanceData?.tractor_no}
+                            required={true}
+                            handleChange={handleMainChange}   //for main element change
+                            disabled={!isedit && !isAdd}
+                            error={error}
+                            // errorMsg={errorMsg}
+                            errorField={"tractor_no"}
+
+
+                        />
+                        {errString && (
+                            <span className="req-text">{errString}</span>
+                        )}
+                    </Grid>
+
+                )}
+
+            </Grid>
+
+
+
+
+        </>
+
+
+
+    )
+}
+
+
+
+
 
 
 

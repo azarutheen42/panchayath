@@ -17,11 +17,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import CustomTable from "./Table";
 import AlertDialog from "./Alert"
 
-import { toast, ToastContainer } from 'react-toastify';
-
-// import Container from '@mui/material/Container';
-// import Grid from '@mui/material/Grid';
-// import Paper from '@mui/material/Paper';
 import AddIcon from '@mui/icons-material/Add';
 import { Typography, Container, Grid, Paper } from '@mui/material';
 import SelectDropdown from "./Dropdown"
@@ -543,9 +538,6 @@ function Employee(props) {
                             // handleChange={handleChange}
 
                             />}
-
-                        // setImage={setImage}
-                        // image={image}
 
 
                         />

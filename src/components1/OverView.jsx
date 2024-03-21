@@ -51,7 +51,7 @@ function OverView() {
         'name': (value) => value,
         'role_name': (value) => value,
         'clock_in': (value) => value ? value : "0.00",
-        'present': (value) => value,
+        'present': (value) => value ? "Present" : "absent",
 
     }
 
@@ -217,7 +217,7 @@ function OverView() {
         <>
 
             {/* first card */}
-            <Grid item xs={12} sm={3} sx={{ p: 2 }} >
+            <Grid item xs={12}  sm={3}  >
                 <Card style={{ backgroundColor: '#ff9f43' }}>
                     <CardContent>
                         <Typography variant="h6" component="div" sx={styles.card1Title}>
@@ -242,7 +242,7 @@ function OverView() {
                     </CardContent>
                 </Card>
             </Grid>
-            <Grid item xs={12} sm={3}>
+            <Grid item xs={12}  sm={3}>
                 <Card style={{ backgroundColor: '#1B2850' }}>
                     <CardContent>
                         <Typography variant="h6" component="div" sx={styles.card1Title}>
@@ -255,11 +255,11 @@ function OverView() {
                 </Card>
             </Grid>
 
-            <Grid item xs={12} sm={3} >
+            <Grid item xs={12}  sm={3} >
                 <Card style={{ backgroundColor: '#00CFE8' }}>
                     <CardContent>
                         <Typography variant="h6" component="div" sx={styles.card1Title}>
-                            {overData?.hazard}
+                            {overData?.hazard} Kg
                         </Typography>
                         <Typography variant="body2" component="div" sx={styles.card1Text}>
                             Hazard waste
@@ -275,7 +275,7 @@ function OverView() {
 
             {/* ----------------------------------------- */}
 
-            <Grid item xs={12} sm={4} sx={{ p: 2 }} >
+            <Grid item xs={12} sm={4}>
                 <Card sx={{ padding: '25px' }}>
                     <Grid container>
                         <Grid item xs={4}>

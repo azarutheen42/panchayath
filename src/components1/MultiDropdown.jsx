@@ -22,7 +22,7 @@ const MenuProps = {
 function MultipleSelect(props) {
 
     // const {data } =props
-    const { data, list, onchange, value, name, showname, disabled, error, report } = props
+    const { data, list, onchange, value, name, showname, disabled, error, report,label } = props
 
     const [personName, setPersonName] = React.useState([]);
 
@@ -46,9 +46,9 @@ function MultipleSelect(props) {
 
     return (
         <>
-
+             <InputLabel id="demo-multiple-checkbox-label">{label}</InputLabel>
             <FormControl fullWidth>
-                {/* <InputLabel id="demo-multiple-checkbox-label">Tag</InputLabel> */}
+               
                 <Select
                     labelId="demo-multiple-checkbox-label"
                     id="demo-multiple-checkbox"
