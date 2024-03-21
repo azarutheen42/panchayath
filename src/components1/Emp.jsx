@@ -185,12 +185,7 @@ function Employee(props) {
     const checkValidation = () => {
 
         console.log(employee)
-        if (employee?.phone_number) {
-            if (employee?.phone_number.length != 10) { seterrString("Phone Number Should be in 10 Characters") }
-        }
-        else {
-            seterrString()
-        }
+
 
         if (!employee?.name || !employee?.phone_number || !employee?.start_date || !employee?.role) {
             console.log("please fill required fields")
@@ -199,8 +194,19 @@ function Employee(props) {
 
         }
         else {
-            setError(false)
-            return true
+
+            if (employee?.phone_number.length != 10) {
+                seterrString("Phone Number Should be in 10 Characters")
+                setError(true)
+                return false
+            }
+
+            else {
+                setError(false)
+                seterrString();
+                return true
+            }
+
         }
 
 
@@ -564,8 +570,8 @@ function Employee(props) {
                         <Typography variant="h6">Permanent Employee Details</Typography>
                     </Grid>
                     <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
-                        <Button variant="contained" startIcon={<AddIcon />}    onClick={() => setisAdd(true)}>
-                        Add Employee
+                        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
+                            Add Employee
                         </Button>
                     </Grid>
 
@@ -924,7 +930,7 @@ const Child = (props) => {
                         disabled={!isedit && !isAdd}
                         error={error}
                         errorMsg={errorMsg}
-                        errorField={"phone"}
+                        errorField={"role"}
                         label="Select Role"
                     />
 
