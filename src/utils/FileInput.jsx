@@ -109,7 +109,12 @@ const FileUploadBox = (props) => {
 
          </div>
 
-         {(!value && error) && (
+         {/* {((!value) && error) && (
+          <span className="req-text">This field is required</span>
+        )} */}
+
+
+{((!image) && error) && (
           <span className="req-text">This field is required</span>
         )}
 

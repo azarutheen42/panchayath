@@ -213,7 +213,6 @@ function Employee(props) {
     }
 
 
-
     // ADD NEW EMPLOYEES
     const addEmployee = () => {
 
