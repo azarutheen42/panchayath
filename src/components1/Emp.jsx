@@ -17,16 +17,19 @@ import EditIcon from '@mui/icons-material/Edit';
 import CustomTable from "./Table";
 import AlertDialog from "./Alert"
 
+import { toast, ToastContainer } from 'react-toastify';
 
 // import Container from '@mui/material/Container';
 // import Grid from '@mui/material/Grid';
 // import Paper from '@mui/material/Paper';
 import AddIcon from '@mui/icons-material/Add';
 import { Typography, Container, Grid, Paper } from '@mui/material';
-import  SelectDropdown from "./Dropdown"
-import SelectDropDown from"../utils/SelectDropDown"
+import SelectDropdown from "./Dropdown"
+import SelectDropDown from "../utils/SelectDropDown"
 
 import FormModal from "../utils/FormModal";
+
+
 
 
 
@@ -53,6 +56,7 @@ function Employee(props) {
     };
 
 
+    const modalHeader = "Permenant Employee"
 
 
     const handleChangeRowsPerPage = (event) => {
@@ -81,6 +85,10 @@ function Employee(props) {
     const [lazyLoading, setLazyLoading] = useState(true);
 
 
+
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+
     const handleClose = () => {
         setImage();
         // setIsView();
@@ -90,6 +98,8 @@ function Employee(props) {
         setEmployee();
         setViewEmployee();
         setisAdd();
+        setErrorMsg({});
+        seterrString();
 
 
     }
@@ -106,12 +116,13 @@ function Employee(props) {
 
 
     // META DATA
-    const headersToShow = ["Image", "Name", "Position", "Contact No", "Joined"]
+    const headersToShow = ["Image", "Name", "Employee Id", "Position", "Contact No", "Joined"]
     const tableData = permEmployee
     const fieldsToShow = []
     const fields = {
         'image': (value) => value,
         'name': (value) => value,
+        'emp_id': (value) => value,
         'role': (role) => getRoleLabel(role),
         'phone_number': (value) => value,
         'start_date': (value) => value,
@@ -173,6 +184,14 @@ function Employee(props) {
     // Check form field validation
     const checkValidation = () => {
 
+        console.log(employee)
+        if (employee?.phone_number) {
+            if (employee?.phone_number.length != 10) { seterrString("Phone Number Should be in 10 Characters") }
+        }
+        else {
+            seterrString()
+        }
+
         if (!employee?.name || !employee?.phone_number || !employee?.start_date || !employee?.role) {
             console.log("please fill required fields")
             setError(true)
@@ -183,6 +202,7 @@ function Employee(props) {
             setError(false)
             return true
         }
+
 
     }
 
@@ -221,7 +241,7 @@ function Employee(props) {
                     setPermEmployee((prevstate) => {
                         return [...prevstate, response?.data]
                     })
-
+                    Config?.toastalert("Submitted Successfully", "success")
                     setEmployee();
                     handleClose();
 
@@ -229,22 +249,23 @@ function Employee(props) {
 
             })
             .catch(function (error) {
-                console.log(error);
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Submission Failed", "warn")
+                }
 
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             });
 
     }
 
 
 
-    const handleChange = (e, name) => {
-        // const { value } = e.target
-        // setEmployee((prevstate) => {
-        //     return {
-        //         ...prevstate, [name]: value
-        //     }
-
-        // })
+    const handleChange = (e) => {
+        const { value, name } = e.target
 
         if (name === "image") {
             const check = Config?.fileType(e.target.files[0].name)
@@ -259,7 +280,7 @@ function Employee(props) {
         }
         else {
 
-            const { value } = e.target
+            // const { value } = e.target
             setEmployee((prevstate) => {
                 return {
                     ...prevstate, [name]: value
@@ -270,6 +291,18 @@ function Employee(props) {
         }
 
     }
+
+
+    const handleDateChange = (e) => {
+        const date = Config?.DateFormater(e)
+        setEmployee((prevstate) => {
+            return {
+                ...prevstate, start_date: date
+            }
+
+        })
+
+    };
 
     console.log(employee)
 
@@ -341,7 +374,7 @@ function Employee(props) {
             .then(function (response) {
                 if (response.status === 200) {
                     // console.log(response);
-
+                    Config?.toastalert("Updated Successfully", "success")
                     setPermEmployee(prevArray => {
                         const index = prevArray.findIndex(obj => obj.id === id);
                         if (index !== -1) {
@@ -363,7 +396,15 @@ function Employee(props) {
 
             })
             .catch(function (error) {
-                console.log(error);
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
 
             });
 
@@ -383,6 +424,7 @@ function Employee(props) {
                 if (response.status === 204) {
                     console.log(response);
                     setPermEmployee(permEmployee?.filter((e) => e.id !== id))
+                    Config?.toastalert("Deleted Successfully", "info")
                     handleClose();
                     // setLoader()
 
@@ -391,9 +433,15 @@ function Employee(props) {
 
             })
             .catch(function (error) {
-                console.log(error);
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
+                }
 
-
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             });
 
     }
@@ -438,17 +486,21 @@ function Employee(props) {
                     /> */}
 
                         <FormModal
+                            modalHeader={modalHeader}
                             lazyLoading={lazyLoading}
                             setIsOpen={setIsOpen}
                             isAdd={isAdd}
+                            isedit={isedit}
+                            setisEdit={setisEdit}
                             error={error}
+                            errorMsg={errorMsg}
 
-                            getRoleLabel={getRoleLabel}
-                            roles={roles}
+                            // getRoleLabel={getRoleLabel}
+                            // roles={roles}
 
-                            setListData={setPermEmployee}
+                            // setListData={setPermEmployee}
                             instanceData={employee}
-                            setInstanceData={setEmployee}
+                            // setInstanceData={setEmployee}
                             handleClose={handleClose}
 
                             // functions
@@ -461,7 +513,10 @@ function Employee(props) {
                                 lazyLoading={lazyLoading}
                                 setIsOpen={setIsOpen}
                                 isAdd={isAdd}
+                                isedit={isedit}
                                 error={error}
+                                errorMsg={errorMsg}
+                                errString={errString}
 
                                 getRoleLabel={getRoleLabel}
                                 roles={roles}
@@ -470,14 +525,17 @@ function Employee(props) {
                                 instanceData={employee}
                                 setInstanceData={setEmployee}
                                 handleClose={handleClose}
-
-                                // functions
-                                addInstance={addEmployee}
-                                updateInstance={updateEmployee}
-                                deleteInstance={deleteEmployee}
                                 handleChange={handleChange}
-                               
+                                handleDateChange={handleDateChange}
 
+                                image={image}
+                                setImage={setImage}
+
+                            // functions
+                            // addInstance={addEmployee}
+                            // updateInstance={updateEmployee}
+                            // deleteInstance={deleteEmployee}
+                            // handleChange={handleChange}
 
                             />}
 
@@ -506,12 +564,9 @@ function Employee(props) {
                         <Typography variant="h6">Permanent Employee Details</Typography>
                     </Grid>
                     <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
-                        <IconButton color="primary" aria-label="add">
-                            <AddButton
-                                onClick={() => setisAdd(true)}
-                                text={" Add Employee"}
-                            />
-                        </IconButton>
+                        <Button variant="contained" startIcon={<AddIcon />}    onClick={() => setisAdd(true)}>
+                        Add Employee
+                        </Button>
                     </Grid>
 
 
@@ -822,27 +877,10 @@ import BasicDatePicker from "../utils/DatePicker";
 
 const Child = (props) => {
 
-    const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader,
+    const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader, isedit, handleDateChange, image, setImage, errorMsg, errString,
         deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, districtList, panchayatList, streetList, buildingType, child,
         // setError, setImage, image 
     } = props
-
-
-
-    const [isedit, setIsedit] = useState(false);
-    const [isdelete, setisDelete] = useState(false);
-    const [image, setImage] = useState();
-
-    const [loading, setLoading] = useState(false);
-
-
-    const handleClickOpen = () => {
-        setisDelete(true);
-    };
-
-    const handleClickClose = () => {
-        setOpen(false);
-    };
 
 
     return (
@@ -850,7 +888,7 @@ const Child = (props) => {
 
         <>
 
-            <Grid container spacing={5}>
+            <Grid container spacing={2}>
                 {/* First Name */}
                 <Grid item xs={12} md={6} sm={6}>
                     <Grid >
@@ -858,13 +896,16 @@ const Child = (props) => {
                     </Grid>
                     <TextInput
 
-                        label="name"
+                        label="Name"
                         placeholder="Name"
-                        name="name"
+                        name={"name"}
                         value={instanceData?.name}
                         required={true}
-                        handleChange={(e) => handleChange(e, "name")}
+                        handleChange={handleChange}
                         disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"name"}
 
                     />
 
@@ -876,12 +917,15 @@ const Child = (props) => {
 
                     <SelectDropDown
                         list={roles}
-                        onchange={handleChange}
+                        handleChange={handleChange}
                         selected={instanceData?.role}
                         showname={"name"}
                         name={"role"}
                         disabled={!isedit && !isAdd}
                         error={error}
+                        errorMsg={errorMsg}
+                        errorField={"phone"}
+                        label="Select Role"
                     />
 
 
@@ -890,40 +934,68 @@ const Child = (props) => {
 
 
                     <TextInput
-
                         label="Phone Number"
                         placeholder="Name"
                         name="phone_number"
                         value={instanceData?.phone_number}
                         required={true}
-                        handleChange={(e) => handleChange(e, "phone_number")}
+                        handleChange={handleChange}
                         disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"phone"}
+                        type={"Number"}
+
+                    />
+                    {errString && (
+                        <span className="req-text">{errString}</span>
+                    )}
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <FileUploadComponent
+                        filelabel="Image"
+                        name="image"
+                        value={instanceData?.image}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        image={image}
+                        setImage={setImage}
+                        errorMsg={errorMsg}
+                        errorField={"image"}
+
+
+
+                    />
+
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <BasicDatePicker
+                        label="Join Date"
+                        placeholder="Join Date"
+                        name="start_date"
+                        value={instanceData?.start_date}
+                        required={true}
+                        handleChange={handleChange}
+                        handleDateChange={handleDateChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"start_date"}
 
                     />
                 </Grid>
 
-                <Grid item xs={12} md={6} sm={6}>
-                   
-                <FileUploadComponent />
-
-
-                </Grid>
-
-
-                <Grid item xs={12} md={6} sm={6}>
-                   
-                  <BasicDatePicker/>
-   
-   
-                   </Grid>
-
-
-
-
             </Grid>
 
 
-      
+
 
         </>
 

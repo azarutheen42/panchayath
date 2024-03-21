@@ -6,7 +6,7 @@ import Select from '@mui/material/Select';
 
 export default function SelectDropDown(props) {
 
-  const { list, onchange, selected, name, showname, disabled, error, report, label } = props
+  const { list, handleChange, selected, name, showname, disabled, error, report, label, errorMsg, errorField } = props
 
 
   // const handleChange = (event) => {
@@ -19,20 +19,20 @@ export default function SelectDropDown(props) {
       <InputLabel id="demo-select-small-label " className='input-label'>{label}</InputLabel>
 
       <FormControl fullWidth
-      // size="small"
+        size="small"
       >
         {/* <InputLabel id="demo-select-small-label">select {label}</InputLabel> */}
 
         <Select
-          // labelId="demo-select-small-label"
-          // id="demo-select-small"
-          defaultValue={selected}
+          labelId="demo-select-small-label"
+          id="demo-select-small"
+          // defaultValue={selected}
           // value={value}
           name={name}
           // className="custom-dropdown"
           required
-          value={selected}
-          onChange={onchange}
+          value={selected ?? ""}
+          onChange={handleChange}
           disabled={disabled}
         >
 
@@ -46,12 +46,19 @@ export default function SelectDropDown(props) {
             <MenuItem key={index} value={each?.id}>{each[showname]}</MenuItem>
           )}
 
-          {(!selected && error) && (
-            <span className="req-text">This field is required</span>
-          )}
+
 
 
         </Select>
+
+        {(!selected && error) && (
+          <span className="req-text">This field is required</span>
+        )}
+
+
+        {errorMsg && (
+          <span className="req-text">{errorMsg[errorField]?.pop()}</span>
+        )}
       </FormControl>
     </>
   );

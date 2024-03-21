@@ -18,7 +18,7 @@ import Dialog from '@mui/material/Dialog';
 
 
 // Define the styled component for the image thumbnail
-const StyledSmallImageThumbnail = styled('img')({
+export const StyledSmallImageThumbnail = styled('img')({
     width: 50, // Adjust the width to make the thumbnail smaller
     height: 'auto', // Maintain aspect ratio
     borderRadius: 4, // Add rounded corners

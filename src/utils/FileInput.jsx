@@ -1,112 +1,123 @@
-// import React, { useState } from 'react';
-// import { Button, Input, Typography, Paper, Grid, IconButton } from '@mui/material';
-// import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-// import CloseIcon from '@mui/icons-material/Close';
-
-// const FileUploadBox = ({ onUpload }) => {
-//     const [selectedFile, setSelectedFile] = useState(null);
-
-//     const handleFileChange = (event) => {
-//         setSelectedFile(event.target.files[0]);
-//     };
-
-//     const handleUpload = () => {
-//         if (selectedFile) {
-//             onUpload(selectedFile);
-//             setSelectedFile(null); // Clear selected file after upload
-//         } else {
-//             console.log('No file selected');
-//         }
-//     };
-
-//     const handleRemoveFile = () => {
-//         setSelectedFile(null);
-//     };
-
-//     return (
-
-//         <>
-//             <Input
-//                 type="file"
-//                 onChange={handleFileChange}
-//                 style={{ display: 'none' }}
-//                 inputProps={{ accept: 'image/*' }} // Optional: restrict to image files
-//                 id="file-input"
-//             />
-//             <label htmlFor="file-input">
-//                 <Button
-//                     variant="outlined"
-//                     component="span"
-//                     startIcon={<CloudUploadIcon />}
-//                 >
-//                     Choose File
-//                 </Button>
-//             </label>
-//             {/* </div> */}
-//             {selectedFile && (
-//                 <div style={{ marginLeft: '20px', display: 'flex', alignItems: 'center' }}>
-//                     <Typography variant="body1" style={{ marginRight: '10px' }}>
-//                         {selectedFile.name}
-//                     </Typography>
-//                     <IconButton onClick={handleRemoveFile}>
-//                         <CloseIcon />
-//                     </IconButton>
-//                 </div>
-//             )}
-//         </>
-//     );
-// };
-
-// export default FileUploadBox;
-
-
-
-
 
 import React, { useState } from 'react';
 import { Button, IconButton } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
+import Config from '../Config';
+import { StyledSmallImageThumbnail } from '../components1/Table';
+import InputLabel from '@mui/material/InputLabel';
 
-const FileUploadBox = () => {
+
+const media ="http://127.0.0.1:8000"
+const containerStyle = {
+    display: 'flex',
+    justifyContent: 'space-between',
+  };
+
+  const itemStyle = {
+    padding: '10px',
+    backgroundColor: '#f0f0f0',
+  };
+  
+
+
+const FileUploadBox = (props) => {
     const [selectedFile, setSelectedFile] = useState(null);
 
-    const handleFileChange = (event) => {
-        setSelectedFile(event.target.files[0]);
-    };
+
+    const { handleChange, value, name, disabled, error, report, filelabel  ,image,setImage ,errorMsg,errorField} = props
+
+
 
     const handleRemoveFile = () => {
-        setSelectedFile(null);
+        setImage(null);
     };
 
+    console.log(value)
+
     return (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <>
+        <InputLabel id="demo-select-small-label " className='input-label'>{filelabel}</InputLabel>
+         <div style={{ display: 'flex', alignItems: 'center' ,}} className='border border-2'>
             <input
                 type="file"
-                onChange={handleFileChange}
+                onChange={handleChange}
                 style={{ display: 'none' }}
-                inputProps={{ accept: 'image/*' }} // Optional: restrict to image files
+                inputprops={{ accept: 'image/*' }} // Optional: restrict to image files
                 id="file-input"
+                name={name}
+                disabled={disabled}
             />
-            <label htmlFor="file-input">
+            <label htmlFor="file-input"  >
                 <Button
                     variant="outlined"
                     component="span"
                     startIcon={<CloudUploadIcon />}
                     style={{ marginRight: '8px' }}
+
+                    disabled={disabled}
                 >
-                    Choose File
+                   {filelabel}
                 </Button>
             </label>
-            {selectedFile && (
-                <div style={{ backgroundColor: '#e0e0e0', padding: '8px', borderRadius: '4px', display: 'flex', alignItems: 'center', marginRight: '8px' }}>
-                    <span style={{ marginRight: '8px' }}>{selectedFile.name}</span>
-                    <IconButton onClick={handleRemoveFile} size="small">
-                        <DeleteIcon />
+
+
+            {(value || image) && (
+                <div 
+                style={{
+                    //  backgroundColor: '#e0e0e0',
+                 paddingLeft: '10px',
+                 paddingRight:"10px", 
+                 borderRadius: '4px', 
+                 display: 'flex', 
+                 alignItems: 'center',
+                  marginRight: '8px' 
+                }}
+                  >
+
+                    {
+                        image ? 
+                    (
+                    <>
+                        <span 
+                        style={{ marginRight: '8px' }}
+                        // style={itemStyle}
+                        >{image?.name}
+                        
+                        </span>
+
+                    <IconButton onClick={handleRemoveFile} size="small" >
+               
+                     X
                     </IconButton>
+
+                        </>
+                        )
+                        :
+
+                        <span 
+                        style={{ marginRight: '8px' }}
+                        // style={itemStyle}
+                        >
+                              <StyledSmallImageThumbnail src={value} alt="" />
+                           {Config?.truncateText(value?.split("/")?.pop(),20)}
+                        
+                        </span>
+                    }
                 </div>
             )}
-        </div>
+
+         </div>
+
+         {(!value && error) && (
+          <span className="req-text">This field is required</span>
+        )}
+
+{errorMsg && (
+                 <span className="req-text">{ errorMsg[errorField]?.pop()}</span>
+            )}
+
+        </>
     );
 };
 

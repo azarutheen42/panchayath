@@ -32,7 +32,7 @@ import TextInput from "./TextInput";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
-        padding: theme.spacing(2),
+        padding: theme.spacing(3),
     },
     '& .MuiDialogActions-root': {
         padding: theme.spacing(1),
@@ -44,13 +44,13 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 
 function HouseDialogs(props) {
 
-    const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader,
+    const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader,setisEdit,isedit,
         deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, districtList, panchayatList, streetList, buildingType,child,
         // setError, setImage, image 
     } = props
 
 
-    const [isedit, setIsedit] = useState(false);
+    // const [isedit, setIsedit] = useState(false);
     const [isdelete, setisDelete] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -80,7 +80,7 @@ function HouseDialogs(props) {
                 aria-labelledby="customized-dialog-title"
                 open={open}
                 fullWidth
-                maxWidth={"lg"}
+                maxWidth={"md"}
 
             >
                 <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title" >
@@ -88,7 +88,7 @@ function HouseDialogs(props) {
 
                         {!isAdd && (
 
-                            <button className="btn btn-sm" onClick={() => setIsedit(!isedit)}>  <EditIcon
+                            <button className="btn btn-sm" onClick={() => setisEdit(!isedit)}>  <EditIcon
                                 style={{ color: "blue" }}
                             />  </button>
                         )}
@@ -121,6 +121,8 @@ function HouseDialogs(props) {
                     <Typography gutterBottom>
 
                        {child}
+                       {/* {child}
+                       {child} */}
 
                     </Typography>
 
