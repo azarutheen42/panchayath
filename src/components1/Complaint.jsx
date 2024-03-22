@@ -24,6 +24,16 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SelectDropdown from "./Dropdown"
 
+
+import SelectDropDown from "../utils/SelectDropDown"
+import FormModal from "../utils/FormModal";
+import TextInput from "../utils/TextInput";
+import FileUploadComponent from "../utils/FileInput"
+import BasicDatePicker from "../utils/DatePicker";
+import InputBox from "../utils/NumberInput";
+import { TextField } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+
 const style = {
     position: 'absolute',
     top: '50%',
@@ -46,10 +56,11 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 
 function Complaint(props) {
 
-    const modalHeader="Complaint";
+    const modalHeader = "Complaint";
 
     const user = useSelector((state) => state?.user?.value);
     const wardlist = useSelector((state) => state?.ward?.value);
+    const streetList = useSelector((state) => state?.street?.value);
     const complaintTypeList = useSelector((state) => state?.complainttype?.value);
 
     // meta StATE
@@ -65,12 +76,33 @@ function Complaint(props) {
 
     const [hide, setHide] = useState(true);
 
+    const [requestId, setRequestId] = useState();
+    const [name, setName] = useState();
+    const [wardnum, setwardnum] = useState();
+    const [address, setAddress] = useState();
+    const [details, setDetails] = useState();
+    const [id, setId] = useState();
+    const [open, setOpen] = useState(false)
+    // const [wardlist, setWardlist] = useState();
+    const [request, setRequest] = useState();
+
+
+    const [isAddRequest, setIsAddRequest] = useState(false);
+
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+    const [lazyLoading, setLazyLoading] = useState(true);
+
 
     const getWardLabel = (id) => {
         const label = wardlist?.find((e) => e?.id === id)?.name
         return label
     }
 
+    const getStreetLabel = (id) => {
+        const label = streetList?.find((e) => e?.id === id)?.name
+        return label ?? "Nill"
+    }
 
 
     const getComplaintTypeLabel = (id) => {
@@ -79,7 +111,7 @@ function Complaint(props) {
     }
 
     // META DATA
-    const headersToShow = ["Complaint ID", "Date", "Name", "Ward", "Type", "Address", "Details","Status", "Image"]
+    const headersToShow = ["Complaint ID", "Date", "Name", "Ward", "Street", "Type", "Address", "Details", "Status", "Image"]
     const tableData = listInstanceData
     const fieldsToShow = []
     const fields = {
@@ -88,6 +120,7 @@ function Complaint(props) {
         'date': (value) => value,
         'name': (value) => value,
         'ward': (value) => getWardLabel(value),
+        'street': (value) => getStreetLabel(value),
         'type': (value) => getComplaintTypeLabel(value) ?? "Nill",
         'address': (value) => value,
         'details': (value) => value,
@@ -101,23 +134,14 @@ function Complaint(props) {
         setisAdd();
         setInstanceData();
         setError();
+        setisEdit(false);
+        setErrorMsg();
+        seterrString();
+        setImage();
+
 
 
     }
-
-
-    const [requestId, setRequestId] = useState();
-    const [name, setName] = useState();
-    const [wardnum, setwardnum] = useState();
-    const [address, setAddress] = useState();
-    const [details, setDetails] = useState();
-    const [id, setId] = useState();
-    const [open, setOpen] = useState(false)
-    // const [wardlist, setWardlist] = useState();
-    const [request, setRequest] = useState();
-
-
-    const [isAddRequest, setIsAddRequest] = useState(false);
 
     useEffect(() => {
         fetchrequests()
@@ -137,6 +161,7 @@ function Complaint(props) {
             // setWardList(data)
         } catch (error) {
             console.error('Error fetching data:', error)
+            Config?.toastalert("Something Went Wrong", "error")
         }
     }
 
@@ -155,6 +180,7 @@ function Complaint(props) {
             })
             .catch(function (error) {
                 console.log(error)
+                Config?.toastalert("Something Went Wrong", "error")
             })
     }
 
@@ -170,7 +196,8 @@ function Complaint(props) {
     // Check form field validation
     const checkValidation = () => {
 
-        if (!instanceData?.name || !instanceData?.phone_number || !instanceData?.ward || !instanceData?.address || instanceData?.type || instanceData?.details) {
+        if (!instanceData?.name || !instanceData?.phone_number || !instanceData?.ward ||
+            !instanceData?.address || !instanceData?.type || !instanceData?.details || !instanceData?.street) {
             console.log("please fill required fields")
             setError(true)
             return false
@@ -183,7 +210,7 @@ function Complaint(props) {
 
     }
 
-
+    console.log(instanceData)
     const addNewInstance = async (e) => {
 
         const check = checkValidation()
@@ -196,24 +223,36 @@ function Complaint(props) {
         data.append('name', instanceData?.name);
         data.append('phone_number', instanceData?.phone_number);
         data.append('ward', instanceData?.ward);
+        data.append('street', instanceData?.street);
         data.append('address', instanceData?.address);
         data.append('details', instanceData?.details);
-        data.append('image', instanceData?.image);
         data.append('type', instanceData?.type);
 
+        if (image) {
+            data.append('image', image);
+        }
+
         try {
-            const response = await axios.post(`${Config.BASE_URL}complaints/`, data, Config.config);
+            const response = await axios.post(`${Config.BASE_URL}complaints`, data, Config.config);
             console.log(response.data); // Handle success response
-            toast.success('Successfully submitted!');
+          
             // Clear form fields
+            Config?.toastalert("Submitted Successfully", "success")
             setListInstanceData((prevstate) => {
                 return [...prevstate, response?.data]
             })
 
             handleClose();
         } catch (error) {
-            console.error('Error occurred:', error); // Handle error
-            toast.error('Submission failed. Please try again.');
+            if (error?.response?.status === 400) {
+                console.log(error);
+                setErrorMsg(error?.response?.data)
+                Config?.toastalert("Submission Failed", "warn")
+            }
+
+            else {
+                Config?.toastalert("Something Went Wrong", "error")
+            }
         }
     };
 
@@ -222,11 +261,11 @@ function Complaint(props) {
     //UPDATE REQUESTS
 
     const updateInstance = (id) => {
-        // const check = checkSchemeValidation()
+        const check = checkValidation()
 
-        // if (!check) {
-        //   return
-        // }
+        if (!check) {
+            return
+        }
 
         const data = new FormData()
         // data.append('date', name)
@@ -234,15 +273,18 @@ function Complaint(props) {
         data.append('ward', instanceData?.ward);
         data.append('address', instanceData?.address);
         data.append('details', instanceData?.details);
-        // data.append('image', instanceData?.image);
+        if (image) {
+            data.append('image', image);
+        }
         data.append('type', instanceData?.type);
+        data.append('street', instanceData?.street);
 
         axios
             .put(`${Config.BASE_URL}complaintsedit/${id}/`, data, Config.config)
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response)
-
+                    Config?.toastalert("Updated Successfully", "success")
                     setListInstanceData((prevArray) => {
                         const index = prevArray.findIndex((obj) => obj.id === id)
                         if (index !== -1) {
@@ -254,33 +296,50 @@ function Complaint(props) {
                         }
                         return prevArray
                     })
-                    // setIsOpen(false)
+                   
                     handleClose()
 
-                    // $('#myModal').modal('show')
-                    // $('.modal-backdrop').show();
+                  
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
     }
 
     //DELETE REQUESTS
 
     const deleteInstance = (id) => {
-        console.log('deleting')
+       
 
         axios.delete(`${Config.BASE_URL}complaintsdelete/${id}`, Config.config)
             .then(function (response) {
                 if (response.status === 204) {
                     console.log(response)
+                    Config?.toastalert("Deleted Successfully", "info")
+
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
                     handleClose();
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                  if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
                 handleClose();
             })
     }
@@ -300,13 +359,13 @@ function Complaint(props) {
             }
             console.log(e.target.files[0].name)
             let value = e.target.files[0]
-            // setImage(value)
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
+            setImage(value)
+            // setInstanceData((prevstate) => {
+            //     return {
+            //         ...prevstate, [name]: value
+            //     }
 
-            })
+            // })
         }
         else {
 
@@ -321,6 +380,19 @@ function Complaint(props) {
         }
 
     }
+
+
+
+    const handleDateChange = (e) => {
+        const date = Config?.DateFormater(e)
+        setInstanceData((prevstate) => {
+            return {
+                ...prevstate, start_date: date
+            }
+
+        })
+
+    };
 
 
 
@@ -342,14 +414,43 @@ function Complaint(props) {
                     {
                         (isOpen || isAdd) && (
 
-                            <CustomizedDialogs
+                            // <CustomizedDialogs
+                            //     setIsOpen={setIsOpen}
+                            //     isAdd={isAdd}
+                            //     error={error}
+
+                            //     setListData={tableData}
+                            //     instanceData={instanceData}
+                            //     setInstanceData={setInstanceData}
+                            //     handleClose={handleClose}
+
+                            //     // functions
+                            //     addInstance={addNewInstance}
+                            //     updateInstance={updateInstance}
+                            //     deleteInstance={deleteInstance}
+                            //     handleChange={handleChange}
+                            //     wardlist={wardlist}
+                            //     requestTypeList={complaintTypeList}
+                            //     modalHeader ={modalHeader}
+
+                            // // setImage={setImage}
+                            // // image={image}
+                            // />
+
+                            <FormModal
+                                modalHeader={modalHeader}
+                                lazyLoading={lazyLoading}
                                 setIsOpen={setIsOpen}
                                 isAdd={isAdd}
+                                isedit={isedit}
+                                setisEdit={setisEdit}
                                 error={error}
+                                errorMsg={errorMsg}
 
                                 setListData={tableData}
                                 instanceData={instanceData}
                                 setInstanceData={setInstanceData}
+
                                 handleClose={handleClose}
 
                                 // functions
@@ -357,33 +458,52 @@ function Complaint(props) {
                                 updateInstance={updateInstance}
                                 deleteInstance={deleteInstance}
                                 handleChange={handleChange}
-                                wardlist={wardlist}
-                                requestTypeList={complaintTypeList}
-                                modalHeader ={modalHeader}
 
-                            // setImage={setImage}
-                            // image={image}
+                                child={<Child
+                                    lazyLoading={lazyLoading}
+                                    setIsOpen={setIsOpen}
+                                    isAdd={isAdd}
+                                    isedit={isedit}
+
+                                    error={error}
+                                    errorMsg={errorMsg}
+                                    errString={errString}
+
+                                    setListData={tableData}
+                                    instanceData={instanceData}
+                                    setInstanceData={setInstanceData}
+
+                                    handleClose={handleClose}
+                                    handleChange={handleChange}
+                                    // handleMainChange={handleMainChange}
+
+                                    wardlist={wardlist}
+                                    streetList={streetList}
+                                    complaintTypeList={complaintTypeList}
+                                    image={image}
+                                    setImage={setImage}
 
 
+                                />}
                             />
+
+
+
                         )
                     }
 
-                    <Grid item  xs={12} sm={6}>
+                    <Grid item xs={12} sm={6}>
                         <Typography variant="h6">{modalHeader}s Details</Typography>
                     </Grid>
                     <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
-                        <IconButton color="primary" aria-label="add">
-                            <AddButton
-                                onClick={() => setisAdd(true)}
-                                text={"Create " +modalHeader}
-                            />
-                        </IconButton>
+                        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
+                            Create {modalHeader}
+                        </Button>
                     </Grid>
 
 
                     <Grid item xs={12}>
-                    <CustomTable
+                        <CustomTable
                             headers={headersToShow}
                             data={tableData}
                             fieldsToShow={fieldsToShow}
@@ -415,9 +535,207 @@ export default Complaint;
 
 
 
+
+const Child = (props) => {
+
+    const { lazyLoading, setIsOpen, isAdd, isedit,
+        errorMsg, errString, error,
+        instanceData, setList, setInstanceData,
+        handleChange, handleClose,
+        wardlist, streetList, image, setImage, complaintTypeList
+
+
+    } = props
+
+
+    return (
+
+        <>
+
+            <Grid container spacing={2}>
+                {/* First Name */}
+                <Grid item xs={12} md={6} sm={6}>
+                    <Grid >
+
+                    </Grid>
+                    <TextInput
+
+                        label="Name"
+                        placeholder="Name"
+                        name={"name"}
+                        value={instanceData?.name}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"name"}
+
+                    />
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <TextInput
+                        label="Contact Number"
+                        placeholder="Name"
+                        name="phone_number"
+                        value={instanceData?.phone_number}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"phone_number"}
+                        type={"Number"}
+
+                    />
+                    {errString && (
+                        <span className="req-text">{errString}</span>
+                    )}
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={wardlist}
+                        handleChange={handleChange}
+                        selected={instanceData?.ward}
+                        showname={"name"}
+                        name={"ward"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"ward"}
+                        label="Select Ward"
+                    />
+
+
+
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={streetList}
+                        handleChange={handleChange}
+                        selected={instanceData?.street}
+                        showname={"name"}
+                        name={"street"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"street"}
+                        label="Select Street"
+                    />
+
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={complaintTypeList}
+                        handleChange={handleChange}
+                        selected={instanceData?.type}
+                        showname={"type"}
+                        name={"type"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"type"}
+                        label="Select Complaint Type"
+                    />
+                </Grid>
+
+
+
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <FileUploadComponent
+                        filelabel="Image"
+                        name="image"
+                        value={instanceData?.image}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        image={image}
+                        setImage={setImage}
+                        errorMsg={errorMsg}
+                        errorField={"image"}
+                    />
+
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <TextInput
+                        label="Address"
+                        placeholder="Address"
+                        name="address"
+                        value={instanceData?.address}
+                        required={true}
+                        handleChange={handleChange}   //for main element change
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"address"}
+                        multiline={true}
+                        rows={2}
+
+                    />
+
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                </Grid>
+
+
+                <Grid item xs={12} md={12} sm={12}>
+
+                    <TextInput
+                        label="Details"
+                        placeholder="details"
+                        name="details"
+                        value={instanceData?.details}
+                        required={true}
+                        handleChange={handleChange}   //for main element change
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        // errorMsg={errorMsg}
+                        errorField={"details"}
+                        multiline={true}
+                        rows={4}
+
+                    />
+
+                </Grid>
+
+
+
+            </Grid>
+
+
+
+
+        </>
+
+
+
+    )
+}
+
+
+
+
+
+
+
 function CustomizedDialogs(props) {
 
-    const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd,modalHeader,
+    const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader,
         deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, requestTypeList
         // setError, setImage, image 
     } = props
@@ -464,7 +782,7 @@ function CustomizedDialogs(props) {
 
             >
                 <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title" >
-                    <h6>{modalHeader+"s"} Details
+                    <h6>{modalHeader + "s"} Details
 
                         {!isAdd && (
                             // <EditIcon 

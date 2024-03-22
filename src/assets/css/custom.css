@@ -9,13 +9,16 @@
 }
 
 .form-required{
-    color:"red"
+    color:"red";
+
 }
 
 
 .req-text{
   color: rgb(183, 65, 65);
   font-size: 13px;
+
+  margin-top: 8px;
 }
 
 /* REPORTS */

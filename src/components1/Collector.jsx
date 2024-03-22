@@ -345,18 +345,18 @@ function HouseCollector(props) {
     // Check form field validation
     const checkValidation = () => {
 
-        const wardCheck= path === "overall-weighing" ? false : !instanceData?.ward.length
+        const wardCheck = path === "overall-weighing" ? false : !instanceData?.ward.length
 
         console.log(wardCheck)
 
         if (!instanceData?.employee?.name || wardCheck
             || !instanceData?.employee?.phone_number || !instanceData?.employee?.start_date) {
 
-                console.log("please fill required fields")
-                setError(true)
-                return false
-          
-        
+            console.log("please fill required fields")
+            setError(true)
+            return false
+
+
 
         }
         else {
@@ -720,12 +720,9 @@ function HouseCollector(props) {
                 <Typography variant="h6">{modalHeader}s Details</Typography>
             </Grid>
             <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
-                <IconButton color="primary" aria-label="add">
-                    <AddButton
-                        onClick={() => setisAdd(true)}
-                        text={" Create"}
-                    />
-                </IconButton>
+                <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
+                    Create
+                </Button>
             </Grid>
 
 

@@ -84,11 +84,11 @@ function UserRegister() {
 
 
     // META DATA
-    const headersToShow = ["Name", "Contact No", "Address", "Ward", "Street"]
+    const headersToShow = ["Image", "Name", "Contact No", "Address", "Ward", "Street"]
     const tableData = listInstanceData
     const fieldsToShow = []
     const fields = {
-
+        'image': (value) => value,
         'name': (value) => value,
         'phone': (value) => value,
         'get_user_address': (value) => formatAddress(value),
@@ -98,12 +98,12 @@ function UserRegister() {
 
 
     const handleClose = () => {
-        setIsOpen();
-        setisAdd();
+        setIsOpen(false);
+        setisAdd(false);
+        setisEdit(false);
         setInstanceData();
         setError();
         setImage();
-
 
     }
 
@@ -138,16 +138,14 @@ function UserRegister() {
 
     const checkValidation = () => {
 
-        
-
         if (!instanceData?.name || !instanceData?.get_user_address?.ward || !instanceData?.get_user_address?.street
             || !instanceData?.phone || !instanceData?.get_user_address?.door_no || !instanceData?.get_user_address?.line1) {
 
-                console.log("please fill required fields")
-                setError(true)
-                return false
-          
-        
+            console.log("please fill required fields")
+            setError(true)
+            return false
+
+
 
         }
         else {
@@ -189,7 +187,7 @@ function UserRegister() {
         data.append('door_no', instanceData?.get_user_address?.door_no);
         data.append('ward', instanceData?.get_user_address?.ward);
         data.append('street', instanceData?.get_user_address?.street);
-      
+
         axios
             .post(`${Config.BASE_URL}auth/registered-users/`, data, Config.config)
             .then(function (response) {
@@ -207,7 +205,7 @@ function UserRegister() {
                     setErrorMsg(error?.response?.data)
                     Config?.toastalert("Submission Failed", "warn")
                 }
-    
+
                 else {
                     Config?.toastalert("Something Went Wrong", "error")
                 }
@@ -238,14 +236,14 @@ function UserRegister() {
         const check = checkValidation()
 
         if (!check) {
-          return
+            return
         }
 
         const data = new FormData()
         data.append('name', instanceData?.name);
         data.append('phone', instanceData?.phone);
         data.append('password', instanceData?.phone);
-        if(image){
+        if (image) {
             data.append('image', image);
         }
         data.append('line1', instanceData?.get_user_address?.line1);
@@ -276,7 +274,7 @@ function UserRegister() {
                 }
             })
             .catch(function (error) {
-                
+
                 if (error?.response?.status === 400) {
                     console.log(error);
                     setErrorMsg(error?.response?.data)
@@ -347,39 +345,39 @@ function UserRegister() {
 
 
 
-        // handle new instance
-        const handleChange = (e) => {
-            const { name,value } = e.target
-    
-            if (name === "image") {
-                const check = Config?.fileType(e.target.files[0].name)
-    
-                if (!check) {
-                    console.log("not supported")
-                    return
-                }
-                console.log(e.target.files[0].name)
-                let value = e.target.files[0]
-                setImage(value)
-            }
-            else {
-    
-                // const { value } = e.target
-    
-                setInstanceData(prevState => ({
-                    ...prevState,
-                    get_user_address: {
-                        ...prevState.get_user_address,
-                        [name]: value 
-                    }
-                }));
-    
-            }
-    
-        }
-    
+    // handle new instance
+    const handleChange = (e) => {
+        const { name, value } = e.target
 
-        console.log(instanceData)
+        if (name === "image") {
+            const check = Config?.fileType(e.target.files[0].name)
+
+            if (!check) {
+                console.log("not supported")
+                return
+            }
+            console.log(e.target.files[0].name)
+            let value = e.target.files[0]
+            setImage(value)
+        }
+        else {
+
+            // const { value } = e.target
+
+            setInstanceData(prevState => ({
+                ...prevState,
+                get_user_address: {
+                    ...prevState.get_user_address,
+                    [name]: value
+                }
+            }));
+
+        }
+
+    }
+
+
+    console.log(instanceData)
 
 
     return (
@@ -473,12 +471,9 @@ function UserRegister() {
                 <Typography variant="h6">User Details</Typography>
             </Grid>
             <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
-                <IconButton color="primary" aria-label="add">
-                    <AddButton
-                        onClick={() => setisAdd(true)}
-                        text={"Add User"}
-                    />
-                </IconButton>
+                <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
+                    Add User
+                </Button>
             </Grid>
 
 
@@ -555,12 +550,13 @@ class User extends React.Component {
 
 
 
+
 const Child = (props) => {
 
     const { lazyLoading, setIsOpen, isAdd, isedit,
         errorMsg, errString, error,
         instanceData, setList, setInstanceData,
-        handleChange, handleClose,handleMainChange,
+        handleChange, handleClose, handleMainChange,
         wardlist, streetList, image, setImage,
 
 
@@ -608,10 +604,10 @@ const Child = (props) => {
                         label="Select Ward"
                     />
 
-
+                    {/* 
                     {(error && !instanceData?.get_user_address?.ward) && (
                         <span className="req-text">This field is required</span>
-                    )}
+                    )} */}
                 </Grid>
 
 
@@ -630,9 +626,9 @@ const Child = (props) => {
                     />
 
 
-                    {(error && !instanceData?.get_user_address?.street) && (
+                    {/* {(error && !instanceData?.get_user_address?.street) && (
                         <span className="req-text">This field is required</span>
-                    )}
+                    )} */}
                 </Grid>
 
 
@@ -674,28 +670,6 @@ const Child = (props) => {
 
                 </Grid>
 
-
-                {/* <Grid item xs={12} md={6} sm={6}>
-
-                    <BasicDatePicker
-                        label="Join Date"
-                        placeholder="Join Date"
-                        name="start_date"
-                        value={instanceData?.employee?.start_date}
-                        required={true}
-                        handleChange={handleChange}
-                        // handleDateChange={handleDateChange}
-                        disabled={!isedit && !isAdd}
-                        error={error}
-                        errorMsg={errorMsg}
-                        errorField={"start_date"}
-
-                    />
-                </Grid> */}
-
-
-
-
                 <Grid item xs={12} md={6} sm={6}>
 
                     <TextInput
@@ -714,8 +688,6 @@ const Child = (props) => {
 
                 </Grid>
 
-
-
                 <Grid item xs={12} md={6} sm={6}>
 
                     <TextInput
@@ -727,10 +699,13 @@ const Child = (props) => {
                         handleChange={handleChange}   //for main element change
                         disabled={!isedit && !isAdd}
                         error={error}
-                        // errorMsg={errorMsg}
+                        errorMsg={errorMsg}
                         errorField={"line1"}
+                        multiline={true}
+                        rows={2}
 
                     />
+
 
                 </Grid>
 

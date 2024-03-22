@@ -5,7 +5,7 @@ import InputLabel from '@mui/material/InputLabel';
 
 export default function TextInput(props) {
 
-    const { handleChange, value, name, disabled, error, report, label, errorMsg, errorField, type } = props
+    const { handleChange, value, name, disabled, error, report, label, errorMsg, errorField, type ,multiline,rows} = props
 
     const handleCheckChange = (e) => {
         const inputValue = e.target.value;
@@ -28,16 +28,20 @@ export default function TextInput(props) {
 
     return (
         <>
+
             <InputLabel id="demo-select-small-label " className='input-label'>{label}</InputLabel>
             <TextField
                 type={type}
                 id="outlined-controlled"
                 name={name}
                 // label={label}
+                multiline={multiline}
+                minRows={rows}
+
                 value={value}
                 onChange={handleCheckChange}
                 fullWidth
-                style={{ height: 50 }}
+                style={{ minHeight: 50 }}
                 size='small'
                 inputprops={{
                     style: {
@@ -48,6 +52,7 @@ export default function TextInput(props) {
                 variant="outlined"
                 // disableAnimation
                 disabled={disabled}
+
             // autoFocus
             />
 
@@ -63,17 +68,13 @@ export default function TextInput(props) {
 
 
             {/* <Example/> */}
+  
+            
 
         </>
 
     );
 }
-
-
-
-
-
-
 
 
 
