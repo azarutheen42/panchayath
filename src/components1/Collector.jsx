@@ -93,7 +93,7 @@ function Coll(props) {
         "house": <HouseCollector
             type="house"
             modalHeader="House Collector"
-            headersToShow={["Image", "Name","Employee Id", "Contact No", "Ward No"]}
+            headersToShow={["Image", "Name", "Employee Id", "Contact No", "Ward No"]}
             fields={{
                 'employee.image': (value) => value,
                 'employee.name': (value) => value,
@@ -108,7 +108,7 @@ function Coll(props) {
         "street": <HouseCollector
             type="street"
             modalHeader="Street Collector"
-            headersToShow={["Image", "Name","Employee Id", "Contact No", "Ward No", "Tractor No"]}
+            headersToShow={["Image", "Name", "Employee Id", "Contact No", "Ward No", "Tractor No"]}
             fields={{
                 'employee.image': (value) => value,
                 'employee.name': (value) => value,
@@ -124,7 +124,7 @@ function Coll(props) {
         "shop": <HouseCollector
             type="shop"
             modalHeader="Shop Collector"
-            headersToShow={["Image", "Name","Employee Id", "Contact No", "Ward No"]}
+            headersToShow={["Image", "Name", "Employee Id", "Contact No", "Ward No"]}
             fields={{
                 'employee.image': (value) => value,
                 'employee.name': (value) => value,
@@ -140,7 +140,7 @@ function Coll(props) {
 
             type="Overall"
             modalHeader="Overall Collector"
-            headersToShow={["Image", "Name","Employee Id", "Contact No",]}
+            headersToShow={["Image", "Name", "Employee Id", "Contact No",]}
             fields={{
                 'employee.image': (value) => value,
                 'employee.name': (value) => value,
@@ -195,8 +195,8 @@ function HouseCollector(props) {
     const cityList = useSelector((state) => state?.city?.value);
 
     const collector = useSelector((state) => state?.collector?.value)?.filter((e) => e?.code === "C1");
-    // const role=collector?.find(item => item?.name.toLowerCase() === modalHeader?.toLowerCase())
-    const role = ""
+    const role = collector?.find(item => item?.name.toLowerCase() === modalHeader?.toLowerCase())
+    // const role = ""
     console.log(role, "role")
     // meta StATE
     const [listInstanceData, setListInstanceData] = useState([])
@@ -300,7 +300,10 @@ function HouseCollector(props) {
 
 
     useEffect(() => {
-        fetchListData();
+        if (role) {
+            fetchListData();
+        }
+
     }, [role])
 
 
@@ -345,7 +348,7 @@ function HouseCollector(props) {
     // Check form field validation
     const checkValidation = () => {
 
-       
+
 
         if (!instanceData?.employee?.name || !instanceData?.ward
             || !instanceData?.employee?.phone_number || !instanceData?.employee?.start_date) {
@@ -393,9 +396,15 @@ function HouseCollector(props) {
         }
 
         const wardListdata = instanceData?.ward
-        // instanceData?.collector?.ward?.map((e)=>(
-        data.append("ward", wardListdata)
-        // ))
+        // if (path != "overall-weighing") {
+        //     data.append("ward", wardListdata)
+        // }
+        if (wardListdata?.length>0) {
+            // instanceData?.collector?.ward?.map((e)=>(
+            data.append("ward", wardListdata)
+            // ))
+        }
+
         // data.append("ward", instanceData?.collector?.ward)
         data.append("employee", JSON.stringify(employeeData))
         data.append("description", instanceData?.description)
@@ -456,19 +465,25 @@ function HouseCollector(props) {
 
 
         const wardListdata = instanceData?.ward
-        // instanceData?.collector?.ward?.map((e)=>(
-        data.append("ward", wardListdata)
-        // ))
+        if (wardListdata?.length>0) {
+            // instanceData?.collector?.ward?.map((e)=>(
+            data.append("ward", wardListdata)
+            // ))
+        }
+
         if (image) {
             data.append("image", image)
         }
 
         data.append("employee", JSON.stringify(employeeData))
         data.append("description", instanceData?.description)
-        if(instanceData?.tractor_no){
+        if (instanceData?.tractor_no) {
             data.append("tractor_no", instanceData?.tractor_no)
         }
-        
+        // if (path != "overall-weighing"){
+        //     data.append("ward", wardListdata)
+        // }
+
         axios
             .patch(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
             .then(function (response) {
@@ -737,7 +752,7 @@ const Child = (props) => {
         handleChange, handleClose, handleMainChange,
         wardlist, districtList, panchayatList, streetList, image, setImage,
         path
-       
+
     } = props
 
 
@@ -769,8 +784,8 @@ const Child = (props) => {
 
                 </Grid>
 
-       { path !="overall-weighing"   && (
-                        <Grid item xs={12} md={6} sm={6}>
+                {path != "overall-weighing" && (
+                    <Grid item xs={12} md={6} sm={6}>
                         {/* <SelectDropDown
                             list={roles}
                             handleChange={handleChange}
@@ -783,7 +798,7 @@ const Child = (props) => {
                             errorField={"role"}
                             label="Select Role"
                         /> */}
-    
+
                         <MultipleSelect
                             data={wardlist}
                             onchange={handleMainChange}
@@ -793,14 +808,14 @@ const Child = (props) => {
                             disabled={!isedit && !isAdd}
                             error={error}
                             label={"Select Ward "}
-    
+
                         />
                         {(error && !instanceData?.ward) && (
                             <span className="req-text">This field is required</span>
                         )}
                     </Grid>
 
-       )}         
+                )}
 
 
 

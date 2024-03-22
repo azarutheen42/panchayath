@@ -85,7 +85,7 @@ function Employee(props) {
     const [errString, seterrString] = useState();
 
     const handleClose = () => {
-        setImage();
+   
         // setIsView();
         setError();
         setIsOpen();
@@ -93,8 +93,10 @@ function Employee(props) {
         setEmployee();
         setViewEmployee();
         setisAdd();
+
         setErrorMsg({});
         seterrString();
+        setImage();
 
 
     }
