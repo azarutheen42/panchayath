@@ -56,15 +56,6 @@ import dayjs from 'dayjs';
 // }
 
 
-
-
-
-
-
-
-
-
-
 export default function datePicke(props) {
 
   const { handleChange, handleDateChange, value, name, disabled, error, report, label } = props
@@ -72,17 +63,17 @@ export default function datePicke(props) {
 
   return (
     <>
-      <label class="form-label">{label} : <span class="form-required">*</span></label>
-      <input type="Date" 
-      class="form-control" 
-        name="start_date"
+      <label class="form-label">{label} </label>
+      <input type="Date"
+        class="form-control"
+        name={name}
         onChange={handleChange}
-        defaultValue={value || ""}
+        defaultValue={value}
         disabled={disabled}
         required />
 
 
-        
+
       {(!value && error) && (
         <span className="req-text">This field is required</span>
       )}

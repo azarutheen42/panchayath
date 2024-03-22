@@ -789,19 +789,6 @@ const Child = (props) => {
 
                 {path != "overall-weighing" && (
                     <Grid item xs={12} md={6} sm={6}>
-                        {/* <SelectDropDown
-                            list={roles}
-                            handleChange={handleChange}
-                            selected={instanceData?.role}
-                            showname={"name"}
-                            name={"role"}
-                            disabled={!isedit && !isAdd}
-                            error={error}
-                            errorMsg={errorMsg}
-                            errorField={"role"}
-                            label="Select Role"
-                        /> */}
-
                         <MultipleSelect
                             data={wardlist}
                             onchange={handleMainChange}

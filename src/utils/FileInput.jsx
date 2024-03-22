@@ -25,7 +25,7 @@ const FileUploadBox = (props) => {
     const [selectedFile, setSelectedFile] = useState(null);
 
 
-    const { handleChange, value, name, disabled, error, report, filelabel  ,image,setImage ,errorMsg,errorField} = props
+    const { handleChange, value, name, disabled, error, report, filelabel  ,image,setImage ,errorMsg,errorField ,required} = props
 
 
 
@@ -112,15 +112,19 @@ const FileUploadBox = (props) => {
          {/* {((!value) && error) && (
           <span className="req-text">This field is required</span>
         )} */}
+{required && (<>
 
 
-{((!image && !value ) && error) && (
+   {((!image && !value ) && error) && (
           <span className="req-text">This field is required</span>
         )}
 
-{errorMsg && (
+        {errorMsg && (
                  <span className="req-text">{ errorMsg[errorField]?.pop()}</span>
             )}
+            
+        
+            </>   )}
 
         </>
     );

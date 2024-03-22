@@ -25,6 +25,18 @@ import SelectDropdown from "./Dropdown"
 import Grid from '@mui/material/Grid';
 
 
+import SelectDropDown from "../utils/SelectDropDown"
+import FormModal from "../utils/FormModal";
+import TextInput from "../utils/TextInput";
+import FileUploadComponent from "../utils/FileInput"
+import BasicDatePicker from "../utils/DatePicker";
+import InputBox from "../utils/NumberInput";
+import { TextField } from '@mui/material';
+
+import AddIcon from '@mui/icons-material/Add';
+import TimePicker from "../utils/TimePicker"
+
+
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -80,9 +92,6 @@ export default function Activity(props) {
 
 function MinutesOfMeeting() {
 
-
-
-
     const modalHeader = "Minutes Of Meeting";
 
     const user = useSelector((state) => state?.user?.value);
@@ -123,6 +132,11 @@ function MinutesOfMeeting() {
     const [deleteUrl, setDeleteUrl] = useState();
 
 
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+    const [lazyLoading, setLazyLoading] = useState(true);
+
+
 
     // META DATA
     const headersToShow = ["Date", "Time", "subject", "Place", "Held by", "Details"]
@@ -146,14 +160,17 @@ function MinutesOfMeeting() {
         setisAdd();
         setInstanceData();
         setError();
+        setErrorMsg({});
+        seterrString();
+        setImage();
+        setisEdit();
+
 
 
     }
 
 
     useEffect(() => {
-
-
         fetchListData();
     }, [])
 
@@ -170,6 +187,7 @@ function MinutesOfMeeting() {
 
         } catch (error) {
             console.error('Error fetching data:', error)
+            Config?.toastalert("Something Went Wrong", "error")
         }
     }
 
@@ -229,7 +247,8 @@ function MinutesOfMeeting() {
         try {
             const response = await axios.post(`${Config.BASE_URL}meeting/`, data, Config.config);
             console.log(response.data);
-            toast.success('Successfully submitted!');
+
+            Config?.toastalert("Submitted Successfully", "success")
 
             setListInstanceData((prevstate) => {
                 return [...prevstate, response?.data]
@@ -237,8 +256,15 @@ function MinutesOfMeeting() {
 
             handleClose();
         } catch (error) {
-            console.error('Error occurred:', error);
-            toast.error('Submission failed. Please try again.');
+            if (error?.response?.status === 400) {
+                console.log(error);
+                setErrorMsg(error?.response?.data)
+                Config?.toastalert("Submission Failed", "warn")
+            }
+
+            else {
+                Config?.toastalert("Something Went Wrong", "error")
+            }
         }
     };
 
@@ -266,7 +292,7 @@ function MinutesOfMeeting() {
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response)
-
+                    Config?.toastalert("Updated Successfully", "success")
                     setListInstanceData((prevArray) => {
                         const index = prevArray.findIndex((obj) => obj.id === id)
                         if (index !== -1) {
@@ -285,7 +311,15 @@ function MinutesOfMeeting() {
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
     }
 
@@ -298,12 +332,21 @@ function MinutesOfMeeting() {
             .then(function (response) {
                 if (response.status === 204) {
                     console.log(response)
+                    Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
                     handleClose();
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
                 handleClose();
             })
     }
@@ -323,13 +366,8 @@ function MinutesOfMeeting() {
             }
             console.log(e.target.files[0].name)
             let value = e.target.files[0]
-            // setImage(value)
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
+            setImage(value)
 
-            })
         }
         else {
 
@@ -362,14 +400,48 @@ function MinutesOfMeeting() {
                     {
                         (isOpen || isAdd) && (
 
-                            <MinutesOfMeetingDialogs
+                            // <MinutesOfMeetingDialogs
+                            //     setIsOpen={setIsOpen}
+                            //     isAdd={isAdd}
+                            //     error={error}
+
+                            //     setListData={tableData}
+                            //     instanceData={instanceData}
+                            //     setInstanceData={setInstanceData}
+                            //     handleClose={handleClose}
+
+                            //     // functions
+                            //     addInstance={addNewInstance}
+                            //     updateInstance={updateInstance}
+                            //     deleteInstance={deleteInstance}
+                            //     handleChange={handleChange}
+                            //     wardlist={wardlist}
+                            //     requestTypeList={complaintTypeList}
+                            //     modalHeader={modalHeader}
+
+                            // // setImage={setImage}
+                            // // image={image}
+
+
+                            // />
+
+
+
+
+                            <FormModal
+                                modalHeader={modalHeader}
+                                lazyLoading={lazyLoading}
                                 setIsOpen={setIsOpen}
                                 isAdd={isAdd}
+                                isedit={isedit}
+                                setisEdit={setisEdit}
                                 error={error}
+                                errorMsg={errorMsg}
 
                                 setListData={tableData}
                                 instanceData={instanceData}
                                 setInstanceData={setInstanceData}
+
                                 handleClose={handleClose}
 
                                 // functions
@@ -377,56 +449,43 @@ function MinutesOfMeeting() {
                                 updateInstance={updateInstance}
                                 deleteInstance={deleteInstance}
                                 handleChange={handleChange}
-                                wardlist={wardlist}
-                                requestTypeList={complaintTypeList}
-                                modalHeader={modalHeader}
 
-                            // setImage={setImage}
-                            // image={image}
+                                child={<MinutesOfMeetingForm
+                                    lazyLoading={lazyLoading}
+                                    setIsOpen={setIsOpen}
+                                    isAdd={isAdd}
+                                    isedit={isedit}
+
+                                    error={error}
+                                    errorMsg={errorMsg}
+                                    errString={errString}
+
+                                    setListData={tableData}
+                                    instanceData={instanceData}
+                                    setInstanceData={setInstanceData}
+
+                                    handleClose={handleClose}
+                                    handleChange={handleChange}
+                                    // handleMainChange={handleMainChange}
+
+                                    wardlist={wardlist}
+                                    image={image}
+                                    setImage={setImage}
 
 
+                                />}
                             />
                         )
                     }
-                    {/* <div className="content">
-                        <div className="page-header">
-                            <div className="page-title">
-                                <h4>{modalHeader}s Details</h4>
-                            </div>
-                            <div className="page-btn">
-                                <AddButton
-                                    onClick={() => setisAdd(true)}
-                                    text={" Create"}
-                                />
-
-
-                            </div>
-                        </div>
-
-
-                        <CustomTable
-                            headers={headersToShow}
-                            data={tableData}
-                            fieldsToShow={fieldsToShow}
-                            fields={fields}
-                            getInstanceData={getInstanceData}
-                            loader={loader}
-                            setLoader={setLoader}
-                        />
-                    </div> */}
-
 
 
                     <Grid item xs={12} sm={6}>
                         <Typography variant="h6">{modalHeader + "s"} Details</Typography>
                     </Grid>
                     <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
-                        <IconButton color="primary" aria-label="add">
-                            <AddButton
-                                onClick={() => setisAdd(true)}
-                                text={" Create"}
-                            />
-                        </IconButton>
+                        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
+                            Create
+                        </Button>
                     </Grid>
 
 
@@ -451,6 +510,182 @@ function MinutesOfMeeting() {
 
 
 }
+
+
+
+
+const MinutesOfMeetingForm = (props) => {
+
+    const { lazyLoading, setIsOpen, isAdd, isedit,
+        errorMsg, errString, error,
+        instanceData, setList, setInstanceData,
+        handleChange, handleClose,
+        wardlist, image, setImage
+
+
+    } = props
+
+
+    return (
+
+        <>
+
+            <Grid container spacing={2}>
+                {/* First Name */}
+                <Grid item xs={12} md={6} sm={6}>
+                    <Grid >
+
+                    </Grid>
+                    <TextInput
+
+                        label="Subject"
+                        placeholder="Subject"
+                        name={"subject"}
+                        value={instanceData?.subject}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"subject"}
+
+                    />
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <TextInput
+                        label="Place"
+                        placeholder="Place"
+                        name="place"
+                        value={instanceData?.place}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"place"}
+
+
+                    />
+
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <TextInput
+                        label="Held By"
+                        placeholder="Held By"
+                        name="held_by"
+                        value={instanceData?.held_by}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"held_by"}
+
+
+                    />
+
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <FileUploadComponent
+                        filelabel="Image"
+                        name="image"
+                        value={instanceData?.image}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        image={image}
+                        setImage={setImage}
+                        errorMsg={errorMsg}
+                        errorField={"image"}
+                    />
+
+                </Grid>
+
+
+
+
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <BasicDatePicker
+                        label="Date"
+                        placeholder="Date"
+                        name="date"
+                        value={instanceData?.date}
+                        required={true}
+                        handleChange={handleChange}
+                        // handleDateChange={handleDateChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"date"}
+
+                    />
+
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <TimePicker
+
+                        label="Time"
+                        placeholder="Time"
+                        name="time"
+                        value={instanceData?.time}
+                        required={true}
+                        handleChange={handleChange}
+                        // handleDateChange={handleDateChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"time"}
+                    />
+
+                </Grid>
+
+
+                <Grid item xs={12} md={12} sm={12}>
+
+                    <TextInput
+                        label="Details"
+                        placeholder="details"
+                        name="details"
+                        value={instanceData?.details}
+                        required={true}
+                        handleChange={handleChange}   //for main element change
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        // errorMsg={errorMsg}
+                        errorField={"details"}
+                        multiline={true}
+                        rows={4}
+
+                    />
+
+                </Grid>
+
+
+
+            </Grid>
+
+
+
+
+        </>
+
+
+
+    )
+}
+
+
 
 
 
@@ -754,8 +989,6 @@ function MinutesOfMeetingDialogs(props) {
 function Scheme() {
 
 
-
-
     const modalHeader = "Scheme";
 
     const user = useSelector((state) => state?.user?.value);
@@ -790,6 +1023,11 @@ function Scheme() {
     const [deleteUrl, setDeleteUrl] = useState("scheme-remove");
 
 
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+    const [lazyLoading, setLazyLoading] = useState(true);
+
+
 
     // META DATA
     const headersToShow = ["Date", "Scheme Name", "Scheme period", "Announced by", "Details"]
@@ -813,6 +1051,10 @@ function Scheme() {
         setisAdd();
         setInstanceData();
         setError();
+        setErrorMsg({});
+        seterrString();
+        setImage();
+        setisEdit();
 
 
     }
@@ -837,6 +1079,7 @@ function Scheme() {
 
         } catch (error) {
             console.error('Error fetching data:', error)
+            Config?.toastalert("Something Went Wrong", "error")
         }
     }
 
@@ -896,16 +1139,22 @@ function Scheme() {
         try {
             const response = await axios.post(`${Config.BASE_URL}${postUrl}/`, data, Config.config);
             console.log(response.data);
-            toast.success('Successfully submitted!');
-
+            Config?.toastalert("Submitted Successfully", "success")
             setListInstanceData((prevstate) => {
                 return [...prevstate, response?.data]
             })
 
             handleClose();
         } catch (error) {
-            console.error('Error occurred:', error);
-            toast.error('Submission failed. Please try again.');
+            if (error?.response?.status === 400) {
+                console.log(error);
+                setErrorMsg(error?.response?.data)
+                Config?.toastalert("Submission Failed", "warn")
+            }
+
+            else {
+                Config?.toastalert("Something Went Wrong", "error")
+            }
         }
     };
 
@@ -933,7 +1182,7 @@ function Scheme() {
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response)
-
+                    Config?.toastalert("Updated Successfully", "success")
                     setListInstanceData((prevArray) => {
                         const index = prevArray.findIndex((obj) => obj.id === id)
                         if (index !== -1) {
@@ -952,7 +1201,15 @@ function Scheme() {
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
     }
 
@@ -964,13 +1221,21 @@ function Scheme() {
         axios.delete(`${Config.BASE_URL}${deleteUrl}/${id}/`, Config.config)
             .then(function (response) {
                 if (response.status === 204) {
-                    console.log(response)
+                    Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
                     handleClose();
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
                 handleClose();
             })
     }
@@ -990,13 +1255,8 @@ function Scheme() {
             }
             console.log(e.target.files[0].name)
             let value = e.target.files[0]
-            // setImage(value)
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
+            setImage(value)
 
-            })
         }
         else {
 
@@ -1029,14 +1289,44 @@ function Scheme() {
                     {
                         (isOpen || isAdd) && (
 
-                            <SchemeDialogs
+                            // <SchemeDialogs
+                            //     setIsOpen={setIsOpen}
+                            //     isAdd={isAdd}
+                            //     error={error}
+
+                            //     setListData={tableData}
+                            //     instanceData={instanceData}
+                            //     setInstanceData={setInstanceData}
+                            //     handleClose={handleClose}
+
+                            //     // functions
+                            //     addInstance={addNewInstance}
+                            //     updateInstance={updateInstance}
+                            //     deleteInstance={deleteInstance}
+                            //     handleChange={handleChange}
+                            //     wardlist={wardlist}
+                            //     requestTypeList={complaintTypeList}
+                            //     modalHeader={modalHeader}
+
+                            // // setImage={setImage}
+                            // // image={image}
+                            // />
+
+
+                            <FormModal
+                                modalHeader={modalHeader}
+                                lazyLoading={lazyLoading}
                                 setIsOpen={setIsOpen}
                                 isAdd={isAdd}
+                                isedit={isedit}
+                                setisEdit={setisEdit}
                                 error={error}
+                                errorMsg={errorMsg}
 
                                 setListData={tableData}
                                 instanceData={instanceData}
                                 setInstanceData={setInstanceData}
+
                                 handleClose={handleClose}
 
                                 // functions
@@ -1044,14 +1334,31 @@ function Scheme() {
                                 updateInstance={updateInstance}
                                 deleteInstance={deleteInstance}
                                 handleChange={handleChange}
-                                wardlist={wardlist}
-                                requestTypeList={complaintTypeList}
-                                modalHeader={modalHeader}
 
-                            // setImage={setImage}
-                            // image={image}
+                                child={<SchemeForm
+                                    lazyLoading={lazyLoading}
+                                    setIsOpen={setIsOpen}
+                                    isAdd={isAdd}
+                                    isedit={isedit}
+
+                                    error={error}
+                                    errorMsg={errorMsg}
+                                    errString={errString}
+
+                                    setListData={tableData}
+                                    instanceData={instanceData}
+                                    setInstanceData={setInstanceData}
+
+                                    handleClose={handleClose}
+                                    handleChange={handleChange}
+                                    // handleMainChange={handleMainChange}
+
+                                    wardlist={wardlist}
+                                    image={image}
+                                    setImage={setImage}
 
 
+                                />}
                             />
                         )
                     }
@@ -1118,6 +1425,161 @@ function Scheme() {
 
 }
 
+
+
+const SchemeForm = (props) => {
+
+    const { lazyLoading, setIsOpen, isAdd, isedit,
+        errorMsg, errString, error,
+        instanceData, setList, setInstanceData,
+        handleChange, handleClose,
+        wardlist, image, setImage
+
+
+    } = props
+
+
+    return (
+
+        <>
+
+            <Grid container spacing={2}>
+                {/* First Name */}
+                <Grid item xs={12} md={6} sm={6}>
+                    <Grid >
+
+                    </Grid>
+                    <TextInput
+
+                        label="Scheme Name"
+                        placeholder="Scheme Name"
+                        name={"scheme_name"}
+                        value={instanceData?.scheme_name}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"scheme_name"}
+
+                    />
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <TextInput
+                        label="Period"
+                        placeholder="Period"
+                        name="Period"
+                        value={instanceData?.Period}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"Period"}
+                        type={"Number"}
+
+
+                    />
+
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <TextInput
+                        label="Announced by"
+                        placeholder="Announced by"
+                        name="Announced_by"
+                        value={instanceData?.Announced_by}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"Announced_by"}
+
+
+                    />
+
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <FileUploadComponent
+                        filelabel="Image"
+                        name="image"
+                        value={instanceData?.image}
+                        required={false}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        image={image}
+                        setImage={setImage}
+                        errorMsg={errorMsg}
+                        errorField={"image"}
+
+                    />
+
+                </Grid>
+
+
+
+
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <BasicDatePicker
+                        label="Date"
+                        placeholder="Date"
+                        name="date"
+                        value={instanceData?.date}
+                        required={true}
+                        handleChange={handleChange}
+                        // handleDateChange={handleDateChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"date"}
+
+                    />
+
+                </Grid>
+
+
+                <Grid item xs={12} md={12} sm={12}>
+
+                    <TextInput
+                        label="Details"
+                        placeholder="details"
+                        name="details"
+                        value={instanceData?.details}
+                        required={true}
+                        handleChange={handleChange}   //for main element change
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        // errorMsg={errorMsg}
+                        errorField={"details"}
+                        multiline={true}
+                        rows={4}
+
+                    />
+
+                </Grid>
+
+
+
+            </Grid>
+
+
+
+
+        </>
+
+
+
+    )
+}
 
 
 function SchemeDialogs(props) {
@@ -1431,6 +1893,13 @@ function Events() {
 
 
 
+
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+    const [lazyLoading, setLazyLoading] = useState(true);
+
+
+
     // META DATA
     const headersToShow = ["Date", "Time", "Event Name", "Place", "Details"]
     const tableData = listInstanceData
@@ -1453,6 +1922,10 @@ function Events() {
         setisAdd();
         setInstanceData();
         setError();
+        setErrorMsg({});
+        seterrString();
+        setImage();
+        setisEdit();
 
 
     }
@@ -1477,6 +1950,7 @@ function Events() {
 
         } catch (error) {
             console.error('Error fetching data:', error)
+            Config?.toastalert("Something Went Wrong", "error")
         }
     }
 
@@ -1493,6 +1967,7 @@ function Events() {
                 }
             })
             .catch(function (error) {
+                Config?.toastalert("Something Went Wrong", "error")
                 console.log(error)
             })
     }
@@ -1537,7 +2012,7 @@ function Events() {
         try {
             const response = await axios.post(`${Config.BASE_URL}${postUrl}/`, data, Config.config);
             console.log(response.data);
-            toast.success('Successfully submitted!');
+            Config?.toastalert("Submitted Successfully", "success")
 
             setListInstanceData((prevstate) => {
                 return [...prevstate, response?.data]
@@ -1545,8 +2020,15 @@ function Events() {
 
             handleClose();
         } catch (error) {
-            console.error('Error occurred:', error);
-            toast.error('Submission failed. Please try again.');
+            if (error?.response?.status === 400) {
+                console.log(error);
+                setErrorMsg(error?.response?.data)
+                Config?.toastalert("Submission Failed", "warn")
+            }
+
+            else {
+                Config?.toastalert("Something Went Wrong", "error")
+            }
         }
     };
 
@@ -1573,7 +2055,7 @@ function Events() {
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response)
-
+                    Config?.toastalert("Updated Successfully", "success")
                     setListInstanceData((prevArray) => {
                         const index = prevArray.findIndex((obj) => obj.id === id)
                         if (index !== -1) {
@@ -1592,7 +2074,15 @@ function Events() {
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
     }
 
@@ -1605,12 +2095,21 @@ function Events() {
             .then(function (response) {
                 if (response.status === 204) {
                     console.log(response)
+                    Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
                     handleClose();
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
                 handleClose();
             })
     }
@@ -1630,13 +2129,8 @@ function Events() {
             }
             console.log(e.target.files[0].name)
             let value = e.target.files[0]
-            // setImage(value)
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
+            setImage(value)
 
-            })
         }
         else {
 
@@ -1669,14 +2163,45 @@ function Events() {
                     {
                         (isOpen || isAdd) && (
 
-                            <EventsDialogs
+                            // <EventsDialogs
+                            //     setIsOpen={setIsOpen}
+                            //     isAdd={isAdd}
+                            //     error={error}
+
+                            //     setListData={tableData}
+                            //     instanceData={instanceData}
+                            //     setInstanceData={setInstanceData}
+                            //     handleClose={handleClose}
+
+                            //     // functions
+                            //     addInstance={addNewInstance}
+                            //     updateInstance={updateInstance}
+                            //     deleteInstance={deleteInstance}
+                            //     handleChange={handleChange}
+                            //     wardlist={wardlist}
+                            //     requestTypeList={complaintTypeList}
+                            //     modalHeader={modalHeader}
+
+                            // // setImage={setImage}
+                            // // image={image}
+
+
+                            // />
+
+                            <FormModal
+                                modalHeader={modalHeader}
+                                lazyLoading={lazyLoading}
                                 setIsOpen={setIsOpen}
                                 isAdd={isAdd}
+                                isedit={isedit}
+                                setisEdit={setisEdit}
                                 error={error}
+                                errorMsg={errorMsg}
 
                                 setListData={tableData}
                                 instanceData={instanceData}
                                 setInstanceData={setInstanceData}
+
                                 handleClose={handleClose}
 
                                 // functions
@@ -1684,47 +2209,39 @@ function Events() {
                                 updateInstance={updateInstance}
                                 deleteInstance={deleteInstance}
                                 handleChange={handleChange}
-                                wardlist={wardlist}
-                                requestTypeList={complaintTypeList}
-                                modalHeader={modalHeader}
 
-                            // setImage={setImage}
-                            // image={image}
+                                child={<EventForm
+                                    lazyLoading={lazyLoading}
+                                    setIsOpen={setIsOpen}
+                                    isAdd={isAdd}
+                                    isedit={isedit}
+
+                                    error={error}
+                                    errorMsg={errorMsg}
+                                    errString={errString}
+
+                                    setListData={tableData}
+                                    instanceData={instanceData}
+                                    setInstanceData={setInstanceData}
+
+                                    handleClose={handleClose}
+                                    handleChange={handleChange}
+                                    // handleMainChange={handleMainChange}
+
+                                    wardlist={wardlist}
+                                    image={image}
+                                    setImage={setImage}
 
 
+                                />}
                             />
                         )
                     }
-                    {/* <div className="content">
-                        <div className="page-header">
-                            <div className="page-title">
-                                <h4>{modalHeader}s Details</h4>
-                            </div>
-                            <div className="page-btn">
-                                <AddButton
-                                    onClick={() => setisAdd(true)}
-                                    text={" Create"}
-                                />
 
 
-                            </div>
-                        </div>
 
-
-                        <CustomTable
-                            headers={headersToShow}
-                            data={tableData}
-                            fieldsToShow={fieldsToShow}
-                            fields={fields}
-                            getInstanceData={getInstanceData}
-                            loader={loader}
-                            setLoader={setLoader}
-                        />
-                    </div> */}
-
-
-<Grid item  xs={12} sm={6}>
-                        <Typography variant="h6">{modalHeader+"s"} Details</Typography>
+                    <Grid item xs={12} sm={6}>
+                        <Typography variant="h6">{modalHeader + "s"} Details</Typography>
                     </Grid>
                     <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
                         <IconButton color="primary" aria-label="add">
@@ -1756,6 +2273,164 @@ function Events() {
     )
 
 
+}
+
+
+
+
+
+const EventForm = (props) => {
+
+    const { lazyLoading, setIsOpen, isAdd, isedit,
+        errorMsg, errString, error,
+        instanceData, setList, setInstanceData,
+        handleChange, handleClose,
+        wardlist, image, setImage
+
+
+    } = props
+
+
+    return (
+
+        <>
+
+            <Grid container spacing={2}>
+                {/* First Name */}
+                <Grid item xs={12} md={6} sm={6}>
+                    <Grid >
+
+                    </Grid>
+                    <TextInput
+
+                        label="Event Name"
+                        placeholder="Event Name"
+                        name={"event_name"}
+                        value={instanceData?.event_name}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"event_name"}
+
+                    />
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <TextInput
+                        label="Place"
+                        placeholder="Place"
+                        name="Place"
+                        value={instanceData?.Place}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"Place"}
+
+
+
+                    />
+
+                </Grid>
+
+
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <FileUploadComponent
+                        filelabel="Image"
+                        name="image"
+                        value={instanceData?.image}
+                        required={false}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        image={image}
+                        setImage={setImage}
+                        errorMsg={errorMsg}
+                        errorField={"image"}
+
+                    />
+
+                </Grid>
+
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <BasicDatePicker
+                        label="Date"
+                        placeholder="Date"
+                        name="date"
+                        value={instanceData?.date}
+                        required={true}
+                        handleChange={handleChange}
+                        // handleDateChange={handleDateChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"date"}
+
+                    />
+
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <TimePicker
+
+                        label="Time"
+                        placeholder="Time"
+                        name="time"
+                        value={instanceData?.time}
+                        required={true}
+                        handleChange={handleChange}
+                        // handleDateChange={handleDateChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"time"}
+                    />
+
+                </Grid>
+
+
+                <Grid item xs={12} md={12} sm={12}>
+
+                    <TextInput
+                        label="Details"
+                        placeholder="details"
+                        name="details"
+                        value={instanceData?.details}
+                        required={true}
+                        handleChange={handleChange}   //for main element change
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        // errorMsg={errorMsg}
+                        errorField={"details"}
+                        multiline={true}
+                        rows={4}
+
+                    />
+
+                </Grid>
+
+
+
+            </Grid>
+
+
+
+
+        </>
+
+
+
+    )
 }
 
 
@@ -2025,11 +2700,7 @@ function EventsDialogs(props) {
     );
 }
 
-const getUrl = "staffnotice";
-const getListUrl = "staffnotice";
-const postUrl = "staffnotice";
-const updateUrl = "staffnotice";
-const deleteUrl = "staffnotice";
+
 // -------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -2359,8 +3030,8 @@ function StaffNoticeBoard() {
 
 
 
-                    <Grid item  xs={12} sm={6}>
-                        <Typography variant="h6">{modalHeader+"s"} Details</Typography>
+                    <Grid item xs={12} sm={6}>
+                        <Typography variant="h6">{modalHeader + "s"} Details</Typography>
                     </Grid>
                     <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
                         <IconButton color="primary" aria-label="add">
@@ -2373,7 +3044,7 @@ function StaffNoticeBoard() {
 
 
                     <Grid item xs={12}>
-                    <CustomTable
+                        <CustomTable
                             headers={headersToShow}
                             data={tableData}
                             fieldsToShow={fieldsToShow}
@@ -2993,8 +3664,8 @@ function Announcement() {
                         />
                     </div> */}
 
-<Grid item  xs={12} sm={6}>
-                        <Typography variant="h6">{modalHeader+"s"} Details</Typography>
+                    <Grid item xs={12} sm={6}>
+                        <Typography variant="h6">{modalHeader + "s"} Details</Typography>
                     </Grid>
                     <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
                         <IconButton color="primary" aria-label="add">
@@ -3007,7 +3678,7 @@ function Announcement() {
 
 
                     <Grid item xs={12}>
-                    <CustomTable
+                        <CustomTable
                             headers={headersToShow}
                             data={tableData}
                             fieldsToShow={fieldsToShow}
