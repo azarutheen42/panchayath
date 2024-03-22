@@ -43,7 +43,7 @@ function Attendance() {
     'name': (value) => value,
     'clock_in': (value) => value ? value : "Nill",
     'clock_out': (value) => value ? value : "Nill",
-    'status': (value) => value ? "Present" : "Absent",
+    'present': (value) => value ? "Present" : "Absent",
     'role_name': (value) => value,
     'image': (value) => value,
 
@@ -205,6 +205,9 @@ function Attendance() {
 }
 
 export default Attendance
+
+
+
 
 
 

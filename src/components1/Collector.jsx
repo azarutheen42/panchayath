@@ -27,9 +27,6 @@ import { setWard } from "../features/WardSlice"
 import { setStreet } from "../features/StreetSlice";
 import MultipleSelect from "./MultiDropdown";
 
-
-
-
 import AddIcon from '@mui/icons-material/Add';
 import { Typography, Container, Grid, Paper } from '@mui/material';
 import SelectDropDown from "../utils/SelectDropDown"
@@ -416,6 +413,10 @@ function HouseCollector(props) {
 
         if (image) {
             data.append("image", image)
+        }
+
+        if (instanceData?.tractor_no) {
+            data.append("tractor_no", instanceData?.tractor_no)
         }
 
         // data.append("role", role?.id)

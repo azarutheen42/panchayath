@@ -20,7 +20,19 @@ import EditIcon from '@mui/icons-material/Edit';
 import CustomTable from "./Table";
 import AlertDialog from "./Alert"
 
-import {Typography,Container,Grid,Paper} from '@mui/material';
+import { Typography, Container, Grid, Paper } from '@mui/material';
+
+
+import AddIcon from '@mui/icons-material/Add';
+
+import SelectDropDown from "../utils/SelectDropDown"
+import FormModal from "../utils/FormModal";
+import TextInput from "../utils/TextInput";
+import FileUploadComponent from "../utils/FileInput"
+import BasicDatePicker from "../utils/DatePicker";
+import InputBox from "../utils/NumberInput";
+import { TextField } from '@mui/material';
+
 
 
 function UserRegister() {
@@ -28,6 +40,7 @@ function UserRegister() {
     // sys
     const user = useSelector((state) => state?.user?.value);
     const wardlist = useSelector((state) => state?.ward?.value);
+    const streetList = useSelector((state) => state?.street?.value);
 
 
     // meta StATE
@@ -43,22 +56,28 @@ function UserRegister() {
 
     const [hide, setHide] = useState(true);
 
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+    const [lazyLoading, setLazyLoading] = useState(true);
+
+
+    const modalHeader = "User Registration"
 
     const getWardLabel = (id) => {
         const label = wardlist?.find((e) => e?.id === id)?.name
-        return label
+        return label ?? "Nill"
     }
 
     const getStreetLabel = (id) => {
-        const label = wardlist?.find((e) => e?.id === id)?.name
-        return label
+        const label = streetList?.find((e) => e?.id === id)?.name
+        return label ?? "Nill"
     }
 
 
     const formatAddress = (addressData) => {
-        const data = `${addressData.door_no || ''} ${addressData.line1 || ''} ${addressData.line2 || ''} `.replace(/, +/g, ', ').trim();
+        const data = `${addressData?.door_no ? addressData?.door_no + "," : ''}  ${addressData.line1 || ''} ${addressData.line2 || ''} `.replace(/, +/g, ', ').trim();
         if (!data) {
-            return ""
+            return "Nill"
         }
         return data
     };
@@ -73,8 +92,8 @@ function UserRegister() {
         'name': (value) => value,
         'phone': (value) => value,
         'get_user_address': (value) => formatAddress(value),
-        'ward_name': (value) => value,
-        'get_user_address.street': (value) => value ? value : 'Nill',
+        'get_user_address.ward': (value) => getWardLabel(value),
+        'get_user_address.street': (value) => getStreetLabel(value),
     }
 
 
@@ -83,6 +102,7 @@ function UserRegister() {
         setisAdd();
         setInstanceData();
         setError();
+        setImage();
 
 
     }
@@ -97,32 +117,6 @@ function UserRegister() {
     }, [])
 
 
-    // handle new instance
-    const handleChange = (e, name) => {
-        if (name === "image") {
-            const check = Config?.fileType(e.target.files[0].name)
-
-            if (!check) {
-                console.log("not supported")
-                return
-            }
-            console.log(e.target.files[0].name)
-            let value = e.target.files[0]
-            setImage(value)
-        }
-        else {
-
-            const { value } = e.target
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
-
-            })
-
-        }
-
-    }
 
 
     // fetch all users
@@ -142,27 +136,65 @@ function UserRegister() {
 
 
 
+    const checkValidation = () => {
+
+        
+
+        if (!instanceData?.name || !instanceData?.get_user_address?.ward || !instanceData?.get_user_address?.street
+            || !instanceData?.phone || !instanceData?.get_user_address?.door_no || !instanceData?.get_user_address?.line1) {
+
+                console.log("please fill required fields")
+                setError(true)
+                return false
+          
+        
+
+        }
+        else {
+            if (instanceData?.phone?.length != 10) {
+                seterrString("Phone Number Should be in 10 Characters")
+                setError(true)
+                return false
+            }
+
+            else {
+                setError(false)
+                seterrString();
+                return true
+            }
+
+        }
+
+    }
+
+
 
     // create new instance
     const addNewInstance = async (e) => {
 
+        const check = checkValidation()
+
+        if (!check) {
+            return
+        }
+
         const data = new FormData()
         data.append('name', instanceData?.name);
         data.append('phone', instanceData?.phone);
-        data.append('ward', instanceData?.ward);
-        data.append('email', instanceData?.email);
+        data.append('password', instanceData?.phone);
         data.append('image', image);
-        // data.append('address', address);
-        // data.append('door', door);
-        // data.append('panchayat', panchayat);
 
-        data.append('password', instanceData?.password);
-        data.append('is_admin', true);
 
+        data.append('line1', instanceData?.get_user_address?.line1);
+        data.append('door_no', instanceData?.get_user_address?.door_no);
+        data.append('ward', instanceData?.get_user_address?.ward);
+        data.append('street', instanceData?.get_user_address?.street);
+      
         axios
             .post(`${Config.BASE_URL}auth/registered-users/`, data, Config.config)
             .then(function (response) {
                 if (response.status === 201) {
+                    Config?.toastalert("Submitted Successfully", "success")
                     setListInstanceData((prevstate) => {
                         return [...prevstate, response?.data]
                     })
@@ -170,7 +202,15 @@ function UserRegister() {
                 handleClose();
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Submission Failed", "warn")
+                }
+    
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
     }
 
@@ -195,25 +235,30 @@ function UserRegister() {
 
     // update instance
     const updateInstance = (id) => {
-        // const check = checkSchemeValidation()
+        const check = checkValidation()
 
-        // if (!check) {
-        //   return
-        // }
+        if (!check) {
+          return
+        }
 
         const data = new FormData()
         data.append('name', instanceData?.name);
         data.append('phone', instanceData?.phone);
-        data.append('ward', instanceData?.ward);
-        data.append('email', instanceData?.email);
-        data.append('image', image);
+        data.append('password', instanceData?.phone);
+        if(image){
+            data.append('image', image);
+        }
+        data.append('line1', instanceData?.get_user_address?.line1);
+        data.append('door_no', instanceData?.get_user_address?.door_no);
+        data.append('ward', instanceData?.get_user_address?.ward);
+        data.append('street', instanceData?.get_user_address?.street);
 
         axios
             .put(`${Config.BASE_URL}auth/registered-users/${id}/`, data, Config.config)
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response)
-
+                    Config?.toastalert("Updated Successfully", "success")
                     setListInstanceData((prevArray) => {
                         const index = prevArray.findIndex((obj) => obj.id === id)
                         if (index !== -1) {
@@ -231,7 +276,16 @@ function UserRegister() {
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
     }
 
@@ -244,87 +298,210 @@ function UserRegister() {
             .then(function (response) {
                 if (response.status === 204) {
                     console.log(response)
+                    Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
                     setIsOpen(false)
                 }
                 handleClose();
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
     }
 
 
 
 
+    const handleDateChange = (e) => {
+        const date = Config?.DateFormater(e)
+        setInstanceData((prevstate) => {
+            return {
+                ...prevstate, start_date: date
+            }
+
+        })
+
+    };
+
+
+
+    const handleMainChange = (e) => {
+        const { name, value } = e.target;
+        setInstanceData((prevstate) => {
+            return {
+                ...prevstate, [name]: value
+            }
+
+        })
+
+
+    }
+
+
+
+        // handle new instance
+        const handleChange = (e) => {
+            const { name,value } = e.target
+    
+            if (name === "image") {
+                const check = Config?.fileType(e.target.files[0].name)
+    
+                if (!check) {
+                    console.log("not supported")
+                    return
+                }
+                console.log(e.target.files[0].name)
+                let value = e.target.files[0]
+                setImage(value)
+            }
+            else {
+    
+                // const { value } = e.target
+    
+                setInstanceData(prevState => ({
+                    ...prevState,
+                    get_user_address: {
+                        ...prevState.get_user_address,
+                        [name]: value 
+                    }
+                }));
+    
+            }
+    
+        }
+    
+
+        console.log(instanceData)
+
+
     return (
 
         <>
-            {hide && (
-                <>
-
-                    {
-                        (isOpen || isAdd) && (
-
-                            <CustomizedDialogs
-                                setIsOpen={setIsOpen}
-                                isAdd={isAdd}
-                                error={error}
-
-                                setListData={tableData}
-                                instanceData={instanceData}
-                                setInstanceData={setInstanceData}
-                                handleClose={handleClose}
-
-                                // functions
-                                addInstance={addNewInstance}
-                                updateInstance={updateInstance}
-                                deleteInstance={deleteInstance}
-                                handleChange={handleChange}
-                                wardlist={wardlist}
-
-                            // setImage={setImage}
-                            // image={image}
 
 
-                            />
-                        )
-                    }
+            {
+                (isOpen || isAdd) && (
+
+                    // <CustomizedDialogs
+                    //     setIsOpen={setIsOpen}
+                    //     isAdd={isAdd}
+                    //     error={error}
+
+                    //     setListData={tableData}
+                    //     instanceData={instanceData}
+                    //     setInstanceData={setInstanceData}
+                    //     handleClose={handleClose}
+
+                    //     // functions
+                    //     addInstance={addNewInstance}
+                    //     updateInstance={updateInstance}
+                    //     deleteInstance={deleteInstance}
+                    //     handleChange={handleChange}
+                    //     wardlist={wardlist}
+
+                    // // setImage={setImage}
+                    // // image={image}
 
 
-<Grid item  xs={12} sm={6}>
-                        <Typography variant="h6">User Details</Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
-                        <IconButton color="primary" aria-label="add">
-                            <AddButton
-                                onClick={() => setisAdd(true)}
-                                text={"Add User"}
-                            />
-                        </IconButton>
-                    </Grid>
+                    // />
+
+                    <FormModal
+                        modalHeader={modalHeader}
+                        lazyLoading={lazyLoading}
+                        setIsOpen={setIsOpen}
+                        isAdd={isAdd}
+                        isedit={isedit}
+                        setisEdit={setisEdit}
+                        error={error}
+                        errorMsg={errorMsg}
+
+                        setListData={tableData}
+                        instanceData={instanceData}
+                        setInstanceData={setInstanceData}
+
+                        handleClose={handleClose}
+
+                        // functions
+                        addInstance={addNewInstance}
+                        updateInstance={updateInstance}
+                        deleteInstance={deleteInstance}
+                        handleChange={handleChange}
 
 
 
 
-                    <Grid item xs={12}>
-                        <CustomTable
-                            headers={headersToShow}
-                            data={tableData}
-                            fieldsToShow={fieldsToShow}
-                            fields={fields}
-                            getInstanceData={getInstanceData}
-                            loader={loader}
-                            setLoader={setLoader}
-                        />
-                    </Grid>
+                        child={<Child
+                            lazyLoading={lazyLoading}
+                            setIsOpen={setIsOpen}
+                            isAdd={isAdd}
+                            isedit={isedit}
 
-                </>
-            )}
+                            error={error}
+                            errorMsg={errorMsg}
+                            errString={errString}
 
+                            setListData={tableData}
+                            instanceData={instanceData}
+                            setInstanceData={setInstanceData}
+
+                            handleClose={handleClose}
+                            handleChange={handleChange}
+                            handleMainChange={handleMainChange}
+
+
+                            wardlist={wardlist}
+                            streetList={streetList}
+                            image={image}
+                            setImage={setImage}
+
+
+                        />}
+                    />
+                )
+            }
+
+
+            <Grid item xs={12} sm={6}>
+                <Typography variant="h6">User Details</Typography>
+            </Grid>
+            <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+                <IconButton color="primary" aria-label="add">
+                    <AddButton
+                        onClick={() => setisAdd(true)}
+                        text={"Add User"}
+                    />
+                </IconButton>
+            </Grid>
+
+
+
+
+            <Grid item xs={12}>
+                <CustomTable
+                    headers={headersToShow}
+                    data={tableData}
+                    fieldsToShow={fieldsToShow}
+                    fields={fields}
+                    getInstanceData={getInstanceData}
+                    loader={loader}
+                    setLoader={setLoader}
+                />
+            </Grid>
 
         </>
+
     )
+
+
+
 }
 
 
@@ -372,6 +549,204 @@ class User extends React.Component {
 
 // export default User;
 
+
+
+
+
+
+
+const Child = (props) => {
+
+    const { lazyLoading, setIsOpen, isAdd, isedit,
+        errorMsg, errString, error,
+        instanceData, setList, setInstanceData,
+        handleChange, handleClose,handleMainChange,
+        wardlist, streetList, image, setImage,
+
+
+    } = props
+
+
+    return (
+
+        <>
+
+            <Grid container spacing={2}>
+                {/* First Name */}
+                <Grid item xs={12} md={6} sm={6}>
+                    <Grid >
+
+                    </Grid>
+                    <TextInput
+
+                        label="Name"
+                        placeholder="Name"
+                        name={"name"}
+                        value={instanceData?.name}
+                        required={true}
+                        handleChange={handleMainChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"name"}
+
+                    />
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={wardlist}
+                        handleChange={handleChange}
+                        selected={instanceData?.get_user_address?.ward}
+                        showname={"name"}
+                        name={"ward"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"ward"}
+                        label="Select Ward"
+                    />
+
+
+                    {(error && !instanceData?.get_user_address?.ward) && (
+                        <span className="req-text">This field is required</span>
+                    )}
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={streetList}
+                        handleChange={handleChange}
+                        selected={instanceData?.get_user_address?.street}
+                        showname={"name"}
+                        name={"street"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"street"}
+                        label="Select Street"
+                    />
+
+
+                    {(error && !instanceData?.get_user_address?.street) && (
+                        <span className="req-text">This field is required</span>
+                    )}
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <TextInput
+                        label="Contact Number"
+                        placeholder="Name"
+                        name="phone"
+                        value={instanceData?.phone}
+                        required={true}
+                        handleChange={handleMainChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"phone"}
+                        type={"Number"}
+
+                    />
+                    {errString && (
+                        <span className="req-text">{errString}</span>
+                    )}
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <FileUploadComponent
+                        filelabel="Image"
+                        name="image"
+                        value={instanceData?.image}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        image={image}
+                        setImage={setImage}
+                        errorMsg={errorMsg}
+                        errorField={"image"}
+                    />
+
+                </Grid>
+
+
+                {/* <Grid item xs={12} md={6} sm={6}>
+
+                    <BasicDatePicker
+                        label="Join Date"
+                        placeholder="Join Date"
+                        name="start_date"
+                        value={instanceData?.employee?.start_date}
+                        required={true}
+                        handleChange={handleChange}
+                        // handleDateChange={handleDateChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"start_date"}
+
+                    />
+                </Grid> */}
+
+
+
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <TextInput
+                        label="Door No"
+                        placeholder="door no"
+                        name="door_no"
+                        value={instanceData?.get_user_address?.door_no}
+                        required={true}
+                        handleChange={handleChange}   //for main element change
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        // errorMsg={errorMsg}
+                        errorField={"door_no"}
+
+                    />
+
+                </Grid>
+
+
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <TextInput
+                        label="Address"
+                        placeholder="Address"
+                        name="line1"
+                        value={instanceData?.get_user_address?.line1}
+                        required={true}
+                        handleChange={handleChange}   //for main element change
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        // errorMsg={errorMsg}
+                        errorField={"line1"}
+
+                    />
+
+                </Grid>
+
+
+
+            </Grid>
+
+
+
+
+        </>
+
+
+
+    )
+}
 
 
 
