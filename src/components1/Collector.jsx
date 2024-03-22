@@ -348,13 +348,18 @@ function HouseCollector(props) {
     // Check form field validation
     const checkValidation = () => {
 
+        const wardCheck= path === "overall-weighing" ? false : !instanceData?.ward.length
 
+        console.log(wardCheck)
 
-        if (!instanceData?.employee?.name || !instanceData?.ward
+        if (!instanceData?.employee?.name || wardCheck
             || !instanceData?.employee?.phone_number || !instanceData?.employee?.start_date) {
-            console.log("please fill required fields")
-            setError(true)
-            return false
+
+                console.log("please fill required fields")
+                setError(true)
+                return false
+          
+        
 
         }
         else {
@@ -399,7 +404,7 @@ function HouseCollector(props) {
         // if (path != "overall-weighing") {
         //     data.append("ward", wardListdata)
         // }
-        if (wardListdata?.length>0) {
+        if (wardListdata?.length > 0) {
             // instanceData?.collector?.ward?.map((e)=>(
             data.append("ward", wardListdata)
             // ))
@@ -465,7 +470,7 @@ function HouseCollector(props) {
 
 
         const wardListdata = instanceData?.ward
-        if (wardListdata?.length>0) {
+        if (wardListdata?.length > 0) {
             // instanceData?.collector?.ward?.map((e)=>(
             data.append("ward", wardListdata)
             // ))
@@ -810,7 +815,7 @@ const Child = (props) => {
                             label={"Select Ward "}
 
                         />
-                        {(error && !instanceData?.ward) && (
+                        {(error && !instanceData?.ward?.length) && (
                             <span className="req-text">This field is required</span>
                         )}
                     </Grid>
