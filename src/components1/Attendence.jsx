@@ -12,16 +12,28 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import Typography from '@mui/material/Typography';
 import EditIcon from '@mui/icons-material/Edit';
 import CustomTable from "./Table";
 import AlertDialog from "./Alert"
 import Grid from '@mui/material/Grid';
 
 
+import SelectDropDown from "../utils/SelectDropDown"
+import FormModal from "../utils/FormModal";
+import TextInput from "../utils/TextInput";
+import FileUploadComponent from "../utils/FileInput"
+import BasicDatePicker from "../utils/DatePicker";
+import InputBox from "../utils/NumberInput";
+import { TextField } from '@mui/material';
+import MultipleSelect from "./MultiDropdown";
+import AddIcon from '@mui/icons-material/Add';
+import { toast, ToastContainer } from 'react-toastify';
+import { Typography, Container, Paper, Card, CardContent, CardMedia } from '@mui/material';
+
+
 function Attendance() {
   // Get
-
+  const modalHeader = "Attendence";
   // meta StATE
   const [listInstanceData, setListInstanceData] = useState([])
   const [instanceData, setInstanceData] = useState({})
@@ -31,6 +43,14 @@ function Attendance() {
   const [error, setError] = useState(false);
   const [image, setImage] = useState();
   const [loader, setLoader] = useState();
+
+
+  const [errorMsg, setErrorMsg] = useState({});
+  const [errString, seterrString] = useState();
+  const [lazyLoading, setLazyLoading] = useState(true);
+
+
+
 
 
   // META DATA
@@ -51,7 +71,11 @@ function Attendance() {
 
 
   const handleClose = () => {
-    setIsOpen()
+    setIsOpen();
+    setisAdd();
+    setErrorMsg({});
+    seterrString();
+    setisEdit();
 
   }
 
@@ -88,6 +112,7 @@ function Attendance() {
       console.log(data), setListInstanceData(data)
     } catch (error) {
       console.log('Scheme fetching data error', error)
+      Config?.toastalert("Something Went Wrong", "error")
     }
   }
 
@@ -104,6 +129,7 @@ function Attendance() {
       setIsOpen(true)
     } catch (error) {
       console.log('Emp Attendance fetching data error', error)
+      Config?.toastalert("Something Went Wrong", "error")
     }
   }
 
@@ -141,48 +167,78 @@ function Attendance() {
 
   return (
     <>
-
+      <ToastContainer />
 
       {
         (isOpen || isAdd) && (
 
-          <CustomizedDialogs
+          // <CustomizedDialogs
+          //   setIsOpen={setIsOpen}
+          //   isAdd={isAdd}
+          //   error={error}
+
+          //   setListData={tableData}
+          //   instanceData={instanceData}
+          //   setInstanceData={setInstanceData}
+          //   handleClose={handleClose}
+
+          //   // functions
+          //   // addInstance={addEmployee}
+          //   // updateInstance={updateEmployee}
+          //   // deleteInstance={deleteEmployee}
+          //   handleChange={handleChange}
+
+          // // setImage={setImage}
+          // // image={image}
+
+
+          // />
+
+
+          <FormModal
+            modalHeader={modalHeader}
+            lazyLoading={lazyLoading}
             setIsOpen={setIsOpen}
             isAdd={isAdd}
-            error={error}
+            isedit={isedit}
+            setisEdit={setisEdit}
 
-            setListData={tableData}
             instanceData={instanceData}
-            setInstanceData={setInstanceData}
             handleClose={handleClose}
-
-            // functions
-            // addInstance={addEmployee}
-            // updateInstance={updateEmployee}
-            // deleteInstance={deleteEmployee}
             handleChange={handleChange}
+            view={true}
 
-          // setImage={setImage}
-          // image={image}
+            child={<AttendenceModal
+              lazyLoading={lazyLoading}
+              setIsOpen={setIsOpen}
+              isAdd={isAdd}
+              isedit={isedit}
+
+              error={error}
+              errorMsg={errorMsg}
+              errString={errString}
+
+              setListData={tableData}
+              instanceData={instanceData}
+              setInstanceData={setInstanceData}
+
+              handleClose={handleClose}
+              handleChange={handleChange}
+            // setEndDate={setEndDate}
+            // setStartDate={setStartDate}
+            // setTrigger={setTrigger}
 
 
+            />}
           />
         )
       }
 
 
-      <Grid item xs={6}>
-        <Typography variant="h6">Attendance Details</Typography>
-      </Grid>
-      {/* <Grid item xs={6} display="flex" justifyContent="flex-end">
-        <IconButton color="primary" aria-label="add">
-          <AddButton
-            onClick={() => setisAdd(true)}
-            text={" Create"}
-          />
-        </IconButton>
-      </Grid> */}
 
+      <Grid item xs={12} sm={6}>
+        <Typography variant="h6">{modalHeader + "s"} Details</Typography>
+      </Grid>
 
       <Grid item xs={12}>
 
@@ -208,6 +264,210 @@ export default Attendance
 
 
 
+
+const AttendenceModal = (props) => {
+
+  const {
+    instanceData, setInstanceData
+
+  } = props
+
+
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [trigger, setTrigger] = useState(false);
+
+
+  const styles = {
+    cardTitle: {
+      color: 'black',
+      fontWeight: 500,
+      fontSize: '1.2rem',
+
+    },
+    cardText: {
+      color: 'black',
+      fontWeight: 500,
+      fontSize: '1rem',
+    },
+
+  };
+
+
+
+
+  const cardStyle = {
+    display: 'flex',
+    marginTop: "-10px",
+    marginBottom:"20px",
+    // margin: '20px auto',
+    // borderRadius: 8,
+    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+  };
+
+  const userImageStyle = {
+    flex: '0 0 30%',
+    height: "150px"
+  };
+
+  const userDetailsStyle = {
+    flex: 1,
+   
+  };
+
+
+
+  useEffect(() => {
+    if(startDate || endDate ){
+      fetchEmpAttendanceData(instanceData?.id);
+    }
+  }, [trigger, startDate, endDate])
+
+  const fetchEmpAttendanceData = async (id) => {
+    try {
+      const response = await fetch(
+        Config.BASE_URL + `get-attendance/${id}/?start_date=${startDate??""}&end_date=${endDate??""}`,
+        Config?.config,
+      )
+
+      const data = await response.json()
+      console.log(data), setInstanceData(data)
+    } catch (error) {
+      console.log('Emp Attendance fetching data error', error)
+      Config?.toastalert("Something Went Wrong", "error")
+    }
+  }
+
+
+  return (
+
+    <>
+
+
+
+
+      <Grid container spacing={0}>
+
+
+        <Grid item xs={12} sm={12} md={12}>
+
+        <Card style={cardStyle} >
+          <CardMedia
+            component="img"
+            style={userImageStyle}
+            image={instanceData?.image}
+            alt="User Image"
+          />
+          <CardContent style={userDetailsStyle} >
+            <Typography variant="body1" gutterBottom>
+              Employee Name : {instanceData?.name}
+            </Typography>
+            <Typography variant="body1" >
+              Employee ID: {instanceData?.emp_id}
+            </Typography>
+
+            <Typography variant="body1" gutterBottom>
+              Total working Days :{instanceData?.total_working_days}
+            </Typography>
+            <Typography variant="body1" >
+              Present Days : {instanceData?.present_count}
+            </Typography>
+            <Typography variant="body1" >
+              Absent Days : {instanceData?.absent_count}
+            </Typography>
+
+          </CardContent>
+        </Card>
+
+        </Grid>
+
+      </Grid>
+
+
+      <Grid container spacing={3}>
+        <Grid item xs={12} sm={5}>
+          <div class="form-group" style={{ paddingLeft: 5 }}>
+            <label for="fromDate" style={{ fontWeight: "bold" }}>From Date :</label>
+            <input type="date" class="form-control" id="fromDate"
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+          </div>
+        </Grid>
+        <Grid item xs={12} sm={5}>
+          <div class="form-group" style={{ paddingLeft: 5 }}>
+            <label for="toDate" style={{ fontWeight: "bold" }}>To Date :</label>
+            <input type="date" class="form-control" id="toDate"
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+          </div>
+
+        </Grid>
+
+        {/* <Grid item xs={12} sm={2}>
+          <div class="form-group" style={{ paddingLeft: 5 }}>
+            <label for="search" style={{ fontWeight: "bold" }}>Search</label>
+            <button class="btn btn-success"
+              onChange={(e) => setTrigger(!trigger)}
+            >Get</button>
+          </div>
+
+        </Grid> */}
+       
+      </Grid>
+
+
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={12}>
+          <div className="table-responsive">
+            <table className="table table-bordered">
+              <thead>
+                <tr className="table-info">
+                  <th>S.No</th>
+                  <th>Date</th>
+                  <th>In Time</th>
+                  <th>Out Time</th>
+
+                  {/* <th className="text-center">Action</th> */}
+                </tr>
+              </thead>
+              <tbody>
+                {instanceData?.attendances?.map(
+                  (empAttenTable, e) => (
+                    <tr key={empAttenTable.id}>
+                      <td>{e + 1}</td>
+                      <td>{empAttenTable.date}</td>
+                      <td>{empAttenTable.clock_in ?? 0.00}</td>
+                      <td>{empAttenTable.clock_out ?? 0.00}</td>
+
+                      {/* <td>
+                      <p className="text-center">
+                        <button className="btn btn-success">
+                          <span className="glyphicon glyphicon-pencil"></span>{' '}
+                          Edit
+                        </button>
+                      </p>
+                    </td> */}
+                    </tr>
+                  ),
+                )}
+              </tbody>
+            </table>
+          </div>
+        </Grid>
+
+      </Grid>
+
+
+
+
+
+
+    </>
+
+
+
+  )
+}
 
 
 

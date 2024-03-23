@@ -44,8 +44,8 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 
 function HouseDialogs(props) {
 
-    const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader,setisEdit,isedit,
-        deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, districtList, panchayatList, streetList, buildingType,child,
+    const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader, setisEdit, isedit,
+        deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, districtList, panchayatList, streetList, buildingType, child, view
         // setError, setImage, image 
     } = props
 
@@ -83,18 +83,22 @@ function HouseDialogs(props) {
                 maxWidth={"md"}
 
             >
-                <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title" >
-                    <h6>{modalHeader + "s"} Details
+             
 
-                        {!isAdd && (
+                    <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title" >
+                        <h6>{modalHeader + "s"} Details
+                        {!view && (
+                            (!isAdd && (
 
-                            <button className="btn btn-sm" onClick={() => setisEdit(!isedit)}>  <EditIcon
-                                style={{ color: "blue" }}
-                            />  </button>
-                        )}
+                                <button className="btn btn-sm" onClick={() => setisEdit(!isedit)}>  <EditIcon
+                                    style={{ color: "blue" }}
+                                />  </button>
+                            ))
 
-                    </h6>
-                </DialogTitle>
+                            )}
+                        </h6>
+                    </DialogTitle>
+
 
                 <IconButton
                     aria-label="close"
@@ -120,8 +124,8 @@ function HouseDialogs(props) {
 
                     <Typography gutterBottom>
 
-                       {child}
-                       {/* {child}
+                        {child}
+                        {/* {child}
                        {child} */}
 
                     </Typography>
@@ -129,67 +133,64 @@ function HouseDialogs(props) {
                 </DialogContent>
 
 
+                {!view && (
 
-                <DialogActions  >
+                    <DialogActions  >
 
-                    <Grid item xs={12} sm={6}>
+                        <Grid item xs={12} sm={6}>
 
-                        {!isAdd && (
+                            {!isAdd && (
 
-                            <DeleteButton
-                                loading={loading}
-                                setLoading={setLoading}
-                                onClick={handleClickOpen}
-                            />
-                        )}
-
-                    </Grid>
-
-                    <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
-
-                        {isedit && (
-                            <IconButton color="primary" aria-label="add">
-
-                                <UpdateButton
+                                <DeleteButton
                                     loading={loading}
                                     setLoading={setLoading}
-                                    onClick={() => updateInstance(instanceData?.id)}
+                                    onClick={handleClickOpen}
+                                />
+                            )}
+
+                        </Grid>
+
+                        <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+
+                            {isedit && (
+                                <IconButton color="primary" aria-label="add">
+
+                                    <UpdateButton
+                                        loading={loading}
+                                        setLoading={setLoading}
+                                        onClick={() => updateInstance(instanceData?.id)}
+                                    />
+                                </IconButton>
+
+
+                            )}
+                            {isAdd && (
+
+                                <IconButton color="primary" aria-label="add">
+
+                                    <SaveButton
+                                        loading={loading}
+                                        setLoading={setLoading}
+                                        onClick={addInstance}
+                                    />
+                                </IconButton>
+
+                            )}
+
+                            <IconButton color="primary" aria-label="add">
+
+                                <CloseButton
+                                    onClick={handleClose}
                                 />
                             </IconButton>
 
 
-                        )}
-                        {isAdd && (
-
-                            <IconButton color="primary" aria-label="add">
-
-                                <SaveButton
-                                    loading={loading}
-                                    setLoading={setLoading}
-                                    onClick={addInstance}
-                                />
-                            </IconButton>
-
-                        )}
-
-                        <IconButton color="primary" aria-label="add">
-
-                            <CloseButton
-                                onClick={handleClose}
-                            />
-                        </IconButton>
 
 
+                        </Grid>
 
-
-                    </Grid>
-
-
-
-
-
-                </DialogActions>
-
+                    </DialogActions>
+                )}
 
             </BootstrapDialog>
         </React.Fragment>

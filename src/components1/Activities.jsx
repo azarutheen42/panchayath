@@ -246,6 +246,10 @@ function MinutesOfMeeting() {
         data.append('place', instanceData?.place)
         data.append('held_by', instanceData?.held_by)
         data.append('details', instanceData?.details)
+        if(image){
+            data.append('image', image)
+        }
+        
         try {
             const response = await axios.post(`${Config.BASE_URL}meeting/`, data, Config.config);
             console.log(response.data);
@@ -288,6 +292,9 @@ function MinutesOfMeeting() {
         data.append('place', instanceData?.place)
         data.append('held_by', instanceData?.held_by)
         data.append('details', instanceData?.details)
+        if(image){
+            data.append('image', image)
+        }
 
         axios
             .put(`${Config.BASE_URL}momedit/${id}/`, data, Config.config)
@@ -1139,6 +1146,10 @@ function Scheme() {
         data.append('Period', instanceData?.Period)
         data.append('Announced_by', instanceData?.Announced_by)
         data.append('details', instanceData?.details)
+
+        if(image){
+            data.append('file', image)
+        }
         try {
             const response = await axios.post(`${Config.BASE_URL}${postUrl}/`, data, Config.config);
             console.log(response.data);
@@ -1179,6 +1190,9 @@ function Scheme() {
         data.append('Period', instanceData?.Period)
         data.append('Announced_by', instanceData?.Announced_by)
         data.append('details', instanceData?.details)
+        if(image){
+            data.append('file', image)
+        }
 
         axios
             .put(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
@@ -1831,9 +1845,6 @@ function SchemeDialogs(props) {
 
 function Events() {
 
-
-
-
     const modalHeader = "Event";
 
     const user = useSelector((state) => state?.user?.value);
@@ -1985,6 +1996,10 @@ function Events() {
         data.append('event_name', instanceData?.event_name)
         data.append('Place', instanceData?.Place)
         data.append('details', instanceData?.details)
+
+        if(image){
+            data.append('image', image)
+        }
         try {
             const response = await axios.post(`${Config.BASE_URL}${postUrl}/`, data, Config.config);
             console.log(response.data);
@@ -2025,6 +2040,9 @@ function Events() {
         data.append('event_name', instanceData?.event_name)
         data.append('Place', instanceData?.Place)
         data.append('details', instanceData?.details)
+        if(image){
+            data.append('image', image)
+        }
 
         axios
             .put(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
@@ -2826,6 +2844,9 @@ function StaffNoticeBoard() {
         data.append('subject', instanceData?.subject)
 
         data.append('details', instanceData?.details)
+        if(image){
+            data.append('file', image)
+        }
         try {
             const response = await axios.post(`${Config.BASE_URL}${postUrl}/`, data, Config.config);
             console.log(response.data);
@@ -2864,6 +2885,9 @@ function StaffNoticeBoard() {
         data.append('subject', instanceData?.subject)
 
         data.append('details', instanceData?.details)
+        if(image){
+            data.append('file', image)
+        }
 
         axios
             .put(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
@@ -3616,6 +3640,9 @@ function Announcement() {
         data.append('time', instanceData?.time)
         data.append('name', instanceData?.name)
         data.append('place', instanceData?.place)
+        if(image){
+            data.append('file', image)
+        }
         const wardlist = instanceData?.ward
         if (wardlist?.length > 0) {
             wardlist.map((e) => (
@@ -3669,6 +3696,9 @@ function Announcement() {
         data.append('place', instanceData?.place)
         // data.append('ward', instanceData?.ward)
         data.append('details', instanceData?.details)
+        if(image){
+            data.append('file', image)
+        }
 
         const wardlist = instanceData?.ward
         if (wardlist?.length > 0) {

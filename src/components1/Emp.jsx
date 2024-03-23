@@ -560,7 +560,7 @@ function Employee(props) {
                 <>
 
                     <Grid item xs={12} sm={6}>
-                        <Typography variant="h6">Permanent Employee Details</Typography>
+                        <Typography variant="h6">Permanent Employees Details</Typography>
                     </Grid>
                     <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
                         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
