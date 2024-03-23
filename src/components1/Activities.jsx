@@ -1499,7 +1499,7 @@ const SchemeForm = (props) => {
                     <FileUploadComponent
                         filelabel="Image"
                         name="image"
-                        value={instanceData?.image}
+                        value={instanceData?.file}
                         required={false}
                         handleChange={handleChange}
                         disabled={!isedit && !isAdd}
@@ -3161,7 +3161,7 @@ const StaffNoticeForm = (props) => {
                     <FileUploadComponent
                         filelabel="Image"
                         name="image"
-                        value={instanceData?.image}
+                        value={instanceData?.file}
                         required={false}
                         handleChange={handleChange}
                         disabled={!isedit && !isAdd}
