@@ -10,6 +10,7 @@ import SelectDropdown from "./Dropdown";
 import { Typography, Container, Grid, Paper, IconButton } from '@mui/material';
 import { AddButton } from "./Button";
 import { padding } from "@mui/system";
+import SelectDropDown from "../utils/SelectDropDown"
 
 
 
@@ -238,8 +239,11 @@ function Street() {
 
             <Grid item xs={12} >
                 <Typography variant="h6">Ward Report Details</Typography>
-
             </Grid>
+
+
+     
+
 
 
 
@@ -298,6 +302,9 @@ function Street() {
 
     )
 }
+
+
+
 
 
 
@@ -533,17 +540,17 @@ function Overall() {
 
 
             <Grid item xs={6} display="flex" >
-                <div class="form-group" style={{ paddingLeft: 5}}>
+                <div class="form-group" style={{ paddingLeft: 5 }}>
                     <label for="fromDate" style={{ fontWeight: "bold" }}>From Date :</label>
                     <input type="date" class="form-control" id="fromDate" onChange={(e) => setStartDate(e.target.value)} />
                 </div>
 
-                <div class="form-group" style={{ paddingLeft: 5}}>
+                <div class="form-group" style={{ paddingLeft: 5 }}>
                     <label for="toDate" style={{ fontWeight: "bold" }}>To Date :</label>
                     <input type="date" class="form-control" id="toDate" onChange={(e) => setEndDate(e.target.value)} />
                 </div>
 
-                <div class="form-group" style={{ paddingLeft: 5}}>
+                <div class="form-group" style={{ paddingLeft: 5 }}>
                     <label for="search" style={{ fontWeight: "bold" }}>Search :</label>
                     <button class="btn btn-success" onChange={(e) => setTrigger()}>Get Report</button>
                 </div>

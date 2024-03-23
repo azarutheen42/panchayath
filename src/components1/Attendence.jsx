@@ -299,26 +299,31 @@ const AttendenceModal = (props) => {
   const cardStyle = {
     display: 'flex',
     marginTop: "-10px",
-    marginBottom:"20px",
+    marginBottom: "20px",
     // margin: '20px auto',
     // borderRadius: 8,
     boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+    height: "200px"
   };
 
   const userImageStyle = {
     flex: '0 0 30%',
-    height: "150px"
+    height: "180px",
+    // width: "5px", // Adjust the width to make the thumbnail smaller
+    // height: 'auto', // Maintain aspect ratio
+    borderRadius: 4, // Add rounded corners
+    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)'
   };
 
   const userDetailsStyle = {
     flex: 1,
-   
+
   };
 
 
 
   useEffect(() => {
-    if(startDate || endDate ){
+    if (startDate || endDate) {
       fetchEmpAttendanceData(instanceData?.id);
     }
   }, [trigger, startDate, endDate])
@@ -326,7 +331,7 @@ const AttendenceModal = (props) => {
   const fetchEmpAttendanceData = async (id) => {
     try {
       const response = await fetch(
-        Config.BASE_URL + `get-attendance/${id}/?start_date=${startDate??""}&end_date=${endDate??""}`,
+        Config.BASE_URL + `get-attendance/${id}/?start_date=${startDate ?? ""}&end_date=${endDate ?? ""}`,
         Config?.config,
       )
 
@@ -351,10 +356,11 @@ const AttendenceModal = (props) => {
 
         <Grid item xs={12} sm={12} md={12}>
 
-        <Card style={cardStyle} >
+          {/* <Card style={cardStyle} >
           <CardMedia
             component="img"
-            style={userImageStyle}
+            // style={userImageStyle}
+            sx={{ objectFit: 'cover', width: '100%', height: '100%' }}
             image={instanceData?.image}
             alt="User Image"
           />
@@ -377,7 +383,36 @@ const AttendenceModal = (props) => {
             </Typography>
 
           </CardContent>
-        </Card>
+        </Card> */}
+
+          <Card sx={{ display: 'flex', marginBottom: 2 }}>
+            <CardMedia
+              component="img"
+              image={instanceData?.image}
+              alt="Image Title"
+              sx={{ width: 150, objectFit: 'cover' }}
+            />
+
+
+            <CardContent sx={{ flex: 1 }}>
+              <Typography gutterBottom variant="body1">
+                Employee Name : {instanceData?.name}
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Employee ID: {instanceData?.emp_id}
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Total working Days :{instanceData?.total_working_days}
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Present Days : {instanceData?.present_count}
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Absent Days : {instanceData?.absent_count}
+              </Typography>
+            </CardContent>
+
+          </Card>
 
         </Grid>
 
@@ -412,7 +447,7 @@ const AttendenceModal = (props) => {
           </div>
 
         </Grid> */}
-       
+
       </Grid>
 
 
@@ -453,6 +488,11 @@ const AttendenceModal = (props) => {
               </tbody>
             </table>
           </div>
+
+          {!instanceData?.attendances?.length && (
+
+                <div className="text-center p-5"> No data </div>
+          )}
         </Grid>
 
       </Grid>

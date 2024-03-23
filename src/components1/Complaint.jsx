@@ -555,9 +555,6 @@ const Child = (props) => {
             <Grid container spacing={2}>
                 {/* First Name */}
                 <Grid item xs={12} md={6} sm={6}>
-                    <Grid >
-
-                    </Grid>
                     <TextInput
 
                         label="Name"

@@ -100,8 +100,8 @@ const ActionCell = {
 const StyledTableContainer = styled(TableContainer)({
     maxHeight: '100%', // Ensure the container takes full height of its parent
     overflow: 'auto', // Enable scrollable overflow for the container
-  });
-  
+});
+
 
 function CustomTable(props) {
 
@@ -148,7 +148,7 @@ function CustomTable(props) {
 
             {mui && (
                 <StyledTableContainer
-                    // component={Paper}
+                // component={Paper}
                 >
 
 
@@ -177,55 +177,51 @@ function CustomTable(props) {
                             {(lazyLoading || !data) ? (
                                 <TableRowsLoader rowsNum={5} cellNo={headers?.length + 2} />
                             )
-
                                 :
-                                (data?.length === 0) ?
-                                    <>
-                                        <p>No Data</p>
-                                    </>
 
-                                    :
-                                    <>
-                                        {data?.map((row, rowIndex) => (
-                                            <StyledTableRow key={rowIndex}>
-                                                <StyledTableCell style={siCell}>{rowIndex + 1}</StyledTableCell>
+                                (data?.map((row, rowIndex) => (
+                                    <StyledTableRow key={rowIndex}>
+                                        <StyledTableCell style={siCell}>{rowIndex + 1}</StyledTableCell>
 
 
-                                                {Object.entries(fields).map(([fieldName, getValue]) => (
-                                                    <StyledTableCell key={`${rowIndex}-${fieldName}`}>
-                                                        {getValue(renderField(row, fieldName))}
-                                                        {/* {renderField(row, fieldName)} */}
-                                                    </StyledTableCell>
-                                                ))}
-
-                                                {!actionShow && <StyledTableCell style={ActionCell}>
-
-                                                    <ButtonWithLoader
-                                                        itemId={row?.id}
-                                                        onClick={() => fetchData(row?.id, false, "view", rowIndex)}
-                                                        class_name="btn btn-success"
-                                                        text="View"
-                                                        span_class="glyphicon glyphicon-pencil"
-                                                        loader={loader}
-                                                        index={rowIndex}
-                                                    // setLoader={setLoader}
-                                                    // key = {employee?.id}
-                                                    />
-
-
-                                                </StyledTableCell>
-
-                                                }
-
-                                            </StyledTableRow>
+                                        {Object.entries(fields).map(([fieldName, getValue]) => (
+                                            <StyledTableCell key={`${rowIndex}-${fieldName}`}>
+                                                {getValue(renderField(row, fieldName))}
+                                                {/* {renderField(row, fieldName)} */}
+                                            </StyledTableCell>
                                         ))}
 
-                                    </>}
+                                        {!actionShow && <StyledTableCell style={ActionCell}>
+
+                                            <ButtonWithLoader
+                                                itemId={row?.id}
+                                                onClick={() => fetchData(row?.id, false, "view", rowIndex)}
+                                                class_name="btn btn-success"
+                                                text="View"
+                                                span_class="glyphicon glyphicon-pencil"
+                                                loader={loader}
+                                                index={rowIndex}
+                                            // setLoader={setLoader}
+                                            // key = {employee?.id}
+                                            />
+
+
+                                        </StyledTableCell>
+
+                                        }
+
+                                    </StyledTableRow>
+                                )))
+
+                            }
 
                         </TableBody>
                     </StyledTable>
 
 
+                    {!data?.length &&
+                       <div className="text-center p-5"> No data </div>
+                    }
 
 
                 </StyledTableContainer>
