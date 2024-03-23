@@ -609,9 +609,6 @@ const Child = (props) => {
                         errorField={"ward"}
                         label="Select Ward"
                     />
-
-
-
                 </Grid>
 
 

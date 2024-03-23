@@ -45,6 +45,13 @@ const Config = {
     return supported.includes(ext)
   },
 
+  DocfileType: (e) => {
+    const supported = ["jpg", "png", "pdf", "doc", "docx", "csv", "jpeg"]
+    let ext = e.split(".").pop()
+    return supported.includes(ext)
+  },
+
+
   loader: <RotatingLines
     visible={true}
     height="20"
@@ -70,22 +77,26 @@ const Config = {
     switch (type) {
       case "success":
         toast.success(text, {
-          position: "top-center"
+          position: "top-center",
+          autoClose: 1000,
         });
         break;
       case "error":
         toast.error(text, {
-          position: "top-center"
+          position: "top-center",
+          autoClose: 1000,
         });
         break;
       case "warn":
         toast.warn(text, {
-          position: "top-center"
+          position: "top-center",
+          autoClose: 1000,
         });
         break;
       case "info":
         toast.info(text, {
-          position: "top-center"
+          position: "top-center",
+          autoClose: 1000,
         });
         break;
 

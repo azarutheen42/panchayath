@@ -635,7 +635,7 @@ const Child = (props) => {
                 <Grid item xs={12} md={6} sm={6}>
                     <TextInput
                         label="Contact Number"
-                        placeholder="Name"
+                        placeholder="Phone"
                         name="phone"
                         value={instanceData?.phone}
                         required={true}

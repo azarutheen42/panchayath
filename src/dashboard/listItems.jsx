@@ -454,6 +454,15 @@ export default function SideBar(props) {
 
           <Collapse in={show?.masters} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
+{/* 
+              <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=masters&s=panchayath")}>
+                <ListItemIcon>
+                  <StarBorder />
+                </ListItemIcon>
+                <ListItemText primary="Panchayath" />
+              </ListItemButton> */}
+
+
 
               <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=masters&s=ward")}>
                 <ListItemIcon>

@@ -25,7 +25,20 @@ import SelectDropdown from "./Dropdown"
 import { useDispatch } from "react-redux";
 import { setWard } from "../features/WardSlice"
 import { setStreet } from "../features/StreetSlice";
-import {Typography,Container,Grid,Paper} from '@mui/material';
+import { Typography, Container, Grid, Paper } from '@mui/material';
+
+
+import SelectDropDown from "../utils/SelectDropDown"
+import FormModal from "../utils/FormModal";
+import TextInput from "../utils/TextInput";
+import FileUploadComponent from "../utils/FileInput"
+import BasicDatePicker from "../utils/DatePicker";
+import InputBox from "../utils/NumberInput";
+import { TextField } from '@mui/material';
+import MultipleSelect from "./MultiDropdown";
+
+import AddIcon from '@mui/icons-material/Add';
+import TimePicker from "../utils/TimePicker"
 
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -72,6 +85,7 @@ function Masters(props) {
             <Content
                 path={props?.path}
             />
+            <ToastContainer />
         </>
 
     )
@@ -85,14 +99,10 @@ export default Masters;
 
 function District() {
 
-
-
-
     const modalHeader = "District";
 
     const user = useSelector((state) => state?.user?.value);
-    const wardlist = useSelector((state) => state?.ward?.value);
-    const complaintTypeList = useSelector((state) => state?.complainttype?.value);
+    const zoneList = useSelector((state) => state?.zone?.value);
 
     // meta StATE
     const [listInstanceData, setListInstanceData] = useState([])
@@ -108,41 +118,21 @@ function District() {
     const [hide, setHide] = useState(true);
 
 
-    const getWardLabel = (id) => {
-        const label = wardlist?.find((e) => e?.id === id)?.name
-        return label
-    }
 
 
-
-    const getComplaintTypeLabel = (id) => {
-        const label = complaintTypeList?.find((e) => e?.id === id)?.type
-        return label
-    }
-
-
-    const [getUrl, setGetUrl] = useState();
-    const [getListUrl, setGetListUrl] = useState();
-    const [postUrl, setPostUrl] = useState();
-    const [updateUrl, setUpdateUrl] = useState();
-    const [deleteUrl, setDeleteUrl] = useState();
-
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+    const [lazyLoading, setLazyLoading] = useState(true);
 
 
     // META DATA
-    const headersToShow = ["Date", "Time", "subject", "Place", "Held by", "Details"]
+    const headersToShow = ["Zone", "Name"]
     const tableData = listInstanceData
     const fieldsToShow = []
     const fields = {
 
-        'date': (value) => value,
-        'time': (value) => value,
-        'subject': (value) => value,
-        'place': (value) => value,
-        'held_by': (value) => value,
-        'details': (value) => value,
-
-
+        "zone": (value) => value,
+        "name": (value) => value,
     }
 
 
@@ -151,6 +141,9 @@ function District() {
         setisAdd();
         setInstanceData();
         setError();
+        setErrorMsg({});
+        seterrString();
+        setisEdit();
 
 
     }
@@ -168,13 +161,14 @@ function District() {
     const fetchListData = async () => {
         try {
 
-            const response = await fetch(Config.BASE_URL + 'meeting', Config?.config)
+            const response = await fetch(Config.BASE_URL + 'districts', Config?.config)
             const data = await response.json()
             console.log(data)
             setListInstanceData(data)
 
         } catch (error) {
             console.error('Error fetching data:', error)
+            Config?.toastalert("Something Went Wrong", "error")
         }
     }
 
@@ -183,7 +177,7 @@ function District() {
 
     const getInstanceData = (id, edit) => {
         axios
-            .get(`${Config.BASE_URL}momedit/${id}`, Config.config)
+            .get(`${Config.BASE_URL}districts/${id}`, Config.config)
             .then(function (response) {
                 if (response.status === 200) {
                     setInstanceData(response?.data)
@@ -192,6 +186,7 @@ function District() {
             })
             .catch(function (error) {
                 console.log(error)
+                Config?.toastalert("Something Went Wrong", "error")
             })
     }
 
@@ -202,7 +197,7 @@ function District() {
     // Check form field validation
     const checkValidation = () => {
         console.log(instanceData)
-        if (!instanceData?.date || !instanceData?.time || !instanceData?.subject || !instanceData?.place || !instanceData?.held_by || !instanceData?.details) {
+        if (!instanceData?.name || !instanceData?.zone) {
             console.log("please fill required fields")
             setError(true)
             return false
@@ -225,25 +220,27 @@ function District() {
         }
 
         const data = new FormData();
-        data.append('date', instanceData?.date)
-        data.append('time', instanceData?.time)
-        data.append('subject', instanceData?.subject)
-        data.append('place', instanceData?.place)
-        data.append('held_by', instanceData?.held_by)
-        data.append('details', instanceData?.details)
+        data.append("name", instanceData?.name)
+        data.append("zone", instanceData?.zone)
         try {
-            const response = await axios.post(`${Config.BASE_URL}meeting/`, data, Config.config);
+            const response = await axios.post(`${Config.BASE_URL}districts/`, data, Config.config);
             console.log(response.data);
-            toast.success('Successfully submitted!');
-
+            Config?.toastalert("Submitted Successfully", "success")
             setListInstanceData((prevstate) => {
                 return [...prevstate, response?.data]
             })
 
             handleClose();
         } catch (error) {
-            console.error('Error occurred:', error);
-            toast.error('Submission failed. Please try again.');
+            if (error?.response?.status === 400) {
+                console.log(error);
+                setErrorMsg(error?.response?.data)
+                Config?.toastalert("Submission Failed", "warn")
+            }
+
+            else {
+                Config?.toastalert("Something Went Wrong", "error")
+            }
         }
     };
 
@@ -259,19 +256,15 @@ function District() {
         }
 
         const data = new FormData()
-        data.append('date', instanceData?.date)
-        data.append('time', instanceData?.time)
-        data.append('subject', instanceData?.subject)
-        data.append('place', instanceData?.place)
-        data.append('held_by', instanceData?.held_by)
-        data.append('details', instanceData?.details)
+        data.append("name", instanceData?.name)
+        data.append("zone", instanceData?.zone)
 
         axios
-            .put(`${Config.BASE_URL}momedit/${id}/`, data, Config.config)
+            .put(`${Config.BASE_URL}districts/${id}/`, data, Config.config)
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response)
-
+                    Config?.toastalert("Updated Successfully", "success")
                     setListInstanceData((prevArray) => {
                         const index = prevArray.findIndex((obj) => obj.id === id)
                         if (index !== -1) {
@@ -290,25 +283,41 @@ function District() {
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
     }
 
     //DELETE REQUESTS
 
     const deleteInstance = (id) => {
-        console.log('deleting')
 
         axios.delete(`${Config.BASE_URL}momdelete/${id}`, Config.config)
             .then(function (response) {
                 if (response.status === 204) {
                     console.log(response)
+                    Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
                     handleClose();
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
                 handleClose();
             })
     }
@@ -319,35 +328,12 @@ function District() {
     // handle new instance
     const handleChange = (e) => {
         const { name, value } = e.target;
-        if (name === "image") {
-            const check = Config?.fileType(e.target.files[0].name)
-
-            if (!check) {
-                console.log("not supported")
-                return
+        setInstanceData((prevstate) => {
+            return {
+                ...prevstate, [name]: value
             }
-            console.log(e.target.files[0].name)
-            let value = e.target.files[0]
-            // setImage(value)
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
 
-            })
-        }
-        else {
-
-            // const { value } = e.target
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
-
-            })
-
-        }
-
+        })
     }
 
 
@@ -359,7 +345,7 @@ function District() {
 
         <>
 
-            <ToastContainer />
+
 
             {hide && (
                 <>
@@ -367,14 +353,44 @@ function District() {
                     {
                         (isOpen || isAdd) && (
 
-                            <MinutesOfMeetingDialogs
+                            // <MinutesOfMeetingDialogs
+                            //     setIsOpen={setIsOpen}
+                            //     isAdd={isAdd}
+                            //     error={error}
+
+                            //     setListData={tableData}
+                            //     instanceData={instanceData}
+                            //     setInstanceData={setInstanceData}
+                            //     handleClose={handleClose}
+
+                            //     // functions
+                            //     addInstance={addNewInstance}
+                            //     updateInstance={updateInstance}
+                            //     deleteInstance={deleteInstance}
+                            //     handleChange={handleChange}
+                            //     wardlist={wardlist}
+                            //     requestTypeList={complaintTypeList}
+                            //     modalHeader={modalHeader}
+
+                            // // setImage={setImage}
+                            // // image={image}
+                            // />
+
+
+                            <FormModal
+                                modalHeader={modalHeader}
+                                lazyLoading={lazyLoading}
                                 setIsOpen={setIsOpen}
                                 isAdd={isAdd}
+                                isedit={isedit}
+                                setisEdit={setisEdit}
                                 error={error}
+                                errorMsg={errorMsg}
 
                                 setListData={tableData}
                                 instanceData={instanceData}
                                 setInstanceData={setInstanceData}
+
                                 handleClose={handleClose}
 
                                 // functions
@@ -382,60 +398,48 @@ function District() {
                                 updateInstance={updateInstance}
                                 deleteInstance={deleteInstance}
                                 handleChange={handleChange}
-                                wardlist={wardlist}
-                                requestTypeList={complaintTypeList}
-                                modalHeader={modalHeader}
 
-                            // setImage={setImage}
-                            // image={image}
+                                child={<DistrictForm
+                                    lazyLoading={lazyLoading}
+                                    setIsOpen={setIsOpen}
+                                    isAdd={isAdd}
+                                    isedit={isedit}
+
+                                    error={error}
+                                    errorMsg={errorMsg}
+                                    errString={errString}
+
+                                    setListData={tableData}
+                                    instanceData={instanceData}
+                                    setInstanceData={setInstanceData}
+
+                                    handleClose={handleClose}
+                                    handleChange={handleChange}
+                                    // handleMainChange={handleMainChange}
+
+                                    zoneList={zoneList}
 
 
+                                />}
                             />
+
                         )
                     }
-                    {/* <div className="content">
-                        <div className="page-header">
-                            <div className="page-title">
-                                <h4>{modalHeader}s Details</h4>
-                            </div>
-                            <div className="page-btn">
-                                <AddButton
-                                    onClick={() => setisAdd(true)}
-                                    text={" Create"}
-                                />
 
 
-                            </div>
-                        </div>
 
-
-                        <CustomTable
-                            headers={headersToShow}
-                            data={tableData}
-                            fieldsToShow={fieldsToShow}
-                            fields={fields}
-                            getInstanceData={getInstanceData}
-                            loader={loader}
-                            setLoader={setLoader}
-                        />
-                    </div> */}
-
-
-                    <Grid item  xs={12} sm={6}>
-                        <Typography variant="h6">{modalHeader+"s"} Details</Typography>
+                    <Grid item xs={12} sm={6}>
+                        <Typography variant="h6">{modalHeader + "s"} Details</Typography>
                     </Grid>
                     <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
-                        <IconButton color="primary" aria-label="add">
-                            <AddButton
-                                onClick={() => setisAdd(true)}
-                                text={" Create"}
-                            />
-                        </IconButton>
+                        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
+                            Create
+                        </Button>
                     </Grid>
 
 
                     <Grid item xs={12}>
-                    <CustomTable
+                        <CustomTable
                             headers={headersToShow}
                             data={tableData}
                             fieldsToShow={fieldsToShow}
@@ -455,6 +459,74 @@ function District() {
     )
 
 
+}
+
+
+
+
+const DistrictForm = (props) => {
+
+    const { lazyLoading, setIsOpen, isAdd, isedit,
+        errorMsg, errString, error,
+        instanceData, setList, setInstanceData,
+        handleChange, handleClose,
+        zoneList, image, setImage
+
+
+    } = props
+
+
+    return (
+
+        <>
+
+            <Grid container spacing={2}>
+                {/* First Name */}
+                <Grid item xs={12} md={6} sm={6}>
+                    <Grid >
+
+                    </Grid>
+                    <TextInput
+
+                        label="Name"
+                        placeholder="Name"
+                        name={"name"}
+                        value={instanceData?.name}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"name"}
+
+                    />
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={zoneList}
+                        handleChange={handleChange}
+                        selected={instanceData?.street}
+                        showname={"name"}
+                        name={"street"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"street"}
+                        label="Select Street"
+                    />
+
+                </Grid>
+
+
+            </Grid>
+
+        </>
+
+
+
+    )
 }
 
 
@@ -758,14 +830,11 @@ function DistrictDialogs(props) {
 
 function City() {
 
-
-
-
     const modalHeader = "City";
 
     const user = useSelector((state) => state?.user?.value);
-    const wardlist = useSelector((state) => state?.ward?.value);
-    const complaintTypeList = useSelector((state) => state?.complainttype?.value);
+    const DistrictList = useSelector((state) => state?.ward?.value);
+
 
     // meta StATE
     const [listInstanceData, setListInstanceData] = useState([])
@@ -788,28 +857,24 @@ function City() {
 
 
 
-    const [getUrl, setGetUrl] = useState("get-scheme");
-    const [getListUrl, setGetListUrl] = useState("scheme");
-    const [postUrl, setPostUrl] = useState("scheme");
-    const [updateUrl, setUpdateUrl] = useState("update-scheme");
-    const [deleteUrl, setDeleteUrl] = useState("scheme-remove");
+    const getUrl = "";
+    const getListUrl = "";
+    const postUrl = "";
+    const updateUrl = "";
+    const deleteUrl = "";
 
 
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+    const [lazyLoading, setLazyLoading] = useState(true);
 
     // META DATA
-    const headersToShow = ["Date", "Scheme Name", "Scheme period", "Announced by", "Details"]
+    const headersToShow = ["Name", "District Name"]
     const tableData = listInstanceData
     const fieldsToShow = []
     const fields = {
-
-        'date': (value) => value,
-        'scheme_name': (value) => value,
-        'Period': (value) => value,
-        // 'place': (value) => value,
-        'Announced_by': (value) => value,
-        'details': (value) => value,
-
-
+        "name": (value) => value,
+        "district": (value) => value,
     }
 
 
@@ -818,6 +883,10 @@ function City() {
         setisAdd();
         setInstanceData();
         setError();
+        setErrorMsg({});
+        seterrString();
+        setisEdit();
+
 
 
     }
@@ -842,6 +911,7 @@ function City() {
 
         } catch (error) {
             console.error('Error fetching data:', error)
+            Config?.toastalert("Something Went Wrong", "error")
         }
     }
 
@@ -859,6 +929,7 @@ function City() {
             })
             .catch(function (error) {
                 console.log(error)
+                Config?.toastalert("Something Went Wrong", "error")
             })
     }
 
@@ -868,8 +939,8 @@ function City() {
     //add new
     // Check form field validation
     const checkValidation = () => {
-
-        if (!instanceData?.date || !instanceData?.scheme_name || !instanceData?.Period || !instanceData?.Announced_by || !instanceData?.details) {
+        console.log(instanceData)
+        if (!instanceData?.name || !instanceData?.district) {
             console.log("please fill required fields")
             setError(true)
             return false
@@ -892,16 +963,12 @@ function City() {
         }
 
         const data = new FormData();
-        data.append('date', instanceData?.date)
-        // data.append('time', instanceData?.schemetime)
-        data.append('scheme_name', instanceData?.scheme_name)
-        data.append('Period', instanceData?.Period)
-        data.append('Announced_by', instanceData?.Announced_by)
-        data.append('details', instanceData?.details)
+        data.append("name", instanceData?.name)
+        data.append("district", instanceData?.district)
         try {
             const response = await axios.post(`${Config.BASE_URL}${postUrl}/`, data, Config.config);
             console.log(response.data);
-            toast.success('Successfully submitted!');
+            Config?.toastalert("Submitted Successfully", "success")
 
             setListInstanceData((prevstate) => {
                 return [...prevstate, response?.data]
@@ -909,8 +976,15 @@ function City() {
 
             handleClose();
         } catch (error) {
-            console.error('Error occurred:', error);
-            toast.error('Submission failed. Please try again.');
+            if (error?.response?.status === 400) {
+                console.log(error);
+                setErrorMsg(error?.response?.data)
+                Config?.toastalert("Submission Failed", "warn")
+            }
+
+            else {
+                Config?.toastalert("Something Went Wrong", "error")
+            }
         }
     };
 
@@ -926,19 +1000,14 @@ function City() {
         }
 
         const data = new FormData()
-        data.append('date', instanceData?.date)
-        // data.append('time', instanceData?.schemetime)
-        data.append('scheme_name', instanceData?.scheme_name)
-        data.append('Period', instanceData?.Period)
-        data.append('Announced_by', instanceData?.Announced_by)
-        data.append('details', instanceData?.details)
-
+        data.append("name", instanceData?.name)
+        data.append("district", instanceData?.district)
         axios
             .put(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response)
-
+                    Config?.toastalert("Updated Successfully", "success")
                     setListInstanceData((prevArray) => {
                         const index = prevArray.findIndex((obj) => obj.id === id)
                         if (index !== -1) {
@@ -957,25 +1026,42 @@ function City() {
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
     }
 
     //DELETE REQUESTS
 
     const deleteInstance = (id) => {
-        console.log('deleting')
+
 
         axios.delete(`${Config.BASE_URL}${deleteUrl}/${id}/`, Config.config)
             .then(function (response) {
                 if (response.status === 204) {
                     console.log(response)
+                    Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
                     handleClose();
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
                 handleClose();
             })
     }
@@ -983,40 +1069,15 @@ function City() {
 
 
 
-    // handle new instance
     const handleChange = (e) => {
         const { name, value } = e.target;
-        if (name === "image") {
-            const check = Config?.fileType(e.target.files[0].name)
-
-            if (!check) {
-                console.log("not supported")
-                return
+        setInstanceData((prevstate) => {
+            return {
+                ...prevstate, [name]: value
             }
-            console.log(e.target.files[0].name)
-            let value = e.target.files[0]
-            // setImage(value)
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
 
-            })
-        }
-        else {
-
-            // const { value } = e.target
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
-
-            })
-
-        }
-
+        })
     }
-
 
 
 
@@ -1026,7 +1087,7 @@ function City() {
 
         <>
 
-            <ToastContainer />
+
 
             {hide && (
                 <>
@@ -1034,14 +1095,21 @@ function City() {
                     {
                         (isOpen || isAdd) && (
 
-                            <SchemeDialogs
+
+                            <FormModal
+                                modalHeader={modalHeader}
+                                lazyLoading={lazyLoading}
                                 setIsOpen={setIsOpen}
                                 isAdd={isAdd}
+                                isedit={isedit}
+                                setisEdit={setisEdit}
                                 error={error}
+                                errorMsg={errorMsg}
 
                                 setListData={tableData}
                                 instanceData={instanceData}
                                 setInstanceData={setInstanceData}
+
                                 handleClose={handleClose}
 
                                 // functions
@@ -1049,14 +1117,29 @@ function City() {
                                 updateInstance={updateInstance}
                                 deleteInstance={deleteInstance}
                                 handleChange={handleChange}
-                                wardlist={wardlist}
-                                requestTypeList={complaintTypeList}
-                                modalHeader={modalHeader}
 
-                            // setImage={setImage}
-                            // image={image}
+                                child={<CityForm
+                                    lazyLoading={lazyLoading}
+                                    setIsOpen={setIsOpen}
+                                    isAdd={isAdd}
+                                    isedit={isedit}
+
+                                    error={error}
+                                    errorMsg={errorMsg}
+                                    errString={errString}
+
+                                    setListData={tableData}
+                                    instanceData={instanceData}
+                                    setInstanceData={setInstanceData}
+
+                                    handleClose={handleClose}
+                                    handleChange={handleChange}
+                                    // handleMainChange={handleMainChange}
+
+                                    districtList={districtList}
 
 
+                                />}
                             />
                         )
                     }
@@ -1096,6 +1179,74 @@ function City() {
 
 
 }
+
+
+
+const CityForm = (props) => {
+
+    const { lazyLoading, setIsOpen, isAdd, isedit,
+        errorMsg, errString, error,
+        instanceData, setList, setInstanceData,
+        handleChange, handleClose,
+        zoneList, image, setImage
+
+
+    } = props
+
+
+    return (
+
+        <>
+
+            <Grid container spacing={2}>
+                {/* First Name */}
+                <Grid item xs={12} md={6} sm={6}>
+                    <Grid >
+
+                    </Grid>
+                    <TextInput
+
+                        label="Name"
+                        placeholder="Name"
+                        name={"name"}
+                        value={instanceData?.name}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"name"}
+
+                    />
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={zoneList}
+                        handleChange={handleChange}
+                        selected={instanceData?.street}
+                        showname={"name"}
+                        name={"street"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"street"}
+                        label="Select Street"
+                    />
+
+                </Grid>
+
+
+            </Grid>
+
+        </>
+
+
+
+    )
+}
+
 
 
 
@@ -1370,16 +1521,646 @@ function CityDialogs(props) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------
 
+// function Panchayat() {
+
+
+
+
+//     const modalHeader = "Panchayath";
+
+//     const user = useSelector((state) => state?.user?.value);
+//     const wardlist = useSelector((state) => state?.ward?.value);
+
+//     // meta StATE
+//     const [listInstanceData, setListInstanceData] = useState([])
+//     const [instanceData, setInstanceData] = useState({})
+
+//     const [isOpen, setIsOpen] = useState();
+//     const [isedit, setisEdit] = useState();
+//     const [isAdd, setisAdd] = useState();
+//     const [error, setError] = useState(false);
+//     const [image, setImage] = useState();
+//     const [loader, setLoader] = useState();
+
+//     const [hide, setHide] = useState(true);
+
+
+//     const getWardLabel = (id) => {
+//         const label = wardlist?.find((e) => e?.id === id)?.name
+//         return label
+//     }
+
+
+
+//     const getUrl = "event-register-get";
+//     const getListUrl = "eventregister";
+//     const postUrl = "eventregister";
+//     const updateUrl = "event-register-get";
+//     const deleteUrl = "eventregister";
+
+
+
+//     // META DATA
+//     const headersToShow = ["Date", "Time", "Event Name", "Place", "Details"]
+//     const tableData = listInstanceData
+//     const fieldsToShow = []
+//     const fields = {
+
+//         'date': (value) => value,
+//         'time': (value) => value,
+//         'event_name': (value) => value,
+//         // 'place': (value) => value,
+//         'Place': (value) => value,
+//         'details': (value) => value,
+
+
+//     }
+
+
+//     const handleClose = () => {
+//         setIsOpen();
+//         setisAdd();
+//         setInstanceData();
+//         setError();
+
+
+//     }
+
+
+//     useEffect(() => {
+
+
+//         fetchListData();
+//     }, [])
+
+
+
+
+//     const fetchListData = async () => {
+//         try {
+
+//             const response = await fetch(Config.BASE_URL + getListUrl, Config?.config)
+//             const data = await response.json()
+//             console.log(data)
+//             setListInstanceData(data)
+
+//         } catch (error) {
+//             console.error('Error fetching data:', error)
+//         }
+//     }
+
+
+
+
+//     const getInstanceData = (id, edit) => {
+//         axios
+//             .get(`${Config.BASE_URL}${getUrl}/${id}/`, Config.config)
+//             .then(function (response) {
+//                 if (response.status === 200) {
+//                     setInstanceData(response?.data)
+//                     setIsOpen(true);
+//                 }
+//             })
+//             .catch(function (error) {
+//                 console.log(error)
+//             })
+//     }
+
+
+
+
+//     //add new
+//     // Check form field validation
+//     const checkValidation = () => {
+
+//         console.log(instanceData, "fdj")
+
+//         if (!instanceData?.ward_no || !instanceData?.name) {
+//             console.log("please fill required fields")
+//             setError(true)
+//             return false
+
+//         }
+//         else {
+//             setError(false)
+//             return true
+//         }
+
+//     }
+
+
+//     const addNewInstance = async (e) => {
+
+//         const check = checkValidation()
+
+//         if (!check) {
+//             return
+//         }
+
+//         const data = new FormData();
+//         data.append('name', instanceData?.name)
+//         data.append('ward_no', instanceData?.ward_no)
+
+//         try {
+//             const response = await axios.post(`${Config.BASE_URL}${postUrl}/`, data, Config.config);
+//             console.log(response.data);
+//             toast.success('Successfully submitted!');
+
+//             setListInstanceData((prevstate) => {
+//                 return [...prevstate, response?.data]
+//             })
+
+//             handleClose();
+//         } catch (error) {
+//             console.error('Error occurred:', error);
+//             toast.error('Submission failed. Please try again.');
+//         }
+//     };
+
+
+
+//     //UPDATE REQUESTS
+
+//     const updateInstance = (id) => {
+//         const check = checkValidation()
+
+//         if (!check) {
+//             return
+//         }
+
+//         const data = new FormData()
+//         data.append('name', instanceData?.name)
+//         data.append('ward_no', instanceData?.ward_no)
+
+//         axios
+//             .put(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
+//             .then(function (response) {
+//                 if (response.status === 200) {
+//                     console.log(response)
+
+//                     setListInstanceData((prevArray) => {
+//                         const index = prevArray.findIndex((obj) => obj.id === id)
+//                         if (index !== -1) {
+//                             return [
+//                                 ...prevArray.slice(0, index),
+//                                 { ...prevArray[index], ...response.data },
+//                                 ...prevArray.slice(index + 1),
+//                             ]
+//                         }
+//                         return prevArray
+//                     })
+
+//                     handleClose()
+
+
+//                 }
+//             })
+//             .catch(function (error) {
+//                 console.log(error)
+//             })
+//     }
+
+//     //DELETE REQUESTS
+
+//     const deleteInstance = (id) => {
+//         console.log('deleting')
+
+//         axios.delete(`${Config.BASE_URL}${deleteUrl}/${id}/`, Config.config)
+//             .then(function (response) {
+//                 if (response.status === 204) {
+//                     console.log(response)
+//                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
+//                     handleClose();
+//                 }
+//             })
+//             .catch(function (error) {
+//                 console.log(error)
+//                 handleClose();
+//             })
+//     }
+
+
+
+
+//     // handle new instance
+//     const handleChange = (e) => {
+//         const { name, value } = e.target;
+//         if (name === "image") {
+//             const check = Config?.fileType(e.target.files[0].name)
+
+//             if (!check) {
+//                 console.log("not supported")
+//                 return
+//             }
+//             console.log(e.target.files[0].name)
+//             let value = e.target.files[0]
+//             // setImage(value)
+//             setInstanceData((prevstate) => {
+//                 return {
+//                     ...prevstate, [name]: value
+//                 }
+
+//             })
+//         }
+//         else {
+
+//             // const { value } = e.target
+//             setInstanceData((prevstate) => {
+//                 return {
+//                     ...prevstate, [name]: value
+//                 }
+
+//             })
+
+//         }
+
+//     }
+
+
+
+
+//     return (
+
+
+
+//         <>
+
+//             <ToastContainer />
+
+//             {hide && (
+//                 <>
+
+//                     {
+//                         (isOpen || isAdd) && (
+
+//                             <EventsDialogs
+//                                 setIsOpen={setIsOpen}
+//                                 isAdd={isAdd}
+//                                 error={error}
+
+//                                 setListData={tableData}
+//                                 instanceData={instanceData}
+//                                 setInstanceData={setInstanceData}
+//                                 handleClose={handleClose}
+
+//                                 // functions
+//                                 addInstance={addNewInstance}
+//                                 updateInstance={updateInstance}
+//                                 deleteInstance={deleteInstance}
+//                                 handleChange={handleChange}
+//                                 wardlist={wardlist}
+//                                 requestTypeList={complaintTypeList}
+//                                 modalHeader={modalHeader}
+
+//                             // setImage={setImage}
+//                             // image={image}
+
+
+//                             />
+//                         )
+//                     }
+//                     {/* <div className="content">
+//                         <div className="page-header">
+//                             <div className="page-title">
+//                                 <h4>{modalHeader}s Details</h4>
+//                             </div>
+//                             <div className="page-btn">
+//                                 <AddButton
+//                                     onClick={() => setisAdd(true)}
+//                                     text={" Create"}
+//                                 />
+
+
+//                             </div>
+//                         </div>
+
+
+//                         <CustomTable
+//                             headers={headersToShow}
+//                             data={tableData}
+//                             fieldsToShow={fieldsToShow}
+//                             fields={fields}
+//                             getInstanceData={getInstanceData}
+//                             loader={loader}
+//                             setLoader={setLoader}
+//                         />
+//                     </div> */}
+
+
+//                     <Grid item xs={12} sm={6}>
+//                         <Typography variant="h6">{modalHeader + "s"} Details</Typography>
+//                     </Grid>
+//                     <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+//                         <IconButton color="primary" aria-label="add">
+//                             <AddButton
+//                                 onClick={() => setisAdd(true)}
+//                                 text={" Create"}
+//                             />
+//                         </IconButton>
+//                     </Grid>
+
+
+//                     <Grid item xs={12}>
+//                         <CustomTable
+//                             headers={headersToShow}
+//                             data={tableData}
+//                             fieldsToShow={fieldsToShow}
+//                             fields={fields}
+//                             getInstanceData={getInstanceData}
+//                             loader={loader}
+//                             setLoader={setLoader}
+//                         />
+//                     </Grid>
+//                 </>
+//             )}
+
+
+
+//         </>
+//     )
+
+
+// }
+
+
+
+// function PanchayatDialogs(props) {
+
+//     const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader,
+//         deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, requestTypeList
+//         // setError, setImage, image 
+//     } = props
+
+
+//     const [isedit, setIsedit] = useState(false);
+//     const [isdelete, setisDelete] = useState(false);
+//     const [loading, setLoading] = useState(false);
+
+
+//     const handleClickOpen = () => {
+//         setisDelete(true);
+//     };
+
+//     const handleClickClose = () => {
+//         setisDelete(false);
+//     };
+
+
+//     return (
+//         <React.Fragment>
+//             {/* <Button variant="outlined" >
+//         Open dialog
+//       </Button> */}
+
+//             {isdelete && (
+//                 <AlertDialog
+//                     handleClose={handleClickClose}
+//                     onClick={() => deleteInstance(instanceData?.id)}
+//                     loading={loading}
+//                     setLoading={setLoading}
+
+//                 />
+//             )}
+
+
+
+//             <BootstrapDialog
+//                 onClose={handleClose}
+//                 aria-labelledby="customized-dialog-title"
+//                 open={open}
+
+//             >
+//                 <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title" >
+//                     <h6>{modalHeader + "s"} Details
+
+//                         {!isAdd && (
+//                             // <EditIcon 
+//                             // onClick={() => setIsedit(!isedit)}
+//                             // />
+//                             <button className="btn btn-sm" onClick={() => setIsedit(!isedit)}>  <EditIcon
+//                                 style={{ color: "blue" }}
+//                             // onClick={() => setIsedit(!isedit)}
+//                             />  </button>
+//                         )}
+
+//                     </h6>
+//                 </DialogTitle>
+
+//                 {/* {!isAdd && (<div>
+
+//                     <button className="button btn-edit" onClick={() => setIsedit(!isedit)}>  Edit  </button>
+
+//                 </div>
+//                 )} */}
+
+//                 <IconButton
+//                     aria-label="close"
+//                     onClick={handleClose}
+//                     sx={{
+//                         position: 'absolute',
+//                         right: 8,
+//                         top: 8,
+//                         color: (theme) => theme.palette.grey[500],
+//                     }}
+//                 >
+//                     <CloseIcon />
+//                 </IconButton>
+
+
+
+
+//                 <DialogContent dividers
+
+//                     sx={Config.style}
+//                 >
+
+
+//                     {/* <Typography gutterBottom>
+
+//                     </Typography> */}
+
+//                     {/* <div class="modal-body">
+//                         <div class="card"> */}
+
+
+//                     {/* ----------------modal data */}
+
+//                     <div class="card-body">
+//                         <div class="row">
+//                             <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+//                                 <div class="form-group">
+//                                     <label class="form-label">
+//                                         Date : <span class="form-required">*</span>
+//                                     </label>
+//                                     <input
+//                                         type="date"
+//                                         class="form-control"
+//                                         name="date"
+//                                         onChange={handleChange}
+//                                         defaultValue={instanceData?.date || ''}
+//                                         disabled={!isedit && !isAdd}
+//                                         required
+//                                     />
+//                                     {(!instanceData?.date && error) && (
+//                                         <span className="req-text">This field is required</span>
+//                                     )}
+
+//                                 </div>
+//                             </div>
+//                             <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+//                                 <div class="form-group">
+//                                     <label class="form-label">
+//                                         Time : <span class="form-required">*</span>
+//                                     </label>
+//                                     <input
+//                                         type="time"
+//                                         class="form-control"
+//                                         name="time"
+//                                         onChange={handleChange}
+//                                         defaultValue={instanceData?.time || ''}
+//                                         disabled={!isedit && !isAdd}
+//                                         required
+//                                     />
+//                                     {(!instanceData?.time && error) && (
+//                                         <span className="req-text">This field is required</span>
+//                                     )}
+
+//                                 </div>
+//                             </div>
+//                             <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+//                                 <div class="form-group">
+//                                     <label class="form-label">
+//                                         Event Name :{' '}
+//                                         <span class="form-required">*</span>
+//                                     </label>
+//                                     <input
+//                                         type="text"
+//                                         class="form-control"
+//                                         name="event_name"
+//                                         onChange={handleChange}
+//                                         defaultValue={instanceData?.event_name || ''}
+//                                         disabled={!isedit && !isAdd}
+//                                         required
+//                                     />
+//                                     {(!instanceData?.event_name && error) && (
+//                                         <span className="req-text">This field is required</span>
+//                                     )}
+
+//                                 </div>
+//                             </div>
+//                             <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+//                                 <div class="form-group">
+//                                     <label class="form-label">
+//                                         Place : <span class="form-required">*</span>
+//                                     </label>
+//                                     <input
+//                                         type="text"
+//                                         class="form-control"
+//                                         name="Place"
+//                                         onChange={handleChange}
+//                                         defaultValue={instanceData?.Place || ''}
+//                                         disabled={!isedit && !isAdd}
+//                                         required
+//                                     />
+//                                     {(!instanceData?.Place && error) && (
+//                                         <span className="req-text">This field is required</span>
+//                                     )}
+
+//                                 </div>
+//                             </div>
+
+//                             <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+//                                 <div class="form-group">
+//                                     <label class="form-label"> Details :</label>
+//                                     <textarea
+//                                         cols="30"
+//                                         rows="1"
+//                                         name="details"
+//                                         onChange={handleChange}
+//                                         defaultValue={instanceData?.details || ''}
+//                                         disabled={!isedit && !isAdd}
+//                                     ></textarea>
+//                                     {(!instanceData?.details && error) && (
+//                                         <span className="req-text">This field is required</span>
+//                                     )}
+
+//                                 </div>
+//                             </div>
+//                         </div>
+//                     </div>
+//                     {/* </div>
+//                     </div> */}
+//                     <Typography gutterBottom>
+
+//                     </Typography>
+
+//                 </DialogContent>
+
+
+
+//                 <DialogActions  >
+//                     {/* <Button autoFocus onClick={handleClose}>
+//             Save changes
+//           </Button> */}
+
+
+//                     <div class="col-md-12">
+//                         {
+//                             !isAdd && (
+
+//                                 <div className="col">
+//                                     <DeleteButton
+//                                         loading={loading}
+//                                         setLoading={setLoading}
+//                                         onClick={handleClickOpen}
+//                                     />
+//                                 </div>
+
+//                             )
+//                         }
+
+
+//                         <div className="text-end">
+
+//                             {isedit && (
+//                                 <UpdateButton
+//                                     loading={loading}
+//                                     setLoading={setLoading}
+//                                     onClick={() => updateInstance(instanceData?.id)}
+//                                 />
+//                             )}
+//                             {isAdd && (
+//                                 <SaveButton
+//                                     loading={loading}
+//                                     setLoading={setLoading}
+//                                     onClick={addInstance}
+//                                 />
+//                             )}
+
+//                             <CloseButton
+//                                 onClick={handleClose}
+//                             />
+
+//                         </div>
+//                     </div>
+//                 </DialogActions>
+//             </BootstrapDialog>
+//         </React.Fragment>
+//     );
+// }
+
+
+// ----------------------------------------------------------------------------------------------------------------------
+
+
 function Panchayat() {
-
-
-
 
     const modalHeader = "Panchayath";
 
     const user = useSelector((state) => state?.user?.value);
-    const wardlist = useSelector((state) => state?.ward?.value);
-    const complaintTypeList = useSelector((state) => state?.complainttype?.value);
+    const DistrictList = useSelector((state) => state?.ward?.value);
+    const panchayatList = useSelector((state) => state?.panchayat?.value);
+
 
     // meta StATE
     const [listInstanceData, setListInstanceData] = useState([])
@@ -1402,28 +2183,20 @@ function Panchayat() {
 
 
 
-    const getUrl = "event-register-get";
-    const getListUrl = "eventregister";
-    const postUrl = "eventregister";
-    const updateUrl = "event-register-get";
-    const deleteUrl = "eventregister";
 
 
+
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+    const [lazyLoading, setLazyLoading] = useState(true);
 
     // META DATA
-    const headersToShow = ["Date", "Time", "Event Name", "Place", "Details"]
+    const headersToShow = ["Name", "District Name"]
     const tableData = listInstanceData
     const fieldsToShow = []
     const fields = {
-
-        'date': (value) => value,
-        'time': (value) => value,
-        'event_name': (value) => value,
-        // 'place': (value) => value,
-        'Place': (value) => value,
-        'details': (value) => value,
-
-
+        "name": (value) => value,
+        "district": (value) => value,
     }
 
 
@@ -1432,6 +2205,10 @@ function Panchayat() {
         setisAdd();
         setInstanceData();
         setError();
+        setErrorMsg({});
+        seterrString();
+        setisEdit();
+
 
 
     }
@@ -1449,13 +2226,14 @@ function Panchayat() {
     const fetchListData = async () => {
         try {
 
-            const response = await fetch(Config.BASE_URL + getListUrl, Config?.config)
+            const response = await fetch(Config.BASE_URL + "get-panchayath", Config?.config)
             const data = await response.json()
             console.log(data)
             setListInstanceData(data)
 
         } catch (error) {
             console.error('Error fetching data:', error)
+            Config?.toastalert("Something Went Wrong", "error")
         }
     }
 
@@ -1464,7 +2242,7 @@ function Panchayat() {
 
     const getInstanceData = (id, edit) => {
         axios
-            .get(`${Config.BASE_URL}${getUrl}/${id}/`, Config.config)
+            .get(`${Config.BASE_URL}get-panchayath/${id}/`, Config.config)
             .then(function (response) {
                 if (response.status === 200) {
                     setInstanceData(response?.data)
@@ -1473,6 +2251,7 @@ function Panchayat() {
             })
             .catch(function (error) {
                 console.log(error)
+                Config?.toastalert("Something Went Wrong", "error")
             })
     }
 
@@ -1482,10 +2261,8 @@ function Panchayat() {
     //add new
     // Check form field validation
     const checkValidation = () => {
-
-        console.log(instanceData, "fdj")
-
-        if (!instanceData?.ward_no || !instanceData?.name) {
+        console.log(instanceData)
+        if (!instanceData?.name || !instanceData?.district) {
             console.log("please fill required fields")
             setError(true)
             return false
@@ -1508,13 +2285,12 @@ function Panchayat() {
         }
 
         const data = new FormData();
-        data.append('name', instanceData?.name)
-        data.append('ward_no', instanceData?.ward_no)
-
+        data.append("name", instanceData?.name)
+        data.append("district", instanceData?.district)
         try {
-            const response = await axios.post(`${Config.BASE_URL}${postUrl}/`, data, Config.config);
+            const response = await axios.post(`${Config.BASE_URL}get-panchayath/`, data, Config.config);
             console.log(response.data);
-            toast.success('Successfully submitted!');
+            Config?.toastalert("Submitted Successfully", "success")
 
             setListInstanceData((prevstate) => {
                 return [...prevstate, response?.data]
@@ -1522,8 +2298,15 @@ function Panchayat() {
 
             handleClose();
         } catch (error) {
-            console.error('Error occurred:', error);
-            toast.error('Submission failed. Please try again.');
+            if (error?.response?.status === 400) {
+                console.log(error);
+                setErrorMsg(error?.response?.data)
+                Config?.toastalert("Submission Failed", "warn")
+            }
+
+            else {
+                Config?.toastalert("Something Went Wrong", "error")
+            }
         }
     };
 
@@ -1539,15 +2322,14 @@ function Panchayat() {
         }
 
         const data = new FormData()
-        data.append('name', instanceData?.name)
-        data.append('ward_no', instanceData?.ward_no)
-
+        data.append("name", instanceData?.name)
+        data.append("district", instanceData?.district)
         axios
-            .put(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
+            .put(`${Config.BASE_URL}get-panchayath/${id}/`, data, Config.config)
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response)
-
+                    Config?.toastalert("Updated Successfully", "success")
                     setListInstanceData((prevArray) => {
                         const index = prevArray.findIndex((obj) => obj.id === id)
                         if (index !== -1) {
@@ -1560,31 +2342,48 @@ function Panchayat() {
                         return prevArray
                     })
 
-                    handleClose()
+                    handleClose();
 
 
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
     }
 
     //DELETE REQUESTS
 
     const deleteInstance = (id) => {
-        console.log('deleting')
 
-        axios.delete(`${Config.BASE_URL}${deleteUrl}/${id}/`, Config.config)
+
+        axios.delete(`${Config.BASE_URL}get-panchayath/${id}/`, Config.config)
             .then(function (response) {
                 if (response.status === 204) {
                     console.log(response)
+                    Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
                     handleClose();
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
                 handleClose();
             })
     }
@@ -1592,140 +2391,93 @@ function Panchayat() {
 
 
 
-    // handle new instance
     const handleChange = (e) => {
         const { name, value } = e.target;
-        if (name === "image") {
-            const check = Config?.fileType(e.target.files[0].name)
-
-            if (!check) {
-                console.log("not supported")
-                return
+        setInstanceData((prevstate) => {
+            return {
+                ...prevstate, [name]: value
             }
-            console.log(e.target.files[0].name)
-            let value = e.target.files[0]
-            // setImage(value)
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
 
-            })
-        }
-        else {
-
-            // const { value } = e.target
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
-
-            })
-
-        }
-
+        })
     }
 
 
 
-
     return (
-
-
-
         <>
-
-            <ToastContainer />
-
-            {hide && (
-                <>
-
-                    {
-                        (isOpen || isAdd) && (
-
-                            <EventsDialogs
-                                setIsOpen={setIsOpen}
-                                isAdd={isAdd}
-                                error={error}
-
-                                setListData={tableData}
-                                instanceData={instanceData}
-                                setInstanceData={setInstanceData}
-                                handleClose={handleClose}
-
-                                // functions
-                                addInstance={addNewInstance}
-                                updateInstance={updateInstance}
-                                deleteInstance={deleteInstance}
-                                handleChange={handleChange}
-                                wardlist={wardlist}
-                                requestTypeList={complaintTypeList}
-                                modalHeader={modalHeader}
-
-                            // setImage={setImage}
-                            // image={image}
+            {
+                (isOpen || isAdd) && (
 
 
-                            />
-                        )
-                    }
-                    {/* <div className="content">
-                        <div className="page-header">
-                            <div className="page-title">
-                                <h4>{modalHeader}s Details</h4>
-                            </div>
-                            <div className="page-btn">
-                                <AddButton
-                                    onClick={() => setisAdd(true)}
-                                    text={" Create"}
-                                />
+                    <FormModal
+                        modalHeader={modalHeader}
+                        lazyLoading={lazyLoading}
+                        setIsOpen={setIsOpen}
+                        isAdd={isAdd}
+                        isedit={isedit}
+                        setisEdit={setisEdit}
+                        error={error}
+                        errorMsg={errorMsg}
+
+                        setListData={tableData}
+                        instanceData={instanceData}
+                        setInstanceData={setInstanceData}
+
+                        handleClose={handleClose}
+
+                        // functions
+                        addInstance={addNewInstance}
+                        updateInstance={updateInstance}
+                        deleteInstance={deleteInstance}
+                        handleChange={handleChange}
+
+                        child={<PanchayathForm
+                            lazyLoading={lazyLoading}
+                            setIsOpen={setIsOpen}
+                            isAdd={isAdd}
+                            isedit={isedit}
+
+                            error={error}
+                            errorMsg={errorMsg}
+                            errString={errString}
+
+                            setListData={tableData}
+                            instanceData={instanceData}
+                            setInstanceData={setInstanceData}
+
+                            handleClose={handleClose}
+                            handleChange={handleChange}
+                            // handleMainChange={handleMainChange}
+
+                            districtList={districtList}
 
 
-                            </div>
-                        </div>
+                        />}
+                    />
+                )
+            }
+            <Grid item xs={12} sm={6}>
+                <Typography variant="h6">{modalHeader + "s"} Details</Typography>
+            </Grid>
+            <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+                <IconButton color="primary" aria-label="add">
+                    <AddButton
+                        onClick={() => setisAdd(true)}
+                        text={" Create"}
+                    />
+                </IconButton>
+            </Grid>
 
 
-                        <CustomTable
-                            headers={headersToShow}
-                            data={tableData}
-                            fieldsToShow={fieldsToShow}
-                            fields={fields}
-                            getInstanceData={getInstanceData}
-                            loader={loader}
-                            setLoader={setLoader}
-                        />
-                    </div> */}
-
-
-                    <Grid item  xs={12} sm={6}>
-                        <Typography variant="h6">{modalHeader+"s"} Details</Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
-                        <IconButton color="primary" aria-label="add">
-                            <AddButton
-                                onClick={() => setisAdd(true)}
-                                text={" Create"}
-                            />
-                        </IconButton>
-                    </Grid>
-
-
-                    <Grid item xs={12}>
-                    <CustomTable
-                            headers={headersToShow}
-                            data={tableData}
-                            fieldsToShow={fieldsToShow}
-                            fields={fields}
-                            getInstanceData={getInstanceData}
-                            loader={loader}
-                            setLoader={setLoader}
-                        />
-                    </Grid>
-                </>
-            )}
-
-
-
+            <CustomTable
+                headers={headersToShow}
+                data={tableData}
+                fieldsToShow={fieldsToShow}
+                fields={fields}
+                getInstanceData={getInstanceData}
+                loader={loader}
+                setLoader={setLoader}
+            />
         </>
     )
 
@@ -1734,269 +2486,69 @@ function Panchayat() {
 
 
 
-function PanchayatDialogs(props) {
+const PanchayathForm = (props) => {
 
-    const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader,
-        deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, requestTypeList
-        // setError, setImage, image 
+    const { lazyLoading, setIsOpen, isAdd, isedit,
+        errorMsg, errString, error,
+        instanceData, setList, setInstanceData,
+        handleChange, handleClose,
+        zoneList, image, setImage
+
+
     } = props
 
 
-    const [isedit, setIsedit] = useState(false);
-    const [isdelete, setisDelete] = useState(false);
-    const [loading, setLoading] = useState(false);
-
-
-    const handleClickOpen = () => {
-        setisDelete(true);
-    };
-
-    const handleClickClose = () => {
-        setisDelete(false);
-    };
-
-
     return (
-        <React.Fragment>
-            {/* <Button variant="outlined" >
-        Open dialog
-      </Button> */}
 
-            {isdelete && (
-                <AlertDialog
-                    handleClose={handleClickClose}
-                    onClick={() => deleteInstance(instanceData?.id)}
-                    loading={loading}
-                    setLoading={setLoading}
+        <>
 
-                />
-            )}
+            <Grid container spacing={2}>
+                {/* First Name */}
+                <Grid item xs={12} md={6} sm={6}>
+                    <Grid >
+
+                    </Grid>
+                    <TextInput
+
+                        label="Name"
+                        placeholder="Name"
+                        name={"name"}
+                        value={instanceData?.name}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"name"}
+
+                    />
+                </Grid>
 
 
+                <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={zoneList}
+                        handleChange={handleChange}
+                        selected={instanceData?.street}
+                        showname={"name"}
+                        name={"street"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"street"}
+                        label="Select Street"
+                    />
 
-            <BootstrapDialog
-                onClose={handleClose}
-                aria-labelledby="customized-dialog-title"
-                open={open}
+                </Grid>
 
-            >
-                <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title" >
-                    <h6>{modalHeader + "s"} Details
 
-                        {!isAdd && (
-                            // <EditIcon 
-                            // onClick={() => setIsedit(!isedit)}
-                            // />
-                            <button className="btn btn-sm" onClick={() => setIsedit(!isedit)}>  <EditIcon
-                                style={{ color: "blue" }}
-                            // onClick={() => setIsedit(!isedit)}
-                            />  </button>
-                        )}
+            </Grid>
 
-                    </h6>
-                </DialogTitle>
-
-                {/* {!isAdd && (<div>
-
-                    <button className="button btn-edit" onClick={() => setIsedit(!isedit)}>  Edit  </button>
-
-                </div>
-                )} */}
-
-                <IconButton
-                    aria-label="close"
-                    onClick={handleClose}
-                    sx={{
-                        position: 'absolute',
-                        right: 8,
-                        top: 8,
-                        color: (theme) => theme.palette.grey[500],
-                    }}
-                >
-                    <CloseIcon />
-                </IconButton>
+        </>
 
 
 
-
-                <DialogContent dividers
-
-                    sx={Config.style}
-                >
-
-
-                    {/* <Typography gutterBottom>
-
-                    </Typography> */}
-
-                    {/* <div class="modal-body">
-                        <div class="card"> */}
-
-
-                    {/* ----------------modal data */}
-
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-lg-6 col-md-6 col-sm-12 col-12">
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Date : <span class="form-required">*</span>
-                                    </label>
-                                    <input
-                                        type="date"
-                                        class="form-control"
-                                        name="date"
-                                        onChange={handleChange}
-                                        defaultValue={instanceData?.date || ''}
-                                        disabled={!isedit && !isAdd}
-                                        required
-                                    />
-                                    {(!instanceData?.date && error) && (
-                                        <span className="req-text">This field is required</span>
-                                    )}
-
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-12 col-12">
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Time : <span class="form-required">*</span>
-                                    </label>
-                                    <input
-                                        type="time"
-                                        class="form-control"
-                                        name="time"
-                                        onChange={handleChange}
-                                        defaultValue={instanceData?.time || ''}
-                                        disabled={!isedit && !isAdd}
-                                        required
-                                    />
-                                    {(!instanceData?.time && error) && (
-                                        <span className="req-text">This field is required</span>
-                                    )}
-
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-12 col-12">
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Event Name :{' '}
-                                        <span class="form-required">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        name="event_name"
-                                        onChange={handleChange}
-                                        defaultValue={instanceData?.event_name || ''}
-                                        disabled={!isedit && !isAdd}
-                                        required
-                                    />
-                                    {(!instanceData?.event_name && error) && (
-                                        <span className="req-text">This field is required</span>
-                                    )}
-
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-12 col-12">
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Place : <span class="form-required">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        name="Place"
-                                        onChange={handleChange}
-                                        defaultValue={instanceData?.Place || ''}
-                                        disabled={!isedit && !isAdd}
-                                        required
-                                    />
-                                    {(!instanceData?.Place && error) && (
-                                        <span className="req-text">This field is required</span>
-                                    )}
-
-                                </div>
-                            </div>
-
-                            <div class="col-lg-6 col-md-6 col-sm-12 col-12">
-                                <div class="form-group">
-                                    <label class="form-label"> Details :</label>
-                                    <textarea
-                                        cols="30"
-                                        rows="1"
-                                        name="details"
-                                        onChange={handleChange}
-                                        defaultValue={instanceData?.details || ''}
-                                        disabled={!isedit && !isAdd}
-                                    ></textarea>
-                                    {(!instanceData?.details && error) && (
-                                        <span className="req-text">This field is required</span>
-                                    )}
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {/* </div>
-                    </div> */}
-                    <Typography gutterBottom>
-
-                    </Typography>
-
-                </DialogContent>
-
-
-
-                <DialogActions  >
-                    {/* <Button autoFocus onClick={handleClose}>
-            Save changes
-          </Button> */}
-
-
-                    <div class="col-md-12">
-                        {
-                            !isAdd && (
-
-                                <div className="col">
-                                    <DeleteButton
-                                        loading={loading}
-                                        setLoading={setLoading}
-                                        onClick={handleClickOpen}
-                                    />
-                                </div>
-
-                            )
-                        }
-
-
-                        <div className="text-end">
-
-                            {isedit && (
-                                <UpdateButton
-                                    loading={loading}
-                                    setLoading={setLoading}
-                                    onClick={() => updateInstance(instanceData?.id)}
-                                />
-                            )}
-                            {isAdd && (
-                                <SaveButton
-                                    loading={loading}
-                                    setLoading={setLoading}
-                                    onClick={addInstance}
-                                />
-                            )}
-
-                            <CloseButton
-                                onClick={handleClose}
-                            />
-
-                        </div>
-                    </div>
-                </DialogActions>
-            </BootstrapDialog>
-        </React.Fragment>
-    );
+    )
 }
 
 // -------------------------------------------------------------------------------------------------------------------------------
@@ -2041,7 +2593,9 @@ function Ward() {
     const updateUrl = "get-ward";
     const deleteUrl = "get-ward";
 
-
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+    const [lazyLoading, setLazyLoading] = useState(true);
 
     // META DATA
     const headersToShow = ["Ward Name", "Houses", "Streets"]
@@ -2049,8 +2603,8 @@ function Ward() {
     const fieldsToShow = []
     const fields = {
         'name': (value) => value,
-        'house_count': (value) => value,
-        'street_count': (value) => value,
+        'house_count': (value) => value ?? 0,
+        'street_count': (value) => value ?? 0,
     }
 
 
@@ -2059,6 +2613,9 @@ function Ward() {
         setisAdd();
         setInstanceData();
         setError();
+        setErrorMsg({});
+        seterrString();
+        setisEdit();
 
 
     }
@@ -2084,6 +2641,7 @@ function Ward() {
 
         } catch (error) {
             console.error('Error fetching data:', error)
+            Config?.toastalert("Something Went Wrong", "error")
         }
     }
 
@@ -2099,6 +2657,7 @@ function Ward() {
 
         } catch (error) {
             console.error('Error fetching data:', error)
+
         }
     }
 
@@ -2116,6 +2675,7 @@ function Ward() {
             })
             .catch(function (error) {
                 console.log(error)
+                Config?.toastalert("Something Went Wrong", "error")
             })
     }
 
@@ -2142,7 +2702,7 @@ function Ward() {
     }
 
 
-    console.log(instanceData, "fdj")
+
     const addNewInstance = async (e) => {
 
         const check = checkValidation()
@@ -2157,8 +2717,8 @@ function Ward() {
         try {
             const response = await axios.post(`${Config.BASE_URL}${postUrl}`, data, Config.config);
             console.log(response.data);
-            toast.success('Successfully submitted!');
 
+            Config?.toastalert("Submitted Successfully", "success")
             setListInstanceData((prevstate) => {
                 return [...prevstate, response?.data]
             })
@@ -2166,8 +2726,15 @@ function Ward() {
             handleClose();
             updateListData();
         } catch (error) {
-            console.error('Error occurred:', error);
-            toast.error(error?.response?.data?.msg);
+            if (error?.response?.status === 400) {
+                console.log(error);
+                setErrorMsg(error?.response?.data)
+                Config?.toastalert("Submission Failed", "warn")
+            }
+
+            else {
+                Config?.toastalert("Something Went Wrong", "error")
+            }
         }
 
 
@@ -2192,7 +2759,7 @@ function Ward() {
             .patch(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
             .then(function (response) {
                 if (response.status === 200) {
-                    console.log(response)
+                    Config?.toastalert("Updated Successfully", "success")
 
                     setListInstanceData((prevArray) => {
                         const index = prevArray.findIndex((obj) => obj.id === id)
@@ -2212,8 +2779,15 @@ function Ward() {
                 }
             })
             .catch(function (error) {
-                toast.error(error?.response?.data?.msg);
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
     }
 
@@ -2225,14 +2799,22 @@ function Ward() {
         axios.delete(`${Config.BASE_URL}${deleteUrl}/${id}/`, Config.config)
             .then(function (response) {
                 if (response.status === 204) {
-                    console.log(response)
+                    Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
                     handleClose();
                     updateListData();
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
                 handleClose();
             })
     }
@@ -2243,39 +2825,14 @@ function Ward() {
     // handle new instance
 
     const handleChange = (e) => {
-        console.log("trigger")
         const { name, value } = e.target;
-        if (name === "image") {
-            const check = Config?.fileType(e.target.files[0].name)
-
-            if (!check) {
-                console.log("not supported")
-                return
+        setInstanceData((prevstate) => {
+            return {
+                ...prevstate, [name]: value
             }
-            console.log(e.target.files[0].name)
-            let value = e.target.files[0]
-            // setImage(value)
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
 
-            })
-        }
-        else {
-
-            // const { value } = e.target
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
-
-            })
-
-        }
-
+        })
     }
-
 
 
 
@@ -2285,106 +2842,225 @@ function Ward() {
 
         <>
 
-            <ToastContainer />
-
-            {hide && (
-                <>
-
-                    {
-                        (isOpen || isAdd) && (
-
-                            <WardDialogs
-                                setIsOpen={setIsOpen}
-                                isAdd={isAdd}
-                                error={error}
-
-                                setListData={tableData}
-                                instanceData={instanceData}
-                                setInstanceData={setInstanceData}
-                                handleClose={handleClose}
-
-                                // functions
-                                addInstance={addNewInstance}
-                                updateInstance={updateInstance}
-                                deleteInstance={deleteInstance}
-                                handleChange={handleChange}
-                                wardlist={wardlist}
-                                panchayatList={panchayatList}
-                                districtList={districtList}
-
-                                // requestTypeList={complaintTypeList}
-                                modalHeader={modalHeader}
-
-                            // setImage={setImage}
-                            // image={image}
 
 
-                            />
-                        )
-                    }
-                    {/* <div className="content">
-                        <div className="page-header">
-                            <div className="page-title">
-                                <h4>{modalHeader}s Details</h4>
-                            </div>
-                            <div className="page-btn">
-                                <AddButton
-                                    onClick={() => setisAdd(true)}
-                                    text={" Create"}
-                                />
+            {
+                (isOpen || isAdd) && (
+
+                    // <WardDialogs
+                    //     setIsOpen={setIsOpen}
+                    //     isAdd={isAdd}
+                    //     error={error}
+
+                    //     setListData={tableData}
+                    //     instanceData={instanceData}
+                    //     setInstanceData={setInstanceData}
+                    //     handleClose={handleClose}
+
+                    //     // functions
+                    //     addInstance={addNewInstance}
+                    //     updateInstance={updateInstance}
+                    //     deleteInstance={deleteInstance}
+                    //     handleChange={handleChange}
+                    //     wardlist={wardlist}
+                    //     panchayatList={panchayatList}
+                    //     districtList={districtList}
+
+                    //     // requestTypeList={complaintTypeList}
+                    //     modalHeader={modalHeader}
+
+                    // // setImage={setImage}
+                    // // image={image}
+                    // />
 
 
-                            </div>
-                        </div>
+                    <FormModal
+                        modalHeader={modalHeader}
+                        lazyLoading={lazyLoading}
+                        setIsOpen={setIsOpen}
+                        isAdd={isAdd}
+                        isedit={isedit}
+                        setisEdit={setisEdit}
+                        error={error}
+                        errorMsg={errorMsg}
+
+                        setListData={tableData}
+                        instanceData={instanceData}
+                        setInstanceData={setInstanceData}
+
+                        handleClose={handleClose}
+
+                        // functions
+                        addInstance={addNewInstance}
+                        updateInstance={updateInstance}
+                        deleteInstance={deleteInstance}
+                        handleChange={handleChange}
+
+                        child={<WardForm
+                            lazyLoading={lazyLoading}
+                            setIsOpen={setIsOpen}
+                            isAdd={isAdd}
+                            isedit={isedit}
+
+                            error={error}
+                            errorMsg={errorMsg}
+                            errString={errString}
+
+                            setListData={tableData}
+                            instanceData={instanceData}
+                            setInstanceData={setInstanceData}
+
+                            handleClose={handleClose}
+                            handleChange={handleChange}
+                            // handleMainChange={handleMainChange}
+
+                            districtList={districtList}
+                            panchayatList={panchayatList}
 
 
-                        <CustomTable
-                            headers={headersToShow}
-                            data={tableData}
-                            fieldsToShow={fieldsToShow}
-                            fields={fields}
-                            getInstanceData={getInstanceData}
-                            loader={loader}
-                            setLoader={setLoader}
-                        />
-                    </div> */}
+                        />}
+                    />
 
 
 
 
-                    <Grid item  xs={12} sm={6}>
-                        <Typography variant="h6">{modalHeader+"s"} Details</Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
-                        <IconButton color="primary" aria-label="add">
-                            <AddButton
-                                onClick={() => setisAdd(true)}
-                                text={" Create"}
-                            />
-                        </IconButton>
-                    </Grid>
+                )
+            }
+
+            <Grid item xs={12} sm={6}>
+                <Typography variant="h6">{modalHeader + "s"} Details</Typography>
+            </Grid>
+            <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+                <IconButton color="primary" aria-label="add">
+                    <AddButton
+                        onClick={() => setisAdd(true)}
+                        text={" Create"}
+                    />
+                </IconButton>
+            </Grid>
 
 
-                    <Grid item xs={12}>
-                    <CustomTable
-                            headers={headersToShow}
-                            data={tableData}
-                            fieldsToShow={fieldsToShow}
-                            fields={fields}
-                            getInstanceData={getInstanceData}
-                            loader={loader}
-                            setLoader={setLoader}
-                        />
-                    </Grid>
-                </>
-            )}
-
+            <Grid item xs={12}>
+                <CustomTable
+                    headers={headersToShow}
+                    data={tableData}
+                    fieldsToShow={fieldsToShow}
+                    fields={fields}
+                    getInstanceData={getInstanceData}
+                    loader={loader}
+                    setLoader={setLoader}
+                />
+            </Grid>
 
 
         </>
     )
 
 
+}
+
+
+
+
+const WardForm = (props) => {
+
+    const { lazyLoading, setIsOpen, isAdd, isedit,
+        errorMsg, errString, error,
+        instanceData, setList, setInstanceData,
+        handleChange, handleClose,
+        zoneList, panchayatList, districtList
+
+
+    } = props
+
+
+    return (
+
+        <>
+
+            <Grid container spacing={2}>
+
+
+                {/* <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={districtList}
+                        handleChange={handleChange}
+                        selected={instanceData?.district}
+                        showname={"name"}
+                        name={"street"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"street"}
+                        label="Select District"
+                    />
+
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={panchayatList}
+                        handleChange={handleChange}
+                        selected={instanceData?.panchayat}
+                        showname={"name"}
+                        name={"panchayat"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"panchayat"}
+                        label="Select Panchayath"
+                    />
+
+                </Grid> */}
+
+
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <TextInput
+
+                        label="Name"
+                        placeholder="Name"
+                        name={"name"}
+                        value={instanceData?.name}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"name"}
+
+                    />
+                </Grid>
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <TextInput
+
+                        label="Ward No"
+                        placeholder="Ward No"
+                        name={"ward_no"}
+                        value={instanceData?.ward_no}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"ward_no"}
+
+                    />
+                </Grid>
+
+
+
+
+
+            </Grid>
+
+        </>
+
+
+
+    )
 }
 
 
@@ -2666,6 +3342,11 @@ function Street() {
     const deleteUrl = "street";
 
 
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+    const [lazyLoading, setLazyLoading] = useState(true);
+
+
 
     // META DATA
     const headersToShow = ["Street Name", "Street No", "Ward Name"]
@@ -2684,13 +3365,15 @@ function Street() {
         setInstanceData();
         setError();
 
+        setErrorMsg({});
+        seterrString();
+        setisEdit();
+
 
     }
 
 
     useEffect(() => {
-
-
         fetchListData();
     }, [])
 
@@ -2707,6 +3390,7 @@ function Street() {
 
         } catch (error) {
             console.error('Error fetching data:', error)
+            Config?.toastalert("Something Went Wrong", "error")
         }
     }
 
@@ -2739,6 +3423,7 @@ function Street() {
             })
             .catch(function (error) {
                 console.log(error)
+                Config?.toastalert("Something Went Wrong", "error")
             })
     }
 
@@ -2748,8 +3433,6 @@ function Street() {
     //add new
     // Check form field validation
     const checkValidation = () => {
-
-        console.log(instanceData, "fdj")
 
         if (!instanceData?.street_no || !instanceData?.ward || !instanceData?.name) {
             console.log("please fill required fields")
@@ -2765,7 +3448,7 @@ function Street() {
     }
 
 
-    console.log(instanceData, "fdj")
+
     const addNewInstance = async (e) => {
 
         const check = checkValidation()
@@ -2781,8 +3464,7 @@ function Street() {
         try {
             const response = await axios.post(`${Config.BASE_URL}${postUrl}`, data, Config.config);
             console.log(response.data);
-            toast.success('Successfully submitted!');
-
+            Config?.toastalert("Submitted Successfully", "success")
             setListInstanceData((prevstate) => {
                 return [...prevstate, response?.data]
             })
@@ -2790,8 +3472,15 @@ function Street() {
             handleClose();
             updateListData();
         } catch (error) {
-            console.error('Error occurred:', error);
-            toast.error('Submission failed. Please try again.');
+            if (error?.response?.status === 400) {
+                console.log(error);
+                setErrorMsg(error?.response?.data)
+                Config?.toastalert("Submission Failed", "warn")
+            }
+
+            else {
+                Config?.toastalert("Something Went Wrong", "error")
+            }
         }
     };
 
@@ -2815,7 +3504,7 @@ function Street() {
             .patch(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
             .then(function (response) {
                 if (response.status === 200) {
-                    console.log(response)
+                    Config?.toastalert("Updated Successfully", "success")
 
                     setListInstanceData((prevArray) => {
                         const index = prevArray.findIndex((obj) => obj.id === id)
@@ -2835,19 +3524,26 @@ function Street() {
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
     }
 
     //DELETE REQUESTS
 
     const deleteInstance = (id) => {
-        console.log('deleting')
 
         axios.delete(`${Config.BASE_URL}${deleteUrl}/${id}/`, Config.config)
             .then(function (response) {
                 if (response.status === 204) {
-                    console.log(response)
+                    Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
                     handleClose();
                     updateListData();
@@ -2855,7 +3551,15 @@ function Street() {
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
                 handleClose();
             })
     }
@@ -2866,39 +3570,14 @@ function Street() {
     // handle new instance
 
     const handleChange = (e) => {
-        console.log("trigger")
         const { name, value } = e.target;
-        if (name === "image") {
-            const check = Config?.fileType(e.target.files[0].name)
-
-            if (!check) {
-                console.log("not supported")
-                return
+        setInstanceData((prevstate) => {
+            return {
+                ...prevstate, [name]: value
             }
-            console.log(e.target.files[0].name)
-            let value = e.target.files[0]
-            // setImage(value)
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
 
-            })
-        }
-        else {
-
-            // const { value } = e.target
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
-
-            })
-
-        }
-
+        })
     }
-
 
 
 
@@ -2908,107 +3587,228 @@ function Street() {
 
         <>
 
-            <ToastContainer />
 
-            {hide && (
-                <>
+            {
+                (isOpen || isAdd) && (
 
-                    {
-                        (isOpen || isAdd) && (
+                    // <StreetDialogs
+                    //     setIsOpen={setIsOpen}
+                    //     isAdd={isAdd}
+                    //     error={error}
 
-                            <StreetDialogs
-                                setIsOpen={setIsOpen}
-                                isAdd={isAdd}
-                                error={error}
+                    //     setListData={tableData}
+                    //     instanceData={instanceData}
+                    //     setInstanceData={setInstanceData}
+                    //     handleClose={handleClose}
 
-                                setListData={tableData}
-                                instanceData={instanceData}
-                                setInstanceData={setInstanceData}
-                                handleClose={handleClose}
+                    //     // functions
+                    //     addInstance={addNewInstance}
+                    //     updateInstance={updateInstance}
+                    //     deleteInstance={deleteInstance}
+                    //     handleChange={handleChange}
+                    //     wardlist={wardlist}
+                    //     panchayatList={panchayatList}
+                    //     districtList={districtList}
+                    //     modalHeader={modalHeader}
 
-                                // functions
-                                addInstance={addNewInstance}
-                                updateInstance={updateInstance}
-                                deleteInstance={deleteInstance}
-                                handleChange={handleChange}
-                                wardlist={wardlist}
-                                panchayatList={panchayatList}
-                                districtList={districtList}
-
-                                // requestTypeList={complaintTypeList}
-                                modalHeader={modalHeader}
-
-                            // setImage={setImage}
-                            // image={image}
+                    // />
 
 
-                            />
-                        )
-                    }
-                    {/* <div className="content">
-                        <div className="page-header">
-                            <div className="page-title">
-                                <h4>{modalHeader}s Details</h4>
-                            </div>
-                            <div className="page-btn">
-                                <AddButton
-                                    onClick={() => setisAdd(true)}
-                                    text={" Create"}
-                                />
+                    <FormModal
+                        modalHeader={modalHeader}
+                        lazyLoading={lazyLoading}
+                        setIsOpen={setIsOpen}
+                        isAdd={isAdd}
+                        isedit={isedit}
+                        setisEdit={setisEdit}
+                        error={error}
+                        errorMsg={errorMsg}
+
+                        setListData={tableData}
+                        instanceData={instanceData}
+                        setInstanceData={setInstanceData}
+
+                        handleClose={handleClose}
+
+                        // functions
+                        addInstance={addNewInstance}
+                        updateInstance={updateInstance}
+                        deleteInstance={deleteInstance}
+                        handleChange={handleChange}
+
+                        child={<StreetForm
+                            lazyLoading={lazyLoading}
+                            setIsOpen={setIsOpen}
+                            isAdd={isAdd}
+                            isedit={isedit}
+
+                            error={error}
+                            errorMsg={errorMsg}
+                            errString={errString}
+
+                            setListData={tableData}
+                            instanceData={instanceData}
+                            setInstanceData={setInstanceData}
+
+                            handleClose={handleClose}
+                            handleChange={handleChange}
+
+                            districtList={districtList}
+                            panchayatList={panchayatList}
+                            wardlist={wardlist}
 
 
-                            </div>
-                        </div>
-
-
-                        <CustomTable
-                            headers={headersToShow}
-                            data={tableData}
-                            fieldsToShow={fieldsToShow}
-                            fields={fields}
-                            getInstanceData={getInstanceData}
-                            loader={loader}
-                            setLoader={setLoader}
-                        />
-                    </div> */}
-
-
-
-
-                    <Grid item  xs={12} sm={6}>
-                        <Typography variant="h6">{modalHeader+"s"} Details</Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
-                        <IconButton color="primary" aria-label="add">
-                            <AddButton
-                                onClick={() => setisAdd(true)}
-                                text={" Create"}
-                            />
-                        </IconButton>
-                    </Grid>
-
-
-                    <Grid item xs={12}>
-                    <CustomTable
-                            headers={headersToShow}
-                            data={tableData}
-                            fieldsToShow={fieldsToShow}
-                            fields={fields}
-                            getInstanceData={getInstanceData}
-                            loader={loader}
-                            setLoader={setLoader}
-                        />
-                    </Grid>
-                </>
-            )}
+                        />}
+                    />
+                )
+            }
 
 
 
+            <Grid item xs={12} sm={6}>
+                <Typography variant="h6">{modalHeader + "s"} Details</Typography>
+            </Grid>
+            <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+                <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
+                    Create {modalHeader}
+                </Button>
+            </Grid>
+
+
+            <Grid item xs={12}>
+                <CustomTable
+                    headers={headersToShow}
+                    data={tableData}
+                    fieldsToShow={fieldsToShow}
+                    fields={fields}
+                    getInstanceData={getInstanceData}
+                    loader={loader}
+                    setLoader={setLoader}
+                />
+            </Grid>
         </>
+
     )
 
 
 }
+
+
+const StreetForm = (props) => {
+
+    const { lazyLoading, setIsOpen, isAdd, isedit,
+        errorMsg, errString, error,
+        instanceData, setList, setInstanceData,
+        handleChange, handleClose,
+        wardlist, panchayatList, districtList
+
+
+    } = props
+
+
+    return (
+
+        <>
+
+            <Grid container spacing={2}>
+
+
+                {/* <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={districtList}
+                        handleChange={handleChange}
+                        selected={instanceData?.district}
+                        showname={"name"}
+                        name={"street"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"street"}
+                        label="Select District"
+                    />
+
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={panchayatList}
+                        handleChange={handleChange}
+                        selected={instanceData?.panchayat}
+                        showname={"name"}
+                        name={"panchayat"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"panchayat"}
+                        label="Select Panchayath"
+                    />
+
+                </Grid> */}
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={wardlist}
+                        handleChange={handleChange}
+                        selected={instanceData?.ward}
+                        showname={"name"}
+                        name={"ward"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"ward"}
+                        label="Select Ward"
+                    />
+
+                </Grid>
+
+
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <TextInput
+
+                        label="Name"
+                        placeholder="Name"
+                        name={"name"}
+                        value={instanceData?.name}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"name"}
+
+                    />
+                </Grid>
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <TextInput
+
+                        label="Street No"
+                        placeholder="Street No"
+                        name={"street_no"}
+                        value={instanceData?.street_no}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"street_no"}
+
+                    />
+                </Grid>
+
+
+            </Grid>
+
+        </>
+
+
+
+    )
+}
+
 
 
 
@@ -3301,6 +4101,11 @@ function House() {
         return label
     }
 
+    const getStreetLabel = (id) => {
+        const label = streetList?.find((e) => e?.id === id)?.name
+        return label
+    }
+
     const getBuildingLabel = (id) => {
         const label = buildingType?.find((e) => e?.id === id)?.name
         return label
@@ -3314,18 +4119,23 @@ function House() {
     const deleteUrl = "buildingregister";
 
 
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+    const [lazyLoading, setLazyLoading] = useState(true);
 
     // META DATA
-    const headersToShow = ["Ward No", "Type", "Name", "Contact No", "Door No", "Address", "QR code"]
+    const headersToShow = ["Name", "Contact No", "Door No", "Address", "Type", "Ward No", "Street", "QR code",]
     const tableData = listInstanceData
     const fieldsToShow = []
     const fields = {
-        'ward': (value) => getWardLabel(value),
-        'building_type': (value) => getBuildingLabel(value),
+
         'name': (value) => value,
         'phone_num': (value) => value,
         'door_no': (value) => value,
         'line1': (value) => value,
+        'building_type': (value) => getBuildingLabel(value),
+        'ward': (value) => getWardLabel(value),
+        'street': (value) => getStreetLabel(value),
         'qr_code': (value) => value,
     }
 
@@ -3335,6 +4145,9 @@ function House() {
         setisAdd();
         setInstanceData();
         setError();
+        setErrorMsg({});
+        seterrString();
+        setisEdit();
 
 
     }
@@ -3352,7 +4165,7 @@ function House() {
 
     const fetchBuildingType = async () => {
         try {
-            // Make an API call to fetch data from the backend
+
             const response = await fetch(
                 Config.BASE_URL + 'building-type',
                 Config?.config,
@@ -3381,6 +4194,7 @@ function House() {
 
         } catch (error) {
             console.error('Error fetching data:', error)
+            Config?.toastalert("Something Went Wrong", "error")
         }
     }
 
@@ -3398,6 +4212,7 @@ function House() {
             })
             .catch(function (error) {
                 console.log(error)
+                Config?.toastalert("Something Went Wrong", "error")
             })
     }
 
@@ -3409,7 +4224,10 @@ function House() {
     const checkValidation = () => {
 
         console.log(instanceData)
-        if (!instanceData?.ward || !instanceData?.street || !instanceData?.building_type || !instanceData?.name || !instanceData?.phone_num || !instanceData?.door_no || !instanceData?.line1) {
+        if (!instanceData?.ward || !instanceData?.street ||
+            !instanceData?.building_type || !instanceData?.name ||
+            !instanceData?.phone_num || !instanceData?.door_no || !instanceData?.building_id ||
+            !instanceData?.line1) {
             console.log("please fill required fields")
             setError(true)
             return false
@@ -3422,8 +4240,6 @@ function House() {
 
     }
 
-
-    console.log(instanceData, "fdj")
     const addNewInstance = async (e) => {
 
         const check = checkValidation()
@@ -3439,12 +4255,12 @@ function House() {
         data.append("phone_num", instanceData?.phone_num)
         data.append("door_no", instanceData?.door_no)
         data.append("line1", instanceData?.line1)
-
-
+        data.append("building_id", instanceData?.building_id)
+        data.append("street", instanceData?.street)
         try {
             const response = await axios.post(`${Config.BASE_URL}${postUrl}`, data, Config.config);
             console.log(response.data);
-            toast.success('Successfully submitted!');
+            Config?.toastalert("Submitted Successfully", "success")
 
             setListInstanceData((prevstate) => {
                 return [...prevstate, response?.data]
@@ -3453,8 +4269,15 @@ function House() {
             handleClose();
             fetchListData();
         } catch (error) {
-            console.error('Error occurred:', error);
-            toast.error('Submission failed. Please try again.');
+            if (error?.response?.status === 400) {
+                console.log(error);
+                setErrorMsg(error?.response?.data)
+                Config?.toastalert("Submission Failed", "warn")
+            }
+
+            else {
+                Config?.toastalert("Something Went Wrong", "error")
+            }
         }
     };
 
@@ -3471,18 +4294,19 @@ function House() {
 
         const data = new FormData()
         data.append("ward", instanceData?.ward)
+        data.append("street", instanceData?.street)
         data.append("building_type", instanceData?.building_type)
         data.append("name", instanceData?.name)
         data.append("phone_num", instanceData?.phone_num)
         data.append("door_no", instanceData?.door_no)
         data.append("line1", instanceData?.line1)
-
+        data.append("building_id", instanceData?.building_id)
         axios
             .patch(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response)
-
+                    Config?.toastalert("Updated Successfully", "success")
                     setListInstanceData((prevArray) => {
                         const index = prevArray.findIndex((obj) => obj.id === id)
                         if (index !== -1) {
@@ -3501,19 +4325,26 @@ function House() {
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
     }
 
     //DELETE REQUESTS
 
     const deleteInstance = (id) => {
-        console.log('deleting')
 
         axios.delete(`${Config.BASE_URL}${deleteUrl}/${id}/`, Config.config)
             .then(function (response) {
                 if (response.status === 204) {
-                    console.log(response)
+                    Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
                     handleClose();
                     fetchListData();
@@ -3521,7 +4352,15 @@ function House() {
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
                 handleClose();
             })
     }
@@ -3532,37 +4371,13 @@ function House() {
     // handle new instance
 
     const handleChange = (e) => {
-        console.log("trigger")
         const { name, value } = e.target;
-        if (name === "image") {
-            const check = Config?.fileType(e.target.files[0].name)
-
-            if (!check) {
-                console.log("not supported")
-                return
+        setInstanceData((prevstate) => {
+            return {
+                ...prevstate, [name]: value
             }
-            console.log(e.target.files[0].name)
-            let value = e.target.files[0]
-            // setImage(value)
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
 
-            })
-        }
-        else {
-
-            // const { value } = e.target
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
-
-            })
-
-        }
-
+        })
     }
 
 
@@ -3574,101 +4389,112 @@ function House() {
 
         <>
 
-            <ToastContainer />
 
-            {hide && (
-                <>
+            {
+                (isOpen || isAdd) && (
 
-                    {
-                        (isOpen || isAdd) && (
+                    // <HouseDialogs
+                    //     setIsOpen={setIsOpen}
+                    //     isAdd={isAdd}
+                    //     error={error}
 
-                            <HouseDialogs
-                                setIsOpen={setIsOpen}
-                                isAdd={isAdd}
-                                error={error}
+                    //     setListData={tableData}
+                    //     instanceData={instanceData}
+                    //     setInstanceData={setInstanceData}
+                    //     handleClose={handleClose}
 
-                                setListData={tableData}
-                                instanceData={instanceData}
-                                setInstanceData={setInstanceData}
-                                handleClose={handleClose}
+                    //     // functions
+                    //     addInstance={addNewInstance}
+                    //     updateInstance={updateInstance}
+                    //     deleteInstance={deleteInstance}
+                    //     handleChange={handleChange}
 
-                                // functions
-                                addInstance={addNewInstance}
-                                updateInstance={updateInstance}
-                                deleteInstance={deleteInstance}
-                                handleChange={handleChange}
+                    //     wardlist={wardlist}
+                    //     panchayatList={panchayatList}
+                    //     districtList={districtList}
+                    //     streetList={streetList}
+                    //     buildingType={buildingType}
 
-                                wardlist={wardlist}
-                                panchayatList={panchayatList}
-                                districtList={districtList}
-                                streetList={streetList}
-                                buildingType={buildingType}
-
-                                modalHeader={modalHeader}
-
-                            // setImage={setImage}
-                            // image={image}
+                    //     modalHeader={modalHeader}
+                    // />
 
 
-                            />
-                        )
-                    }
-                    {/* <div className="content">
-                        <div className="page-header">
-                            <div className="page-title">
-                                <h4>{modalHeader}s Details</h4>
-                            </div>
-                            <div className="page-btn">
-                                <AddButton
-                                    onClick={() => setisAdd(true)}
-                                    text={" Create"}
-                                />
+                    <FormModal
+                        modalHeader={modalHeader}
+                        lazyLoading={lazyLoading}
+                        setIsOpen={setIsOpen}
+                        isAdd={isAdd}
+                        isedit={isedit}
+                        setisEdit={setisEdit}
+                        error={error}
+                        errorMsg={errorMsg}
+
+                        setListData={tableData}
+                        instanceData={instanceData}
+                        setInstanceData={setInstanceData}
+
+                        handleClose={handleClose}
+
+                        // functions
+                        addInstance={addNewInstance}
+                        updateInstance={updateInstance}
+                        deleteInstance={deleteInstance}
+                        handleChange={handleChange}
+
+                        child={<BuildingForm
+                            lazyLoading={lazyLoading}
+                            setIsOpen={setIsOpen}
+                            isAdd={isAdd}
+                            isedit={isedit}
+
+                            error={error}
+                            errorMsg={errorMsg}
+                            errString={errString}
+
+                            setListData={tableData}
+                            instanceData={instanceData}
+                            setInstanceData={setInstanceData}
+
+                            handleClose={handleClose}
+                            handleChange={handleChange}
+
+                            districtList={districtList}
+                            panchayatList={panchayatList}
+                            wardlist={wardlist}
+                            buildingType={buildingType}
+                            streetList={streetList}
 
 
-                            </div>
-                        </div>
-
-
-                        <CustomTable
-                            headers={headersToShow}
-                            data={tableData}
-                            fieldsToShow={fieldsToShow}
-                            fields={fields}
-                            getInstanceData={getInstanceData}
-                            loader={loader}
-                            setLoader={setLoader}
-                        />
-                    </div> */}
+                        />}
+                    />
+                )
 
 
 
-
-                    <Grid item  xs={12} sm={6}>
-                        <Typography variant="h6">{modalHeader+"s"} Details</Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
-                        <IconButton color="primary" aria-label="add">
-                            <AddButton
-                                onClick={() => setisAdd(true)}
-                                text={" Create"}
-                            />
-                        </IconButton>
-                    </Grid>
+            }
 
 
-                    <Grid item xs={12}>
-                    <CustomTable
-                            headers={headersToShow}
-                            data={tableData}
-                            fieldsToShow={fieldsToShow}
-                            fields={fields}
-                            getInstanceData={getInstanceData}
-                            loader={loader}
-                            setLoader={setLoader}
-                        />
-                    </Grid>
-                </>
-            )}
+            <Grid item xs={12} sm={6}>
+                <Typography variant="h6">{modalHeader + "s"} Details</Typography>
+            </Grid>
+            <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+                <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
+                    Create {modalHeader}
+                </Button>
+            </Grid>
+
+
+            <Grid item xs={12}>
+                <CustomTable
+                    headers={headersToShow}
+                    data={tableData}
+                    fieldsToShow={fieldsToShow}
+                    fields={fields}
+                    getInstanceData={getInstanceData}
+                    loader={loader}
+                    setLoader={setLoader}
+                />
+            </Grid>
 
 
 
@@ -3680,10 +4506,225 @@ function House() {
 
 
 
+
+const BuildingForm = (props) => {
+
+    const { lazyLoading, setIsOpen, isAdd, isedit,
+        errorMsg, errString, error,
+        instanceData, setList, setInstanceData,
+        handleChange, handleClose,
+        wardlist, panchayatList, districtList, streetList, buildingType
+
+
+    } = props
+
+
+    return (
+
+        <>
+
+            <Grid container spacing={2}>
+
+
+                {/* <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={districtList}
+                        handleChange={handleChange}
+                        selected={instanceData?.district}
+                        showname={"name"}
+                        name={"street"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"street"}
+                        label="Select District"
+                    />
+
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={panchayatList}
+                        handleChange={handleChange}
+                        selected={instanceData?.panchayat}
+                        showname={"name"}
+                        name={"panchayat"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"panchayat"}
+                        label="Select Panchayath"
+                    />
+
+                </Grid> */}
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={wardlist}
+                        handleChange={handleChange}
+                        selected={instanceData?.ward}
+                        showname={"name"}
+                        name={"ward"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"ward"}
+                        label="Select Ward"
+                    />
+
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={streetList}
+                        handleChange={handleChange}
+                        selected={instanceData?.street}
+                        showname={"name"}
+                        name={"street"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"ward"}
+                        label="Select Street"
+                    />
+
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={buildingType}
+                        handleChange={handleChange}
+                        selected={instanceData?.building_type}
+                        showname={"name"}
+                        name={"building_type"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"building_type"}
+                        label="Select Building Type"
+                    />
+
+                </Grid>
+
+
+
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <TextInput
+
+                        label="Name"
+                        placeholder="Name"
+                        name={"name"}
+                        value={instanceData?.name}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"name"}
+
+                    />
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <TextInput
+                        label="Contact Number"
+                        placeholder="Phone"
+                        name="phone_num"
+                        value={instanceData?.phone_num}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"phone_num"}
+                        type={"Number"}
+
+                    />
+                    {errString && (
+                        <span className="req-text">{errString}</span>
+                    )}
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <TextInput
+                        label="Building Id"
+                        placeholder="Building Id"
+                        name="building_id"
+                        value={instanceData?.building_id}
+                        required={true}
+                        handleChange={handleChange}   //for main element change
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        // errorMsg={errorMsg}
+                        errorField={"building_id"}
+
+                    />
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <TextInput
+                        label="Door No"
+                        placeholder="door no"
+                        name="door_no"
+                        value={instanceData?.door_no}
+                        required={true}
+                        handleChange={handleChange}   //for main element change
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        // errorMsg={errorMsg}
+                        errorField={"door_no"}
+
+                    />
+
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <TextInput
+                        label="Address"
+                        placeholder="Address"
+                        name="line1"
+                        value={instanceData?.line1}
+                        required={true}
+                        handleChange={handleChange}   //for main element change
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"line1"}
+                        multiline={true}
+                        rows={2}
+
+                    />
+
+
+                </Grid>
+
+
+            </Grid>
+
+        </>
+
+
+
+    )
+}
+
+
+
+
+
 function HouseDialogs(props) {
 
     const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader,
-        deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, districtList, panchayatList, streetList,buildingType
+        deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, districtList, panchayatList, streetList, buildingType
         // setError, setImage, image 
     } = props
 
@@ -3816,7 +4857,7 @@ function HouseDialogs(props) {
                                     error={error}
                                 />
                             </div> */}
-{/* ---------------------------------------------------------------------------------- */}
+                            {/* ---------------------------------------------------------------------------------- */}
 
                             <div class="form-group">
                                 <label class="form-label">Ward <span class="form-required">*</span></label>
@@ -3862,7 +4903,7 @@ function HouseDialogs(props) {
                                 />
                             </div>
 
-                   
+
                             <div class="form-group">
                                 <label class="form-label">Name<span class="form-required">*</span></label>
                                 <input type="text" class="form-control" name="name"
@@ -3876,9 +4917,9 @@ function HouseDialogs(props) {
                                     <span className="req-text">{Config?.errString}</span>
                                 )}
                             </div>
-                          
 
-                           
+
+
                             <div class="form-group">
                                 <label class="form-label">Contact No<span class="form-required">*</span></label>
                                 <input type="text" class="form-control" name="phone_num"
@@ -3907,26 +4948,26 @@ function HouseDialogs(props) {
                             </div>
 
 
-                     
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Address :
-                                    </label>
-                                    <textarea
-                                        cols="30"
-                                        rows="1"
-                                        name="line1"
-                                        onChange={handleChange}
-                                        defaultValue={instanceData?.line1 || ''}
-                                        disabled={!isedit && !isAdd}
-                                    ></textarea>
-                                    {error && !instanceData?.line1 && (
-                                        <span className="req-text">
-                                            This field is required
-                                        </span>
-                                    )}
-                                </div>
-          
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Address :
+                                </label>
+                                <textarea
+                                    cols="30"
+                                    rows="1"
+                                    name="line1"
+                                    onChange={handleChange}
+                                    defaultValue={instanceData?.line1 || ''}
+                                    disabled={!isedit && !isAdd}
+                                ></textarea>
+                                {error && !instanceData?.line1 && (
+                                    <span className="req-text">
+                                        This field is required
+                                    </span>
+                                )}
+                            </div>
+
 
 
 

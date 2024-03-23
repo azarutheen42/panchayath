@@ -28,7 +28,19 @@ import { setStreet } from "../features/StreetSlice";
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
-import {Typography,Container,Grid,Paper} from '@mui/material';
+import { Typography, Container, Grid, Paper } from '@mui/material';
+
+
+
+import SelectDropDown from "../utils/SelectDropDown"
+import FormModal from "../utils/FormModal";
+import TextInput from "../utils/TextInput";
+import FileUploadComponent from "../utils/FileInput"
+import BasicDatePicker from "../utils/DatePicker";
+import InputBox from "../utils/NumberInput";
+import { TextField } from '@mui/material';
+import MultipleSelect from "./MultiDropdown";
+import AddIcon from '@mui/icons-material/Add';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -399,9 +411,15 @@ export default function settings(props) {
     const [permissionList, setPermissionList] = useState([]);
 
 
+
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+    const [lazyLoading, setLazyLoading] = useState(true);
+
+
     const getPermissionName = (data) => {
 
-        const label = data?.map((no)=> ( permissionList?.find((e) => e?.id === no)?.name)).join(', ')
+        const label = data?.map((no) => (permissionList?.find((e) => e?.id === no)?.name)).join(', ')
 
         // const label = data?.map(permission => permission.name).join(', ');
         return label
@@ -444,6 +462,10 @@ export default function settings(props) {
         );
         setError();
 
+        setErrorMsg({});
+        seterrString();
+        setisEdit();
+
 
     }
 
@@ -468,6 +490,7 @@ export default function settings(props) {
 
         } catch (error) {
             console.error('Error fetching data:', error)
+
         }
     }
 
@@ -481,6 +504,7 @@ export default function settings(props) {
             setPermissionList(data);
         } catch (error) {
             console.error('Error fetching data:', error)
+
         }
     }
 
@@ -495,6 +519,7 @@ export default function settings(props) {
 
         } catch (error) {
             console.error('Error fetching data:', error)
+            Config?.toastalert("Something Went Wrong", "error")
         }
     }
 
@@ -511,6 +536,7 @@ export default function settings(props) {
             })
             .catch(function (error) {
                 console.log(error)
+                Config?.toastalert("Something Went Wrong", "error")
             })
     }
 
@@ -552,17 +578,23 @@ export default function settings(props) {
         try {
             const response = await axios.post(`${Config.BASE_URL}${postUrl}/`, data, Config.config);
             console.log(response.data);
-            toast.success('Successfully submitted!');
-
+            Config?.toastalert("Submitted Successfully", "success")
             setListInstanceData((prevstate) => {
                 return [...prevstate, response?.data]
             })
 
             handleClose();
-            
+
         } catch (error) {
-            console.error('Error occurred:', error);
-            toast.error(error?.response?.data?.msg);
+            if (error?.response?.status === 400) {
+                console.log(error);
+                setErrorMsg(error?.response?.data)
+                Config?.toastalert("Submission Failed", "warn")
+            }
+
+            else {
+                Config?.toastalert("Something Went Wrong", "error")
+            }
         }
 
 
@@ -591,7 +623,7 @@ export default function settings(props) {
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response)
-
+                    Config?.toastalert("Updated Successfully", "success")
                     setListInstanceData((prevArray) => {
                         const index = prevArray.findIndex((obj) => obj.id === id)
                         if (index !== -1) {
@@ -610,8 +642,15 @@ export default function settings(props) {
                 }
             })
             .catch(function (error) {
-                toast.error(error?.response?.data?.msg);
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
     }
 
@@ -623,14 +662,22 @@ export default function settings(props) {
         axios.delete(`${Config.BASE_URL}${deleteUrl}/${id}/`, Config.config)
             .then(function (response) {
                 if (response.status === 204) {
-                    console.log(response)
+                    Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
                     handleClose();
 
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
                 handleClose();
             })
     }
@@ -640,7 +687,7 @@ export default function settings(props) {
 
 
 
-// handle instance change
+    // handle instance change
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -697,104 +744,182 @@ export default function settings(props) {
 
         <ToastContainer />
 
-        {hide && (
-            <>
 
-                {
-                    (isOpen || isAdd) && (
+        {
+            (isOpen || isAdd) && (
 
-                        <WardDialogs
-                            setIsOpen={setIsOpen}
-                            isAdd={isAdd}
-                            error={error}
+                // <WardDialogs
+                //     setIsOpen={setIsOpen}
+                //     isAdd={isAdd}
+                //     error={error}
 
-                            setListData={tableData}
-                            instanceData={instanceData}
-                            setInstanceData={setInstanceData}
-                            handleClose={handleClose}
+                //     setListData={tableData}
+                //     instanceData={instanceData}
+                //     setInstanceData={setInstanceData}
+                //     handleClose={handleClose}
 
-                            // functions
-                            addInstance={addNewInstance}
-                            updateInstance={updateInstance}
-                            deleteInstance={deleteInstance}
-                            handleChange={handleChange}
-                            wardlist={wardlist}
-                            panchayatList={panchayatList}
-                            districtList={districtList}
+                //     // functions
+                //     addInstance={addNewInstance}
+                //     updateInstance={updateInstance}
+                //     deleteInstance={deleteInstance}
+                //     handleChange={handleChange}
+                //     // wardlist={wardlist}
+                //     // panchayatList={panchayatList}
+                //     // districtList={districtList}
+                //     modalHeader={modalHeader}
+                //     roleList={roleList}
+                //     permissionList={permissionList}
+                //     handleCheckboxChange={handleCheckboxChange}
+                // />
 
-                            // requestTypeList={complaintTypeList}
-                            modalHeader={modalHeader}
-                            roleList={roleList}
-                            permissionList={permissionList}
-                            handleCheckboxChange={handleCheckboxChange}
+                <FormModal
+                    modalHeader={modalHeader}
+                    lazyLoading={lazyLoading}
+                    setIsOpen={setIsOpen}
+                    isAdd={isAdd}
+                    isedit={isedit}
+                    setisEdit={setisEdit}
+                    // error={error}
+                    // errorMsg={errorMsg}
 
-                        // setImage={setImage}
-                        // image={image}
+                    // setListData={tableData}
+                    instanceData={instanceData}
+                    // setInstanceData={setInstanceData}
+                    handleClose={handleClose}
+
+                    // functions
+                    addInstance={addNewInstance}
+                    updateInstance={updateInstance}
+                    deleteInstance={deleteInstance}
+                    handleChange={handleChange}
+
+                    child={<PermissionForm
+                        lazyLoading={lazyLoading}
+                        setIsOpen={setIsOpen}
+                        isAdd={isAdd}
+                        isedit={isedit}
+
+                        error={error}
+                        errorMsg={errorMsg}
+                        errString={errString}
+
+                        setListData={tableData}
+                        instanceData={instanceData}
+                        setInstanceData={setInstanceData}
+
+                        handleClose={handleClose}
+                        handleChange={handleChange}
+                        roleList={roleList}
+                        permissionList={permissionList}
+                        handleCheckboxChange={handleCheckboxChange}
+
+                    />}
+                />
+
+            )
+        }
+
+        <Grid item xs={12} sm={6}>
+            <Typography variant="h6">{modalHeader + "s"} Details</Typography>
+        </Grid>
+        <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
+                Create {modalHeader}
+            </Button>
+        </Grid>
 
 
-                        />
-                    )
-                }
-                {/* <div className="content">
-                    <div className="page-header">
-                        <div className="page-title">
-                            <h4>{modalHeader}s Details</h4>
-                        </div>
-                        <div className="page-btn">
-                            <AddButton
-                                onClick={() => setisAdd(true)}
-                                text={" Create"}
-                            />
+        <Grid item xs={12}>
 
+            <CustomTable
+                headers={headersToShow}
+                data={tableData}
+                fieldsToShow={fieldsToShow}
+                fields={fields}
+                getInstanceData={getInstanceData}
+                loader={loader}
+                setLoader={setLoader}
+            />
+        </Grid>
 
-                        </div>
-                    </div>
-
-
-                    <CustomTable
-                        headers={headersToShow}
-                        data={tableData}
-                        fieldsToShow={fieldsToShow}
-                        fields={fields}
-                        getInstanceData={getInstanceData}
-                        loader={loader}
-                        setLoader={setLoader}
-                    />
-                </div> */}
-
-
-
-
-                <Grid item  xs={12} sm={6}>
-                        <Typography variant="h6">{modalHeader+"s"} Details</Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
-                        <IconButton color="primary" aria-label="add">
-                            <AddButton
-                                onClick={() => setisAdd(true)}
-                                text={" Create"}
-                            />
-                        </IconButton>
-                    </Grid>
-
-
-                    <Grid item xs={12}>
-                        
-                    <CustomTable
-                        headers={headersToShow}
-                        data={tableData}
-                        fieldsToShow={fieldsToShow}
-                        fields={fields}
-                        getInstanceData={getInstanceData}
-                        loader={loader}
-                        setLoader={setLoader}
-                    />
-                    </Grid>
-            </>
-        )}
 
     </>)
 }
+
+
+
+
+
+
+const PermissionForm = (props) => {
+
+    const { lazyLoading, setIsOpen, isAdd, isedit,
+        errorMsg, errString, error,
+        instanceData, setList, setInstanceData,
+        handleChange, handleClose,
+        roleList, permissionList, handleCheckboxChange,
+    } = props
+
+
+    return (
+
+        <>
+
+            <Grid container spacing={2}>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={roleList}
+                        handleChange={handleChange}
+                        selected={instanceData?.role}
+                        showname={"name"}
+                        name={"role"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"role"}
+                        label="Select Role"
+                    />
+
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <FormGroup>
+                        <Typography variant="h6">Permissions</Typography>
+                        {permissionList?.map((permission) => (
+                            <FormControlLabel
+                                key={permission?.id}
+                                control={<Checkbox
+                                    // checked={instanceData?.permission?.includes((permission.id) !== -1)}
+                                    checked={instanceData?.permission?.includes(permission?.id)}
+                                    onChange={handleCheckboxChange}
+                                    // name={permission.name} 
+                                    name="permission" value={permission?.id}
+                                    disabled={!isedit && !isAdd}
+                                />}
+                                label={permission?.name}
+                            />
+                        ))}
+
+
+                    </FormGroup>
+                </Grid>
+
+
+
+
+            </Grid>
+
+        </>
+
+
+
+    )
+}
+
+
 
 
 
@@ -916,7 +1041,7 @@ function WardDialogs(props) {
                                             disabled={!isedit && !isAdd}
                                             error={error}
                                         />
-                                      
+
 
                                     </div>
                                 </div>
@@ -924,26 +1049,26 @@ function WardDialogs(props) {
                             <hr />
 
                             <div class="row">
-                                    <FormGroup>
-                                        <Typography variant="h6">Permissions</Typography>
-                                        {permissionList?.map((permission) => (
-                                            <FormControlLabel
-                                                key={permission?.id}
-                                                control={<Checkbox 
-                                                    // checked={instanceData?.permission?.includes((permission.id) !== -1)}
-                                                    checked={instanceData?.permission?.includes(permission?.id)}
-                                                    onChange={handleCheckboxChange}
-                                                    // name={permission.name} 
-                                                    name="permission" value={permission?.id}
-                                                    disabled={!isedit && !isAdd}
-                                                />}
-                                                label={permission?.name}
-                                            />
-                                        ))}
+                                <FormGroup>
+                                    <Typography variant="h6">Permissions</Typography>
+                                    {permissionList?.map((permission) => (
+                                        <FormControlLabel
+                                            key={permission?.id}
+                                            control={<Checkbox
+                                                // checked={instanceData?.permission?.includes((permission.id) !== -1)}
+                                                checked={instanceData?.permission?.includes(permission?.id)}
+                                                onChange={handleCheckboxChange}
+                                                // name={permission.name} 
+                                                name="permission" value={permission?.id}
+                                                disabled={!isedit && !isAdd}
+                                            />}
+                                            label={permission?.name}
+                                        />
+                                    ))}
 
 
-                                    </FormGroup>
-                                </div>
+                                </FormGroup>
+                            </div>
 
                             {/* {permissionList?.map((permission) => (
                                 <div key={permission?.id}>

@@ -32,6 +32,7 @@ import FileUploadComponent from "../utils/FileInput"
 import BasicDatePicker from "../utils/DatePicker";
 import InputBox from "../utils/NumberInput";
 import { TextField } from '@mui/material';
+import MultipleSelect from "./MultiDropdown";
 
 import AddIcon from '@mui/icons-material/Add';
 import TimePicker from "../utils/TimePicker"
@@ -81,6 +82,7 @@ export default function Activity(props) {
     return (
         <>
             <Content />
+            <ToastContainer />
         </>
     )
 
@@ -392,7 +394,7 @@ function MinutesOfMeeting() {
 
         <>
 
-            <ToastContainer />
+     
 
             {hide && (
                 <>
@@ -1097,6 +1099,7 @@ function Scheme() {
             })
             .catch(function (error) {
                 console.log(error)
+                Config?.toastalert("Something Went Wrong", "error")
             })
     }
 
@@ -1281,7 +1284,6 @@ function Scheme() {
 
         <>
 
-            <ToastContainer />
 
             {hide && (
                 <>
@@ -1368,12 +1370,11 @@ function Scheme() {
                         <Typography variant="h6">{modalHeader + "s"} Details</Typography>
                     </Grid>
                     <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
-                        <IconButton color="primary" aria-label="add">
-                            <AddButton
-                                onClick={() => setisAdd(true)}
-                                text={" Create"}
-                            />
-                        </IconButton>
+
+                        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
+                            Create {modalHeader}
+                        </Button>
+
                     </Grid>
 
 
@@ -1388,32 +1389,7 @@ function Scheme() {
                             setLoader={setLoader}
                         />
                     </Grid>
-                    {/* <div className="content">
-                        <div className="page-header">
-                            <div className="page-title">
-                                <h4>{modalHeader}s Details</h4>
-                            </div>
-                            <div className="page-btn">
-                                <AddButton
-                                    onClick={() => setisAdd(true)}
-                                    text={" Create"}
-                                />
 
-
-                            </div>
-                        </div>
-
-
-                        <CustomTable
-                            headers={headersToShow}
-                            data={tableData}
-                            fieldsToShow={fieldsToShow}
-                            fields={fields}
-                            getInstanceData={getInstanceData}
-                            loader={loader}
-                            setLoader={setLoader}
-                        />
-                    </div> */}
                 </>
             )}
 
@@ -2155,7 +2131,7 @@ function Events() {
 
         <>
 
-            <ToastContainer />
+          
 
             {hide && (
                 <>
@@ -2742,6 +2718,9 @@ function StaffNoticeBoard() {
     const deleteUrl = "staffnotice";
 
 
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+    const [lazyLoading, setLazyLoading] = useState(true);
 
     // META DATA
     const headersToShow = ["Date", "Subject", "Details"]
@@ -2761,6 +2740,10 @@ function StaffNoticeBoard() {
         setisAdd();
         setInstanceData();
         setError();
+        setErrorMsg({});
+        seterrString();
+        setImage();
+        setisEdit();
 
 
     }
@@ -2785,6 +2768,7 @@ function StaffNoticeBoard() {
 
         } catch (error) {
             console.error('Error fetching data:', error)
+            Config?.toastalert("Something Went Wrong", "error")
         }
     }
 
@@ -2802,6 +2786,7 @@ function StaffNoticeBoard() {
             })
             .catch(function (error) {
                 console.log(error)
+                Config?.toastalert("Something Went Wrong", "error")
             })
     }
 
@@ -2844,16 +2829,22 @@ function StaffNoticeBoard() {
         try {
             const response = await axios.post(`${Config.BASE_URL}${postUrl}/`, data, Config.config);
             console.log(response.data);
-            toast.success('Successfully submitted!');
-
+            Config?.toastalert("Submitted Successfully", "success")
             setListInstanceData((prevstate) => {
                 return [...prevstate, response?.data]
             })
 
             handleClose();
         } catch (error) {
-            console.error('Error occurred:', error);
-            toast.error('Submission failed. Please try again.');
+            if (error?.response?.status === 400) {
+                console.log(error);
+                setErrorMsg(error?.response?.data)
+                Config?.toastalert("Submission Failed", "warn")
+            }
+
+            else {
+                Config?.toastalert("Something Went Wrong", "error")
+            }
         }
     };
 
@@ -2878,8 +2869,8 @@ function StaffNoticeBoard() {
             .put(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
             .then(function (response) {
                 if (response.status === 200) {
-                    console.log(response)
 
+                    Config?.toastalert("Updated Successfully", "success")
                     setListInstanceData((prevArray) => {
                         const index = prevArray.findIndex((obj) => obj.id === id)
                         if (index !== -1) {
@@ -2898,7 +2889,15 @@ function StaffNoticeBoard() {
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
     }
 
@@ -2910,13 +2909,21 @@ function StaffNoticeBoard() {
         axios.delete(`${Config.BASE_URL}${deleteUrl}/${id}/`, Config.config)
             .then(function (response) {
                 if (response.status === 204) {
-                    console.log(response)
+                    Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
                     handleClose();
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
                 handleClose();
             })
     }
@@ -2936,13 +2943,13 @@ function StaffNoticeBoard() {
             }
             console.log(e.target.files[0].name)
             let value = e.target.files[0]
-            // setImage(value)
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
+            setImage(value)
+            // setInstanceData((prevstate) => {
+            //     return {
+            //         ...prevstate, [name]: value
+            //     }
 
-            })
+            // })
         }
         else {
 
@@ -2967,7 +2974,7 @@ function StaffNoticeBoard() {
 
         <>
 
-            <ToastContainer />
+          
 
             {hide && (
                 <>
@@ -2975,14 +2982,45 @@ function StaffNoticeBoard() {
                     {
                         (isOpen || isAdd) && (
 
-                            <StaffNoticeBoardDialogs
+                            // <StaffNoticeBoardDialogs
+                            //     setIsOpen={setIsOpen}
+                            //     isAdd={isAdd}
+                            //     error={error}
+
+                            //     setListData={tableData}
+                            //     instanceData={instanceData}
+                            //     setInstanceData={setInstanceData}
+                            //     handleClose={handleClose}
+
+                            //     // functions
+                            //     addInstance={addNewInstance}
+                            //     updateInstance={updateInstance}
+                            //     deleteInstance={deleteInstance}
+                            //     handleChange={handleChange}
+                            //     wardlist={wardlist}
+                            //     requestTypeList={complaintTypeList}
+                            //     modalHeader={modalHeader}
+
+                            // // setImage={setImage}
+                            // // image={image}
+
+
+                            // />
+
+                            <FormModal
+                                modalHeader={modalHeader}
+                                lazyLoading={lazyLoading}
                                 setIsOpen={setIsOpen}
                                 isAdd={isAdd}
+                                isedit={isedit}
+                                setisEdit={setisEdit}
                                 error={error}
+                                errorMsg={errorMsg}
 
                                 setListData={tableData}
                                 instanceData={instanceData}
                                 setInstanceData={setInstanceData}
+
                                 handleClose={handleClose}
 
                                 // functions
@@ -2990,43 +3028,34 @@ function StaffNoticeBoard() {
                                 updateInstance={updateInstance}
                                 deleteInstance={deleteInstance}
                                 handleChange={handleChange}
-                                wardlist={wardlist}
-                                requestTypeList={complaintTypeList}
-                                modalHeader={modalHeader}
 
-                            // setImage={setImage}
-                            // image={image}
+                                child={<StaffNoticeForm
+                                    lazyLoading={lazyLoading}
+                                    setIsOpen={setIsOpen}
+                                    isAdd={isAdd}
+                                    isedit={isedit}
+
+                                    error={error}
+                                    errorMsg={errorMsg}
+                                    errString={errString}
+
+                                    setListData={tableData}
+                                    instanceData={instanceData}
+                                    setInstanceData={setInstanceData}
+
+                                    handleClose={handleClose}
+                                    handleChange={handleChange}
+                                    // handleMainChange={handleMainChange}
+
+                                    wardlist={wardlist}
+                                    image={image}
+                                    setImage={setImage}
 
 
+                                />}
                             />
                         )
                     }
-                    {/* <div className="content">
-                        <div className="page-header">
-                            <div className="page-title">
-                                <h4>{modalHeader}s Details</h4>
-                            </div>
-                            <div className="page-btn">
-                                <AddButton
-                                    onClick={() => setisAdd(true)}
-                                    text={" Create"}
-                                />
-
-
-                            </div>
-                        </div>
-
-
-                        <CustomTable
-                            headers={headersToShow}
-                            data={tableData}
-                            fieldsToShow={fieldsToShow}
-                            fields={fields}
-                            getInstanceData={getInstanceData}
-                            loader={loader}
-                            setLoader={setLoader}
-                        />
-                    </div> */}
 
 
 
@@ -3034,12 +3063,9 @@ function StaffNoticeBoard() {
                         <Typography variant="h6">{modalHeader + "s"} Details</Typography>
                     </Grid>
                     <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
-                        <IconButton color="primary" aria-label="add">
-                            <AddButton
-                                onClick={() => setisAdd(true)}
-                                text={" Create"}
-                            />
-                        </IconButton>
+                        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
+                            Create {modalHeader}
+                        </Button>
                     </Grid>
 
 
@@ -3066,7 +3092,114 @@ function StaffNoticeBoard() {
 
 }
 
+const StaffNoticeForm = (props) => {
 
+    const { lazyLoading, setIsOpen, isAdd, isedit,
+        errorMsg, errString, error,
+        instanceData, setList, setInstanceData,
+        handleChange, handleClose,
+        wardlist, image, setImage
+
+
+    } = props
+
+
+    return (
+
+        <>
+
+            <Grid container spacing={2}>
+                {/* First Name */}
+                <Grid item xs={12} md={6} sm={6}>
+                    <Grid >
+
+                    </Grid>
+                    <TextInput
+
+                        label="Subject"
+                        placeholder="Subject"
+                        name={"subject"}
+                        value={instanceData?.subject}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"subject"}
+
+                    />
+                </Grid>
+
+
+                {/* 
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <FileUploadComponent
+                        filelabel="Image"
+                        name="image"
+                        value={instanceData?.image}
+                        required={false}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        image={image}
+                        setImage={setImage}
+                        errorMsg={errorMsg}
+                        errorField={"image"}
+
+                    />
+
+                </Grid> */}
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <BasicDatePicker
+                        label="Date"
+                        placeholder="Date"
+                        name="date"
+                        value={instanceData?.date}
+                        required={true}
+                        handleChange={handleChange}
+                        // handleDateChange={handleDateChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"date"}
+
+                    />
+
+                </Grid>
+
+                <Grid item xs={12} md={12} sm={12}>
+
+                    <TextInput
+                        label="Details"
+                        placeholder="details"
+                        name="details"
+                        value={instanceData?.details}
+                        required={true}
+                        handleChange={handleChange}   //for main element change
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        // errorMsg={errorMsg}
+                        errorField={"details"}
+                        multiline={true}
+                        rows={4}
+
+                    />
+
+                </Grid>
+
+            </Grid>
+
+
+
+
+        </>
+
+
+
+    )
+}
 
 function StaffNoticeBoardDialogs(props) {
 
@@ -3326,8 +3459,6 @@ function StaffNoticeBoardDialogs(props) {
 function Announcement() {
 
 
-
-
     const modalHeader = "Announcement";
 
     const user = useSelector((state) => state?.user?.value);
@@ -3372,6 +3503,12 @@ function Announcement() {
 
 
 
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+    const [lazyLoading, setLazyLoading] = useState(true);
+
+
+
     // META DATA
     const headersToShow = ["Date", "Time", "Name", "Place", "Details", "Ward"]
     const tableData = listInstanceData
@@ -3394,6 +3531,10 @@ function Announcement() {
         setisAdd();
         setInstanceData();
         setError();
+        setErrorMsg({});
+        seterrString();
+        setImage();
+        setisEdit();
 
 
     }
@@ -3418,6 +3559,7 @@ function Announcement() {
 
         } catch (error) {
             console.error('Error fetching data:', error)
+            Config?.toastalert("Something Went Wrong", "error")
         }
     }
 
@@ -3435,6 +3577,7 @@ function Announcement() {
             })
             .catch(function (error) {
                 console.log(error)
+                Config?.toastalert("Something Went Wrong", "error")
             })
     }
 
@@ -3473,12 +3616,21 @@ function Announcement() {
         data.append('time', instanceData?.time)
         data.append('name', instanceData?.name)
         data.append('place', instanceData?.place)
-        data.append('ward', instanceData?.ward)
+        const wardlist = instanceData?.ward
+        if (wardlist?.length > 0) {
+            wardlist.map((e) => (
+                data.append('ward', e)
+            ))
+        }
+
         data.append('details', instanceData?.details)
+        if (image) {
+            data.append("file", image)
+        }
         try {
             const response = await axios.post(`${Config.BASE_URL}${postUrl}/`, data, Config.config);
             console.log(response.data);
-            toast.success('Successfully submitted!');
+            Config?.toastalert("Submitted Successfully", "success")
 
             setListInstanceData((prevstate) => {
                 return [...prevstate, response?.data]
@@ -3487,7 +3639,15 @@ function Announcement() {
             handleClose();
         } catch (error) {
             console.error('Error occurred:', error);
-            toast.error('Submission failed. Please try again.');
+            if (error?.response?.status === 400) {
+                console.log(error);
+                setErrorMsg(error?.response?.data)
+                Config?.toastalert("Submission Failed", "warn")
+            }
+
+            else {
+                Config?.toastalert("Something Went Wrong", "error")
+            }
         }
     };
 
@@ -3507,15 +3667,25 @@ function Announcement() {
         data.append('time', instanceData?.time)
         data.append('name', instanceData?.name)
         data.append('place', instanceData?.place)
-        data.append('ward', instanceData?.ward)
+        // data.append('ward', instanceData?.ward)
         data.append('details', instanceData?.details)
+
+        const wardlist = instanceData?.ward
+        if (wardlist?.length > 0) {
+            wardlist.map((e) => (
+                data.append('ward', e)
+            ))
+        }
+        if (image) {
+            data.append("file", image)
+        }
 
         axios
             .put(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response)
-
+                    Config?.toastalert("Updated Successfully", "success")
                     setListInstanceData((prevArray) => {
                         const index = prevArray.findIndex((obj) => obj.id === id)
                         if (index !== -1) {
@@ -3534,7 +3704,15 @@ function Announcement() {
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
     }
 
@@ -3546,13 +3724,21 @@ function Announcement() {
         axios.delete(`${Config.BASE_URL}${deleteUrl}/${id}/`, Config.config)
             .then(function (response) {
                 if (response.status === 204) {
-                    console.log(response)
+                    Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
                     handleClose();
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
                 handleClose();
             })
     }
@@ -3563,8 +3749,8 @@ function Announcement() {
     // handle new instance
     const handleChange = (e) => {
         const { name, value } = e.target;
-        if (name === "image") {
-            const check = Config?.fileType(e.target.files[0].name)
+        if (name === "file") {
+            const check = Config?.DocfileType(e.target.files[0].name)
 
             if (!check) {
                 console.log("not supported")
@@ -3572,13 +3758,13 @@ function Announcement() {
             }
             console.log(e.target.files[0].name)
             let value = e.target.files[0]
-            // setImage(value)
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
+            setImage(value)
+            // setInstanceData((prevstate) => {
+            //     return {
+            //         ...prevstate, [name]: value
+            //     }
 
-            })
+            // })
         }
         else {
 
@@ -3603,7 +3789,7 @@ function Announcement() {
 
         <>
 
-            <ToastContainer />
+         
 
             {hide && (
                 <>
@@ -3611,14 +3797,45 @@ function Announcement() {
                     {
                         (isOpen || isAdd) && (
 
-                            <AnnouncmentDialogs
+                            // <AnnouncmentDialogs
+                            //     setIsOpen={setIsOpen}
+                            //     isAdd={isAdd}
+                            //     error={error}
+
+                            //     setListData={tableData}
+                            //     instanceData={instanceData}
+                            //     setInstanceData={setInstanceData}
+                            //     handleClose={handleClose}
+
+                            //     // functions
+                            //     addInstance={addNewInstance}
+                            //     updateInstance={updateInstance}
+                            //     deleteInstance={deleteInstance}
+                            //     handleChange={handleChange}
+                            //     wardlist={wardlist}
+                            //     requestTypeList={complaintTypeList}
+                            //     modalHeader={modalHeader}
+
+                            // // setImage={setImage}
+                            // // image={image}
+                            // />
+
+
+
+                            <FormModal
+                                modalHeader={modalHeader}
+                                lazyLoading={lazyLoading}
                                 setIsOpen={setIsOpen}
                                 isAdd={isAdd}
+                                isedit={isedit}
+                                setisEdit={setisEdit}
                                 error={error}
+                                errorMsg={errorMsg}
 
                                 setListData={tableData}
                                 instanceData={instanceData}
                                 setInstanceData={setInstanceData}
+
                                 handleClose={handleClose}
 
                                 // functions
@@ -3626,54 +3843,46 @@ function Announcement() {
                                 updateInstance={updateInstance}
                                 deleteInstance={deleteInstance}
                                 handleChange={handleChange}
-                                wardlist={wardlist}
-                                requestTypeList={complaintTypeList}
-                                modalHeader={modalHeader}
 
-                            // setImage={setImage}
-                            // image={image}
+                                child={<AnnouncementForm
+                                    lazyLoading={lazyLoading}
+                                    setIsOpen={setIsOpen}
+                                    isAdd={isAdd}
+                                    isedit={isedit}
+
+                                    error={error}
+                                    errorMsg={errorMsg}
+                                    errString={errString}
+
+                                    setListData={tableData}
+                                    instanceData={instanceData}
+                                    setInstanceData={setInstanceData}
+
+                                    handleClose={handleClose}
+                                    handleChange={handleChange}
+                                    // handleMainChange={handleMainChange}
+
+                                    wardlist={wardlist}
+                                    image={image}
+                                    setImage={setImage}
 
 
+                                />}
                             />
+
+
+
                         )
                     }
-                    {/* <div className="content">
-                        <div className="page-header">
-                            <div className="page-title">
-                                <h4>{modalHeader}s Details</h4>
-                            </div>
-                            <div className="page-btn">
-                                <AddButton
-                                    onClick={() => setisAdd(true)}
-                                    text={" Create"}
-                                />
 
-
-                            </div>
-                        </div>
-
-
-                        <CustomTable
-                            headers={headersToShow}
-                            data={tableData}
-                            fieldsToShow={fieldsToShow}
-                            fields={fields}
-                            getInstanceData={getInstanceData}
-                            loader={loader}
-                            setLoader={setLoader}
-                        />
-                    </div> */}
 
                     <Grid item xs={12} sm={6}>
                         <Typography variant="h6">{modalHeader + "s"} Details</Typography>
                     </Grid>
                     <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
-                        <IconButton color="primary" aria-label="add">
-                            <AddButton
-                                onClick={() => setisAdd(true)}
-                                text={" Create"}
-                            />
-                        </IconButton>
+                        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
+                            Create {modalHeader}
+                        </Button>
                     </Grid>
 
 
@@ -3700,6 +3909,174 @@ function Announcement() {
 
 }
 
+
+
+
+const AnnouncementForm = (props) => {
+
+    const { lazyLoading, setIsOpen, isAdd, isedit,
+        errorMsg, errString, error,
+        instanceData, setList, setInstanceData,
+        handleChange, handleClose,
+        wardlist, image, setImage
+
+
+    } = props
+
+
+    return (
+
+        <>
+
+            <Grid container spacing={2}>
+                {/* First Name */}
+                <Grid item xs={12} md={6} sm={6}>
+                    <Grid >
+
+                    </Grid>
+                    <TextInput
+
+                        label="Name"
+                        placeholder="Name"
+                        name={"name"}
+                        value={instanceData?.name}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"name"}
+
+                    />
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <TextInput
+                        label="Place"
+                        placeholder="Place"
+                        name="place"
+                        value={instanceData?.place}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"place"}
+                    />
+
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <MultipleSelect
+                        data={wardlist}
+                        onchange={handleChange}
+                        value={instanceData?.ward}
+                        showname={"name"}
+                        name={"ward"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"ward"}
+                        label={"Select Wards"}
+
+                    />
+                    {(error && !instanceData?.ward?.length) && (
+                        <span className="req-text">This field is required</span>
+                    )}
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <FileUploadComponent
+                        filelabel="File"
+                        name="file"
+                        value={instanceData?.file}
+                        required={false}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        image={image}
+                        setImage={setImage}
+                        errorMsg={errorMsg}
+                        errorField={"file"}
+
+                    />
+
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <BasicDatePicker
+                        label="Date"
+                        placeholder="Date"
+                        name="date"
+                        value={instanceData?.date}
+                        required={true}
+                        handleChange={handleChange}
+                        // handleDateChange={handleDateChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"date"}
+
+                    />
+
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <TimePicker
+
+                        label="Time"
+                        placeholder="Time"
+                        name="time"
+                        value={instanceData?.time}
+                        required={true}
+                        handleChange={handleChange}
+                        // handleDateChange={handleDateChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"time"}
+                    />
+
+                </Grid>
+
+
+                <Grid item xs={12} md={12} sm={12}>
+
+                    <TextInput
+                        label="Details"
+                        placeholder="details"
+                        name="details"
+                        value={instanceData?.details}
+                        required={true}
+                        handleChange={handleChange}   //for main element change
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        // errorMsg={errorMsg}
+                        errorField={"details"}
+                        multiline={true}
+                        rows={4}
+
+                    />
+
+                </Grid>
+
+
+
+            </Grid>
+
+
+
+
+        </>
+
+
+
+    )
+}
 
 function AnnouncmentDialogs(props) {
 
