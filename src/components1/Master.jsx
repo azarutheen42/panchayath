@@ -62,12 +62,13 @@ function Content(props) {
             return <Panchayat />
         case "ward":
             return <Ward />
-        case "house":
+        case "building":
             return < House />
-        // case "shops":
-        //     return <Shop/>
         case "streets":
             return <Street />
+
+        case "tax":
+            return <TaxMessageInfo/>
         default:
             return <Ward />
     }
@@ -5035,4 +5036,434 @@ function HouseDialogs(props) {
             </BootstrapDialog>
         </React.Fragment>
     );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// -------------------------------------------------------------------------------------------------
+
+
+
+
+
+function TaxMessageInfo() {
+
+    const modalHeader = "Building Tax";
+
+    const dispatch = useDispatch()
+
+    const user = useSelector((state) => state?.user?.value);
+    const wardlist = useSelector((state) => state?.ward?.value);
+    const panchayatList = useSelector((state) => state?.panchayat?.value);
+    const districtList = useSelector((state) => state?.district?.value);
+    const streetList = useSelector((state) => state?.street?.value);
+
+    // meta StATE
+    const [listInstanceData, setListInstanceData] = useState([])
+    const [instanceData, setInstanceData] = useState({})
+
+    const [isOpen, setIsOpen] = useState();
+    const [isedit, setisEdit] = useState();
+    const [isAdd, setisAdd] = useState();
+    const [error, setError] = useState(false);
+    const [image, setImage] = useState();
+    const [loader, setLoader] = useState();
+
+    const [hide, setHide] = useState(true);
+
+    const [buildingType, setBuildingType] = useState([]);
+
+
+    const getWardLabel = (id) => {
+        const label = wardlist?.find((e) => e?.id === id)?.name
+        return label
+    }
+
+    const getStreetLabel = (id) => {
+        const label = streetList?.find((e) => e?.id === id)?.name
+        return label
+    }
+
+    const getBuildingLabel = (id) => {
+        const label = buildingType?.find((e) => e?.id === id)?.name
+        return label
+    }
+
+
+    const getUrl = "buildingregister";
+    const getListUrl = "buildingregister";
+    const postUrl = "buildingregister";
+    const updateUrl = "buildingregister";
+    const deleteUrl = "buildingregister";
+
+
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+    const [lazyLoading, setLazyLoading] = useState(true);
+
+    // META DATA
+    const headersToShow = ["Name", "Contact No", "Door No", "Address", "Type", "Ward No", "Street", "QR code",]
+    const tableData = listInstanceData
+    const fieldsToShow = []
+    const fields = {
+
+        'name': (value) => value,
+        'phone_num': (value) => value,
+        'door_no': (value) => value,
+        'line1': (value) => value,
+        'building_type': (value) => getBuildingLabel(value),
+        'ward': (value) => getWardLabel(value),
+        'street': (value) => getStreetLabel(value),
+        'qr_code': (value) => value,
+    }
+
+
+    const handleClose = () => {
+        setIsOpen();
+        setisAdd();
+        setInstanceData();
+        setError();
+        setErrorMsg({});
+        seterrString();
+        setisEdit();
+
+
+    }
+
+
+    useEffect(() => {
+
+        fetchListData();
+        fetchBuildingType();
+    }, [])
+
+
+
+
+
+    const fetchBuildingType = async () => {
+        try {
+
+            const response = await fetch(
+                Config.BASE_URL + 'building-type',
+                Config?.config,
+            )
+            const data = await response.json()
+
+            console.log(data)
+            setBuildingType(data)
+
+        } catch (error) {
+            console.error('Error fetching data:', error)
+        }
+    }
+
+
+
+
+    const fetchListData = async () => {
+        try {
+
+            const response = await fetch(Config.BASE_URL + getListUrl, Config?.config)
+            const data = await response.json()
+            console.log(data)
+            setListInstanceData(data)
+
+
+        } catch (error) {
+            console.error('Error fetching data:', error)
+            Config?.toastalert("Something Went Wrong", "error")
+        }
+    }
+
+
+
+
+    const getInstanceData = (id, edit) => {
+        axios
+            .get(`${Config.BASE_URL}${getUrl}/${id}/`, Config.config)
+            .then(function (response) {
+                if (response.status === 200) {
+                    setInstanceData(response?.data)
+                    setIsOpen(true);
+                }
+            })
+            .catch(function (error) {
+                console.log(error)
+                Config?.toastalert("Something Went Wrong", "error")
+            })
+    }
+
+
+
+
+    //add new
+    // Check form field validation
+    const checkValidation = () => {
+
+        console.log(instanceData)
+        if (!instanceData?.ward || !instanceData?.street ||
+            !instanceData?.building_type || !instanceData?.name ||
+            !instanceData?.phone_num || !instanceData?.door_no || !instanceData?.building_id ||
+            !instanceData?.line1) {
+            console.log("please fill required fields")
+            setError(true)
+            return false
+
+        }
+        else {
+            setError(false)
+            return true
+        }
+
+    }
+
+    const addNewInstance = async (e) => {
+
+        const check = checkValidation()
+
+        if (!check) {
+            return
+        }
+
+        const data = new FormData();
+        data.append("ward", instanceData?.ward)
+        data.append("building_type", instanceData?.building_type)
+        data.append("name", instanceData?.name)
+        data.append("phone_num", instanceData?.phone_num)
+        data.append("door_no", instanceData?.door_no)
+        data.append("line1", instanceData?.line1)
+        data.append("building_id", instanceData?.building_id)
+        data.append("street", instanceData?.street)
+        try {
+            const response = await axios.post(`${Config.BASE_URL}${postUrl}`, data, Config.config);
+            console.log(response.data);
+            Config?.toastalert("Submitted Successfully", "success")
+
+            setListInstanceData((prevstate) => {
+                return [...prevstate, response?.data]
+            })
+
+            handleClose();
+            fetchListData();
+        } catch (error) {
+            if (error?.response?.status === 400) {
+                console.log(error);
+                setErrorMsg(error?.response?.data)
+                Config?.toastalert("Submission Failed", "warn")
+            }
+
+            else {
+                Config?.toastalert("Something Went Wrong", "error")
+            }
+        }
+    };
+
+
+
+    //UPDATE REQUESTS
+
+    const updateInstance = (id) => {
+        const check = checkValidation()
+
+        if (!check) {
+            return
+        }
+
+        const data = new FormData()
+        data.append("ward", instanceData?.ward)
+        data.append("street", instanceData?.street)
+        data.append("building_type", instanceData?.building_type)
+        data.append("name", instanceData?.name)
+        data.append("phone_num", instanceData?.phone_num)
+        data.append("door_no", instanceData?.door_no)
+        data.append("line1", instanceData?.line1)
+        data.append("building_id", instanceData?.building_id)
+        axios
+            .patch(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
+            .then(function (response) {
+                if (response.status === 200) {
+                    console.log(response)
+                    Config?.toastalert("Updated Successfully", "success")
+                    setListInstanceData((prevArray) => {
+                        const index = prevArray.findIndex((obj) => obj.id === id)
+                        if (index !== -1) {
+                            return [
+                                ...prevArray.slice(0, index),
+                                { ...prevArray[index], ...response.data },
+                                ...prevArray.slice(index + 1),
+                            ]
+                        }
+                        return prevArray
+                    })
+
+                    handleClose()
+
+
+                }
+            })
+            .catch(function (error) {
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
+            })
+    }
+
+    //DELETE REQUESTS
+
+    const deleteInstance = (id) => {
+
+        axios.delete(`${Config.BASE_URL}${deleteUrl}/${id}/`, Config.config)
+            .then(function (response) {
+                if (response.status === 204) {
+                    Config?.toastalert("Deleted Successfully", "info")
+                    setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
+                    handleClose();
+                    fetchListData();
+
+                }
+            })
+            .catch(function (error) {
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
+                handleClose();
+            })
+    }
+
+
+
+
+    // handle new instance
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setInstanceData((prevstate) => {
+            return {
+                ...prevstate, [name]: value
+            }
+
+        })
+    }
+
+
+
+
+    return (
+
+
+
+        <>
+
+
+            {
+                (isOpen || isAdd) && (
+
+                    <FormModal
+                        modalHeader={modalHeader}
+                        lazyLoading={lazyLoading}
+                        setIsOpen={setIsOpen}
+                        isAdd={isAdd}
+                        isedit={isedit}
+                        setisEdit={setisEdit}
+                        error={error}
+                        errorMsg={errorMsg}
+
+                        setListData={tableData}
+                        instanceData={instanceData}
+                        setInstanceData={setInstanceData}
+
+                        handleClose={handleClose}
+
+                        // functions
+                        addInstance={addNewInstance}
+                        updateInstance={updateInstance}
+                        deleteInstance={deleteInstance}
+                        handleChange={handleChange}
+
+                        child={<BuildingForm
+                            lazyLoading={lazyLoading}
+                            setIsOpen={setIsOpen}
+                            isAdd={isAdd}
+                            isedit={isedit}
+
+                            error={error}
+                            errorMsg={errorMsg}
+                            errString={errString}
+
+                            setListData={tableData}
+                            instanceData={instanceData}
+                            setInstanceData={setInstanceData}
+
+                            handleClose={handleClose}
+                            handleChange={handleChange}
+
+                            districtList={districtList}
+                            panchayatList={panchayatList}
+                            wardlist={wardlist}
+                            buildingType={buildingType}
+                            streetList={streetList}
+
+
+                        />}
+                    />
+                )
+
+
+
+            }
+
+
+            <Grid item xs={12} sm={6}>
+                <Typography variant="h6">{modalHeader + "s"} Details</Typography>
+            </Grid>
+            {/* <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+                <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
+                    Create {modalHeader}
+                </Button>
+            </Grid> */}
+
+
+            <Grid item xs={12}>
+                <CustomTable
+                    headers={headersToShow}
+                    data={tableData}
+                    fieldsToShow={fieldsToShow}
+                    fields={fields}
+                    getInstanceData={getInstanceData}
+                    loader={loader}
+                    setLoader={setLoader}
+                />
+            </Grid>
+
+
+
+        </>
+    )
+
+
 }

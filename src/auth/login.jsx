@@ -18,6 +18,7 @@ import FormControl from '@mui/material/FormControl';
 import TextField from '@mui/material/TextField';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { ToastContainer } from "react-toastify";
 
 
 
@@ -107,6 +108,9 @@ function Login() {
 
     return (
         <>
+
+            <ToastContainer />
+
             <div class="auth-page-wrapper pt-5">
                 <div class="container">
                     <div class="row justify-content-center">
@@ -164,41 +168,41 @@ function Login() {
                                                 ><i class="ri-eye-fill align-middle"></i></button>
                                             </div> */}
 
-                                     
-                                                    <FormControl fullWidth variant="outlined">
-                                                        <label htmlFor="outlined-adornment-password">Password</label>
-                                                        <OutlinedInput
-                                                            id="outlined-adornment-password"
-                                                            value={password}
-                                                            onChange={(e) => setPassword(e.target.value)}
-                                                            fullWidth
-                                                            size='small'
-                                                            // style={{ minHeight: 50 }}
-                                                            inputprops={{
-                                                                style: {
-                                                                    height: '50px', 
-                                                                    transition: 'none' 
-                                                                }
-                                                            }}
-                                                            // variant="outlined"
 
-                                                            type={visible ? 'text' : 'password' }
-                                                            endAdornment={
-                                                                <InputAdornment position="end"  >
-                                                                    <IconButton
-                                                                        aria-label="toggle password visibility"
-                                                                        onClick={() => { setVisible(!visible) }}
-                                                                        onMouseDown={handleMouseDownPassword}
-                                                                        edge="end"
-                                                                    >
-                                                                        {visible ? <VisibilityOff /> : <Visibility />}
-                                                                    </IconButton>
-                                                                </InputAdornment>
-                                                            }
+                                            <FormControl fullWidth variant="outlined">
+                                                <label htmlFor="outlined-adornment-password">Password</label>
+                                                <OutlinedInput
+                                                    id="outlined-adornment-password"
+                                                    value={password}
+                                                    onChange={(e) => setPassword(e.target.value)}
+                                                    fullWidth
+                                                    size='small'
+                                                    // style={{ minHeight: 50 }}
+                                                    inputprops={{
+                                                        style: {
+                                                            height: '50px',
+                                                            transition: 'none'
+                                                        }
+                                                    }}
+                                                    // variant="outlined"
 
-                                                        />
-                                                    </FormControl>
-                                          
+                                                    type={visible ? 'text' : 'password'}
+                                                    endAdornment={
+                                                        <InputAdornment position="end"  >
+                                                            <IconButton
+                                                                aria-label="toggle password visibility"
+                                                                onClick={() => { setVisible(!visible) }}
+                                                                onMouseDown={handleMouseDownPassword}
+                                                                edge="end"
+                                                            >
+                                                                {visible ? <VisibilityOff /> : <Visibility />}
+                                                            </IconButton>
+                                                        </InputAdornment>
+                                                    }
+
+                                                />
+                                            </FormControl>
+
                                         </div>
 
                                         <div class="form-check">
@@ -207,7 +211,7 @@ function Login() {
                                         </div>
 
                                         <div class="mt-4">
-                                            <button class="btn btn-success w-100" type="submit" onClick={validate}>Sign In</button>
+                                            <button class="btn btn-success w-100" type="submit" onClick={validate}>{loader && Config?.loader}Sign In</button>
                                         </div>
 
                                         <div class="mt-1 text-center p-1">

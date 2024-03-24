@@ -21,7 +21,7 @@ import "./assets/css/style.css"
 import "./assets/css/custom.css"
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import "./assets/js/feather.min.js"
+// import "./assets/js/feather.min.js"
 
 
 

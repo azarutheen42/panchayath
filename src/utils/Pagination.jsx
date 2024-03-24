@@ -66,7 +66,7 @@ const PaginationComponent = (props) => {
   };
 
 
-  /* Function to genrate Page number Buttons for Total no of pages */ 
+  /* Function to genrate Page number Buttons for Total no of pages */
   const renderPageNumbers = () => {
     const pageNumbers = [];
     for (let i = 1; i <= totalPages; i++) {
@@ -122,4 +122,33 @@ const PaginationComponent = (props) => {
   );
 };
 
-export default PaginationComponent;
+// export default PaginationComponent;
+
+
+
+
+import Typography from '@mui/material/Typography';
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
+
+export default function PaginationControlled(props) {
+  const { page, setPage, handlePageChange, count, data } = props
+ 
+
+  
+  return (
+
+    <>
+
+      {data && (
+
+        <Stack spacing={2}>
+          <Typography>Page: {page}</Typography>
+          <Pagination count={Math.ceil(count / data?.length)} page={page} onChange={handlePageChange} />
+        </Stack>
+      )}
+    </>
+
+
+  );
+}

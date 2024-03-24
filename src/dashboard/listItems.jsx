@@ -479,11 +479,18 @@ export default function SideBar(props) {
               </ListItemButton>
 
 
-              <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=masters&s=house")}>
+              <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=masters&s=building")}>
                 <ListItemIcon>
                   <StarBorder />
                 </ListItemIcon>
                 <ListItemText primary="Building" />
+              </ListItemButton>
+
+              <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=masters&s=tax")}>
+                <ListItemIcon>
+                  <StarBorder />
+                </ListItemIcon>
+                <ListItemText primary="Tax" />
               </ListItemButton>
 
             </List>

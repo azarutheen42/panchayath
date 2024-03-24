@@ -15,6 +15,7 @@ import { useSelector } from "react-redux";
 import ButtonWithLoader from "./Button";
 import { CircularProgress } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
+import { Typography } from '@mui/material';
 
 
 // Define the styled component for the image thumbnail
@@ -137,7 +138,22 @@ function CustomTable(props) {
 
     }
 
-    console.log(lazyLoading, "lazy loading true")
+ 
+
+
+
+    const [page,setPage] =useState(1);
+
+
+    const handlePageChange =(event, value)=>{
+        setPage(value)
+    }
+
+    
+
+
+    const tdata = data?.results ?? data
+    const count=tdata?.count
 
 
 
@@ -178,7 +194,7 @@ function CustomTable(props) {
                             <TableRowsLoader rowsNum={5} cellNo={headers?.length + 2} />
                         )
                             :
-                            (data?.map((row, rowIndex) => (
+                            (tdata?.map((row, rowIndex) => (
                                 <StyledTableRow key={rowIndex}>
                                     <StyledTableCell style={siCell}>{rowIndex + 1}</StyledTableCell>
 
@@ -222,10 +238,20 @@ function CustomTable(props) {
 
             </StyledTableContainer>
 
-            {!data?.length &&
+            {!tdata?.length &&
                 <div className="text-center p-5"> No Data Available</div>
             }
 
+
+
+            <PaginationControlled
+                page={page}
+                setPage={setPage}
+                handlePageChange={handlePageChange}
+                count={count}
+                data={tdata}
+
+            />
 
 
 
@@ -314,7 +340,7 @@ const TableRowsLoader = ({ rowsNum, cellNo }) => {
         <StyledTableRow key={index}>
 
             {[...Array(cellNo)]?.map((e, index) => (
-                <StyledTableCell component="th" scope="row">
+                <StyledTableCell component="th" scope="row" key={index}>
                     <Skeleton animation="wave" variant="text" />
                 </StyledTableCell>
             ))}
@@ -422,3 +448,33 @@ const CustomTableCell = ({ imagePath, altText }) => {
 
 
 
+
+
+
+
+
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
+
+
+function PaginationControlled(props) {
+    const { page, setPage, handlePageChange, count, data } = props
+
+
+
+    return (
+
+        <>
+
+            {data && (
+
+                <Stack spacing={2}>
+                    <Typography>Page: {page}</Typography>
+                    <Pagination count={Math.ceil(count / data?.length)} page={page} onChange={handlePageChange} />
+                </Stack>
+            )}
+        </>
+
+
+    );
+}

@@ -11,6 +11,8 @@ import { Typography, Container, Grid, Paper, IconButton } from '@mui/material';
 import { AddButton } from "./Button";
 import { padding } from "@mui/system";
 import SelectDropDown from "../utils/SelectDropDown"
+import MUIDataTable from "mui-datatables";
+import  PaginationController from "../utils/Pagination"
 
 
 
@@ -176,6 +178,14 @@ function Street() {
 
     const [loader, setLoader] = useState(false);
     const [trigger, setTrigger] = useState();
+    const [page,setPage] =useState(1);
+
+
+    const handlePageChange =(event, value)=>{
+        setPage(value)
+    }
+
+    console.log(page)
 
     const actionShow = true;
 
@@ -185,7 +195,7 @@ function Street() {
 
         // gettempemployee()
 
-    }, [ward, startDate, endDate, trigger])
+    }, [ward, startDate, endDate, trigger,page])
 
     const getWardLabel = (id) => {
         const label = wardlist?.find((e) => e?.id === id)?.name
@@ -197,6 +207,7 @@ function Street() {
 
     const headersToShow = ["Date", "Ward No", "	Bio (kg)", "Non-Bio (Kg)", "Hazard (kg)"]
     const tableData = listInstanceData
+    // const count=listInstanceData?.count
     const fieldsToShow = []
     const fields = {
         'date': (value) => value,
@@ -209,7 +220,7 @@ function Street() {
 
 
     const getWardReports = () => {
-        axios.get(`${Config.BASE_URL}collect-ward-garbage?ward=${ward}&start_date=${startDate}&end_date=${endDate}`,
+        axios.get(`${Config.BASE_URL}collect-ward-garbage?page=${page}&ward=${ward}&start_date=${startDate}&end_date=${endDate}`,
             Config?.config
         )
             .then(function (response) {
@@ -229,6 +240,54 @@ function Street() {
     }
 
 
+    const options = {
+        filterType: 'checkbox',
+      };
+
+
+      const columns = [
+        {
+         name: "date",
+         label: "Date",
+         options: {
+          filter: true,
+          sort: true,
+         }
+        },
+        {
+         name: "ward",
+         label: "Ward No",
+         options: {
+          filter: true,
+          sort: false,
+         }
+        },
+        {
+         name: "bio",
+         label: "Bio (kg)",
+         options: {
+          filter: true,
+          sort: false,
+         }
+        },
+        {
+         name: "non_bio",
+         label: "Non-Bio (Kg)",
+         options: {
+          filter: true,
+          sort: false,
+         }
+        },
+        {
+            name: "hazard",
+            label: "Hazard (Kg)",
+            options: {
+             filter: true,
+             sort: false,
+            }
+           },
+       ];
+
 
     return (
 
@@ -242,14 +301,14 @@ function Street() {
             </Grid>
 
 
-     
+
 
 
 
 
             <Grid item xs={12} sm={4}>
                 <div class="form-group">
-                    <label for="fromDate" style={{ fontWeight: "bold" }}>From Date :</label>
+                    <label for="fromDate" style={{ fontWeight: "bold" }}>Select Ward</label>
                     <SelectDropdown
                         list={wardlist}
                         onchange={(e) => setWard(e?.target?.value)}
@@ -294,6 +353,16 @@ function Street() {
                 />
 
             </Grid>
+   
+
+            {/* <PaginationController 
+            page={page}
+            setPage={setPage}
+            handlePageChange={handlePageChange}
+            count={count}
+            data={tableData}
+            
+            /> */}
 
 
         </>
