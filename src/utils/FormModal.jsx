@@ -150,10 +150,10 @@ function HouseDialogs(props) {
 
                         </Grid>
 
-                        <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+                        <Grid item xs={12} sm={12} md={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
 
                             {isedit && (
-                                <IconButton color="primary" aria-label="add">
+                                <IconButton color="primary" aria-label="add" >    
 
                                     <UpdateButton
                                         loading={loading}

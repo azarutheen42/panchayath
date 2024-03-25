@@ -129,7 +129,7 @@ function Employee(props) {
 
     // get rolw AND lABEL
     const getRoles = () => {
-        axios.get(`${Config.BASE_URL}roles/`,
+        axios.get(`${Config.BASE_URL}get-roles`,
             Config?.config
         )
             .then(function (response) {

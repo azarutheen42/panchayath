@@ -68,7 +68,7 @@ function Content(props) {
             return <Street />
 
         case "tax":
-            return <TaxMessageInfo/>
+            return <TaxMessageInfo />
         default:
             return <Ward />
     }
@@ -5114,19 +5114,21 @@ function TaxMessageInfo() {
     const [lazyLoading, setLazyLoading] = useState(true);
 
     // META DATA
-    const headersToShow = ["Name", "Contact No", "Door No", "Address", "Type", "Ward No", "Street", "QR code",]
+    const headersToShow = ["Tax ID", "Name", "Contact No", "Type", "Address", "House TAX", "", "Water TAX", ""]
     const tableData = listInstanceData
     const fieldsToShow = []
     const fields = {
-
+        "building_id": (value) => value,
         'name': (value) => value,
         'phone_num': (value) => value,
-        'door_no': (value) => value,
-        'line1': (value) => value,
         'building_type': (value) => getBuildingLabel(value),
-        'ward': (value) => getWardLabel(value),
-        'street': (value) => getStreetLabel(value),
-        'qr_code': (value) => value,
+        'address': (value) => value,
+        'get_tax_details.property_tax': (value) => value ? value : "Nill",
+        'get_tax_details.property_tax_paid': (value) => value ? "Paid" : "Pending",
+        'get_tax_details.water_tax': (value) => value ? value : "Nill",
+        'get_tax_details.water_tax_paid': (value) => value ? "Paid" : "Pending",
+        // 'get_tax_details.message_send': (value) => value ? "Send Message" : "Send",
+
     }
 
 
@@ -5176,7 +5178,7 @@ function TaxMessageInfo() {
     const fetchListData = async () => {
         try {
 
-            const response = await fetch(Config.BASE_URL + getListUrl, Config?.config)
+            const response = await fetch(Config.BASE_URL + "building-tax-collection", Config?.config)
             const data = await response.json()
             console.log(data)
             setListInstanceData(data)
@@ -5439,7 +5441,7 @@ function TaxMessageInfo() {
 
 
             <Grid item xs={12} sm={6}>
-                <Typography variant="h6">{modalHeader + "s"} Details</Typography>
+                <Typography variant="h6">{modalHeader} Details</Typography>
             </Grid>
             {/* <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
                 <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
@@ -5449,7 +5451,7 @@ function TaxMessageInfo() {
 
 
             <Grid item xs={12}>
-                <CustomTable
+                {/* <CustomTable
                     headers={headersToShow}
                     data={tableData}
                     fieldsToShow={fieldsToShow}
@@ -5457,6 +5459,14 @@ function TaxMessageInfo() {
                     getInstanceData={getInstanceData}
                     loader={loader}
                     setLoader={setLoader}
+                /> */}
+
+
+                <DenseTable data={tableData}
+                    loader={loader}
+                    setLoader={setLoader}
+                    getInstanceData={getInstanceData}
+
                 />
             </Grid>
 
@@ -5467,3 +5477,229 @@ function TaxMessageInfo() {
 
 
 }
+
+
+
+
+
+
+
+
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import ButtonWithLoader from "./Button";
+import { SendOutlined, CloseCircleFilled, CheckCircleFilled } from '@ant-design/icons';
+import SendIcon from '@mui/icons-material/Send';
+
+
+
+
+function DenseTable(props) {
+
+    const { data, loader, setLoader, getInstanceData } = props
+
+
+    const [edit, setEdit] = useState(false)
+
+    const [rowIndex, setRowIndex] = useState();
+
+
+    const fetchData = async (id, bool, text, rowIndex) => {
+        setLoader(rowIndex)
+        try {
+            // setLoader(rowIndex);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const data = await getInstanceData(id, bool, text);
+            return { success: true };
+
+        } catch (error) {
+            console.error('Error occurred:', error);
+        } finally {
+            setLoader()
+            // setLoading(false);
+        }
+
+    }
+
+
+    const cellStyle = {
+        border: '.5px solid #ccc',
+    }
+
+    const tableHeadStyle = {
+        position: 'sticky',
+        top: '0',
+        zIndex: '100',
+        backgroundColor: "#cff4fc",
+        color: "#000",
+        fontWeight: "bold",
+        padding: "20px",
+        border: '.5px solid #ccc',
+
+    }
+
+
+    const ActionCell = {
+        width: "130px"
+    }
+
+
+
+    const tableRowStyle = {
+
+        // '&:nth-of-type(odd)': {
+        //     backgroundColor: theme.palette.action.hover,
+        // },
+        // hide last border
+        '&:last-child td, &:last-child th': {
+            // border: 0,
+        },
+        '&:hover': {
+            backgroundColor: '#f5f5f5',
+        },
+    }
+
+
+    const handleEdit = (index) => {
+
+        setRowIndex(index)
+        setEdit(!edit)
+    }
+
+
+
+    return (
+        <TableContainer component={Paper}>
+            <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
+                <TableHead style={tableHeadStyle}>
+                    <TableRow style={tableRowStyle}>
+                        <TableCell style={tableHeadStyle}>Si.No</TableCell>
+                        <TableCell align="left" style={tableHeadStyle}>Register ID</TableCell>
+                        {/* <TableCell align="left" style={cellStyle}>Tax ID</TableCell> */}
+                        <TableCell style={tableHeadStyle}>Name&nbsp;</TableCell>
+                        <TableCell style={tableHeadStyle}>Contact No&nbsp;</TableCell>
+                        <TableCell style={tableHeadStyle}>Address&nbsp;</TableCell>
+                        <TableCell style={tableHeadStyle}>House Tax&nbsp;</TableCell>
+                        <TableCell style={tableHeadStyle}>status&nbsp;</TableCell>
+                        <TableCell style={tableHeadStyle}>Water Tax&nbsp;</TableCell>
+                        <TableCell style={tableHeadStyle}>status&nbsp;</TableCell>
+                        <TableCell style={tableHeadStyle}>Message Status&nbsp;</TableCell>
+                        <TableCell style={tableHeadStyle}>Action&nbsp;</TableCell>
+
+
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {data.map((row, index) => (
+                        <TableRow
+                            key={row?.name}
+                            // sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                            style={tableRowStyle}
+                        >
+                            <TableCell style={cellStyle}>{index + 1}</TableCell>
+                            <TableCell component="th" scope="row">
+                                {row.building_id}
+                            </TableCell>
+                            {/* <TableCell align="left" style={cellStyle} >{row?.building_id}</TableCell> */}
+                            <TableCell align="left" style={cellStyle}>{row?.name}</TableCell>
+                            <TableCell align="left" style={cellStyle}>{row?.phone_num}</TableCell>
+                            <TableCell align="left" style={cellStyle}>{row?.address}</TableCell>
+
+                            <TableCell align="left" style={cellStyle}>
+                                {(edit && rowIndex === index) ? (
+                                    <input type="number" />
+
+                                ) : (
+
+                                    (row?.get_tax_details?.property_tax ?? "Nill")
+
+                                )}
+
+                            </TableCell>
+
+                            <TableCell align="left" style={cellStyle}>
+                                {row?.get_tax_details?.property_tax_paid ? "Paid" : "Pending"}
+                            </TableCell>
+
+
+                            <TableCell align="left" style={cellStyle}>
+
+                                {(edit && rowIndex === index) ? (
+                                    <input type="number" />
+
+                                ) : (
+
+                                    (row?.get_tax_details?.water_tax ?? "Nill")
+
+                                )}
+
+                            </TableCell>
+
+
+                            <TableCell align="left" style={cellStyle}>{row?.get_tax_details?.water_tax_paid ? "Paid" : "Pending"}</TableCell>
+
+
+
+                            <TableCell align="center" style={cellStyle}>{row?.get_tax_details?.message_send ?
+                                <CheckCircleFilled
+                                    style={{ fontSize: '25px', color: '#08c' }}
+
+                                /> :
+
+                                <CloseCircleFilled
+                                    style={{ fontSize: '25px' }}
+                                />
+                            }</TableCell>
+                            <TableCell align="left" style={cellStyle} sx={{ width: 200 }}>
+
+                                <button type="submit" class="btn btn-info" onClick={() => handleEdit(index)}  >
+                                    Edit
+                                </button>
+
+                                {/* <Button variant="primary">Primary</Button> */}
+
+                                {
+
+                                    (edit && rowIndex === index) ? (
+                                        <button type="submit" class="btn btn-success" onClick={() => handleEdit(index)}  >
+                                           Update
+                                        </button>
+
+                                    ) :
+
+
+                                        (<button type="submit"
+                                            data={index}
+                                            index={index}
+                                            className={(row?.get_tax_details?.property_tax_paid && row?.get_tax_details?.water_tax_paid) ? "btn btn-success" : "btn btn-secondary"}
+                                            onClick={handleEdit}  >
+                                            {/* <SendIcon size="small"/>  */}
+                                            Edit
+                                        </button>)}
+
+
+                                {/* <ButtonWithLoader
+                                    itemId={row?.id}
+                                    onClick={() => fetchData(row?.id, false, "view", index)}
+                                    class_name={(row?.get_tax_details?.property_tax_paid && row?.get_tax_details?.water_tax_paid) ? "btn btn-success" : "btn btn-secondary"}
+                                    text="Send"
+                                    span_class="glyphicon glyphicon-pencil"
+                                    loader={loader}
+                                    index={index}
+                                    setLoader={setLoader}
+                                // key = {employee?.id}
+                                /> */}
+
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </TableContainer>
+    );
+}
+

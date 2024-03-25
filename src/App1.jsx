@@ -188,7 +188,7 @@ console.log(Config.config)
 
 
   const  getStreet = () => {
-    axios.get(`${Config.BASE_URL}street`,
+    axios.get(`${Config.BASE_URL}get-streets`,
       Config?.config
     )
       .then(function (response) {
@@ -212,7 +212,7 @@ console.log(Config.config)
 
 // get request type
   const getRequestType = () => {
-    axios.get(`${Config.BASE_URL}request-type`,
+    axios.get(`${Config.BASE_URL}get-request-type`,
       Config?.config
     )
       .then(function (response) {
