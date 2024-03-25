@@ -5466,6 +5466,7 @@ function TaxMessageInfo() {
                     loader={loader}
                     setLoader={setLoader}
                     getInstanceData={getInstanceData}
+                    setListInstanceData={setListInstanceData}
 
                 />
             </Grid>
@@ -5494,36 +5495,28 @@ import TableRow from '@mui/material/TableRow';
 import ButtonWithLoader from "./Button";
 import { SendOutlined, CloseCircleFilled, CheckCircleFilled } from '@ant-design/icons';
 import SendIcon from '@mui/icons-material/Send';
-
+import { Input } from "antd";
+import Checkbox from '@mui/material/Checkbox';
+import { CheckBox } from "@mui/icons-material";
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 
 
 function DenseTable(props) {
 
-    const { data, loader, setLoader, getInstanceData } = props
+    const { data, loader, setLoader, getInstanceData,setListInstanceData } = props
 
 
     const [edit, setEdit] = useState(false)
 
     const [rowIndex, setRowIndex] = useState();
 
+    const [taxDetails, setTaxDetails] = useState();
 
-    const fetchData = async (id, bool, text, rowIndex) => {
-        setLoader(rowIndex)
-        try {
-            // setLoader(rowIndex);
-            await new Promise(resolve => setTimeout(resolve, 500));
-            const data = await getInstanceData(id, bool, text);
-            return { success: true };
 
-        } catch (error) {
-            console.error('Error occurred:', error);
-        } finally {
-            setLoader()
-            // setLoading(false);
-        }
+   
 
-    }
+
 
 
     const cellStyle = {
@@ -5537,7 +5530,7 @@ function DenseTable(props) {
         backgroundColor: "#cff4fc",
         color: "#000",
         fontWeight: "bold",
-        padding: "20px",
+        padding: "10px",
         border: '.5px solid #ccc',
 
     }
@@ -5564,31 +5557,193 @@ function DenseTable(props) {
     }
 
 
-    const handleEdit = (index) => {
+    const handleEdit = (index, id) => {
+        if (rowIndex != index) {
+            setEdit(true);
+            setRowIndex(index);
+            setTaxDetails(data?.find((e) => e.id === id)?.get_tax_details);
+        }
+        else {
+            setEdit(false);
+            setRowIndex(-1);
+            setTaxDetails();
+        }
 
-        setRowIndex(index)
-        setEdit(!edit)
+        setLoader(false)
+
+
+
+
+    }
+
+    console.log(edit, rowIndex, taxDetails)
+
+    const handleSendMessage = (id) => {
+        setLoader(true)
+
+        const data = new FormData();
+
+        axios
+            .patch(`${Config.BASE_URL}send-tax-message/${id}/`,data, Config.config)
+            .then(function (response) {
+                if (response.status === 200) {
+                    Config?.toastalert("Message Send Successfully", "success")
+
+                    setListInstanceData((prevArray) => {
+                        const index = prevArray.findIndex((obj) => obj.id === id)
+                        if (index !== -1) {
+                            return [
+                                ...prevArray.slice(0, index),
+                                { ...prevArray[index], ...response.data },
+                                ...prevArray.slice(index + 1),
+                            ]
+                        }
+                        return prevArray
+                    })
+
+                }
+                // setLoader(false)
+            })
+            .catch(function (error) {
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    // setErrorMsg(error?.response?.data)
+                    // Config?.toastalert("Failed To Send Message", "warn")
+                    Config?.toastalert(error?.response?.data?.msg, "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
+                setLoader(false)
+            })
+
     }
 
 
+
+    const handleUpdateTaxDetails = (id) => {
+
+        // setLoader(true)
+
+        const data = new FormData();
+
+        if(taxDetails?.property_tax){
+            data.append("property_tax",taxDetails?.property_tax)
+        }
+        if(taxDetails?.water_tax){
+            data.append("water_tax",taxDetails?.water_tax)
+        }
+        if(taxDetails?.property_tax_paid){
+            data.append("property_tax_paid",taxDetails?.property_tax_paid)
+        }
+
+        if(taxDetails?.water_tax_paid){
+            data.append("water_tax_paid",taxDetails?.water_tax_paid)
+        }
+           
+        // for (const key in taxDetails) {
+
+        //     if (Object.hasOwnProperty.call(taxDetails, key)) {
+        //         if (key){
+        //             data.append(key, taxDetails[key]);
+        //         }
+                
+        //     }
+        //     // data.append(key, taxDetails[key]);
+        // }
+
+        axios
+            .patch(`${Config.BASE_URL}building-tax-collection/${id}/`, data, Config.config)
+            .then(function (response) {
+                if (response.status === 200) {
+                    Config?.toastalert("Updated Successfully", "success")
+                    setListInstanceData((prevArray) => {
+                        const index = prevArray.findIndex((obj) => obj.id === id)
+                        if (index !== -1) {
+                            return [
+                                ...prevArray.slice(0, index),
+                                { ...prevArray[index], ...response.data },
+                                ...prevArray.slice(index + 1),
+                            ]
+                        }
+                        return prevArray
+                    })
+
+
+                    setEdit(false);
+                    setRowIndex(-1);
+                    setTaxDetails();
+
+                }
+
+                setLoader(false)
+            })
+            .catch(function (error) {
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
+
+                setLoader(false)
+            })
+
+    }
+
+
+
+    const handleChange = (e) => {
+        console.log(taxDetails)
+        const { name, value } = e.target;
+        setTaxDetails((prevstate) => {
+            return {
+                ...prevstate, [name]: value
+            }
+
+        })
+    }
+
+
+
+    const [checked, setChecked] = React.useState(true);
+
+    const handlecheckChange = (event) => {
+
+        const { name, checked } = event.target;
+        console.log(checked)
+        setTaxDetails((prevstate) => {
+            return {
+                ...prevstate, [name]: checked
+            }
+
+        })
+    };
+
+
+    console.log(taxDetails)
 
     return (
         <TableContainer component={Paper}>
             <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
                 <TableHead style={tableHeadStyle}>
                     <TableRow style={tableRowStyle}>
-                        <TableCell style={tableHeadStyle}>Si.No</TableCell>
+                        <TableCell style={tableHeadStyle} sx={{ width: 20 }}>Si.No</TableCell>
                         <TableCell align="left" style={tableHeadStyle}>Register ID</TableCell>
                         {/* <TableCell align="left" style={cellStyle}>Tax ID</TableCell> */}
                         <TableCell style={tableHeadStyle}>Name&nbsp;</TableCell>
                         <TableCell style={tableHeadStyle}>Contact No&nbsp;</TableCell>
                         <TableCell style={tableHeadStyle}>Address&nbsp;</TableCell>
-                        <TableCell style={tableHeadStyle}>House Tax&nbsp;</TableCell>
+                        <TableCell style={tableHeadStyle}>Property Tax&nbsp;</TableCell>
                         <TableCell style={tableHeadStyle}>status&nbsp;</TableCell>
                         <TableCell style={tableHeadStyle}>Water Tax&nbsp;</TableCell>
                         <TableCell style={tableHeadStyle}>status&nbsp;</TableCell>
-                        <TableCell style={tableHeadStyle}>Message Status&nbsp;</TableCell>
-                        <TableCell style={tableHeadStyle}>Action&nbsp;</TableCell>
+                        <TableCell style={tableHeadStyle} sx={{ width: 100 }} >Message Status&nbsp;</TableCell>
+                        <TableCell style={tableHeadStyle} sx={{ width: 80 }}>Action&nbsp;</TableCell>
 
 
                     </TableRow>
@@ -5609,27 +5764,57 @@ function DenseTable(props) {
                             <TableCell align="left" style={cellStyle}>{row?.phone_num}</TableCell>
                             <TableCell align="left" style={cellStyle}>{row?.address}</TableCell>
 
-                            <TableCell align="left" style={cellStyle}>
+                            <TableCell align="left" sx={{ width: 150 }}>
+
+
                                 {(edit && rowIndex === index) ? (
-                                    <input type="number" />
+                                    <Input size="small" placeholder="property tax" type="number"
+                                        autoFocus onChange={handleChange} name="property_tax" value={taxDetails?.property_tax || ""} />
 
                                 ) : (
 
-                                    (row?.get_tax_details?.property_tax ?? "Nill")
+                                    <span > {row?.get_tax_details?.property_tax ?? "Nill"}</span>
 
                                 )}
 
                             </TableCell>
 
                             <TableCell align="left" style={cellStyle}>
-                                {row?.get_tax_details?.property_tax_paid ? "Paid" : "Pending"}
+
+                                {(edit && rowIndex === index) ? (
+
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={taxDetails?.property_tax_paid}
+                                                onChange={handlecheckChange}
+                                                inputProps={{ 'aria-label': taxDetails?.property_tax_paid ? "Paid" : "Pending" }}
+                                                name="property_tax_paid"
+                                                disabled={(!edit || rowIndex != index)}
+
+
+
+                                            />
+                                        }
+                                        label="Paid"
+                                    />
+
+                                ) : (
+
+                                    (row?.get_tax_details?.property_tax_paid ? "Paid" : "Pending")
+
+                                )}
+
                             </TableCell>
 
 
-                            <TableCell align="left" style={cellStyle}>
+                            <TableCell align="left" style={cellStyle} sx={{ width: 150 }}>
 
                                 {(edit && rowIndex === index) ? (
-                                    <input type="number" />
+
+                                    <Input size="small" placeholder="water tax" type="number"
+                                      onChange={handleChange} name="water_tax" value={taxDetails?.water_tax || ""} />
+                                  
 
                                 ) : (
 
@@ -5640,7 +5825,37 @@ function DenseTable(props) {
                             </TableCell>
 
 
-                            <TableCell align="left" style={cellStyle}>{row?.get_tax_details?.water_tax_paid ? "Paid" : "Pending"}</TableCell>
+                            <TableCell align="left" style={cellStyle}>
+
+
+                                {(edit && rowIndex === index) ? (
+
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={taxDetails?.water_tax_paid}
+                                                onChange={handlecheckChange}
+                                                inputProps={{ 'aria-label': taxDetails?.water_tax_paid ? "Paid" : "Pending" }}
+                                                name="water_tax_paid"
+                                            // disabled={(!edit && !rowIndex === index)}
+
+
+
+                                            />
+                                        }
+                                        label="Paid"
+                                    />
+
+                                ) : (
+
+                                    (row?.get_tax_details?.water_tax_paid ? "Paid" : "Pending")
+
+                                )}
+
+                                {/* {row?.get_tax_details?.water_tax_paid ? "Paid" : "Pending"} */}
+
+
+                            </TableCell>
 
 
 
@@ -5656,7 +5871,7 @@ function DenseTable(props) {
                             }</TableCell>
                             <TableCell align="left" style={cellStyle} sx={{ width: 200 }}>
 
-                                <button type="submit" class="btn btn-info" onClick={() => handleEdit(index)}  >
+                                <button type="submit" class="btn btn-info" onClick={() => handleEdit(index, row?.id)}  >
                                     Edit
                                 </button>
 
@@ -5665,8 +5880,8 @@ function DenseTable(props) {
                                 {
 
                                     (edit && rowIndex === index) ? (
-                                        <button type="submit" class="btn btn-success" onClick={() => handleEdit(index)}  >
-                                           Update
+                                        <button type="submit" class="btn btn-success" onClick={() => handleUpdateTaxDetails(row?.id)}   >
+                                           {(loader && rowIndex === index) &&  Config?.loader}  Update
                                         </button>
 
                                     ) :
@@ -5675,24 +5890,19 @@ function DenseTable(props) {
                                         (<button type="submit"
                                             data={index}
                                             index={index}
-                                            className={(row?.get_tax_details?.property_tax_paid && row?.get_tax_details?.water_tax_paid) ? "btn btn-success" : "btn btn-secondary"}
-                                            onClick={handleEdit}  >
+                                            // className={(row?.get_tax_details?.property_tax_paid && row?.get_tax_details?.water_tax_paid) ? "btn btn-success" : "btn btn-secondary"}
+                                            className="btn btn-success"
+                                            onClick={() => {
+                                                setLoader(true) 
+                                                handleSendMessage(row?.id)}
+                                            }
+                                        >
                                             {/* <SendIcon size="small"/>  */}
-                                            Edit
+                                           {(loader && rowIndex === index) &&  Config?.loader} Send
                                         </button>)}
 
 
-                                {/* <ButtonWithLoader
-                                    itemId={row?.id}
-                                    onClick={() => fetchData(row?.id, false, "view", index)}
-                                    class_name={(row?.get_tax_details?.property_tax_paid && row?.get_tax_details?.water_tax_paid) ? "btn btn-success" : "btn btn-secondary"}
-                                    text="Send"
-                                    span_class="glyphicon glyphicon-pencil"
-                                    loader={loader}
-                                    index={index}
-                                    setLoader={setLoader}
-                                // key = {employee?.id}
-                                /> */}
+
 
                             </TableCell>
                         </TableRow>
@@ -5703,3 +5913,23 @@ function DenseTable(props) {
     );
 }
 
+
+
+
+
+
+function ControlledCheckbox() {
+    const [checked, setChecked] = React.useState(true);
+
+    const handleChange = (event) => {
+        setChecked(event.target.checked);
+    };
+
+    return (
+        <Checkbox
+            checked={checked}
+            onChange={handleChange}
+            inputProps={{ 'aria-label': 'controlled' }}
+        />
+    );
+}
