@@ -91,8 +91,13 @@ function Login() {
                 setLoader(false)
                 if (error?.response?.status === 401) {
                     console.log(error);
-                    setError(error?.response?.data)
+                    // setError(error?.response?.data)
                     Config?.toastalert("Invalid Credential", "warn")
+                }
+                else if (error?.response?.status === 400){
+      
+                    Config?.toastalert(error?.response?.data?.detail[0], "warn")
+
                 }
 
                 else {

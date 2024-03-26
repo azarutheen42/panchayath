@@ -23,8 +23,7 @@ import SelectDropdown from "./Dropdown"
 import SelectDropDown from "../utils/SelectDropDown"
 
 import FormModal from "../utils/FormModal";
-
-
+import { toast, ToastContainer } from 'react-toastify';
 
 
 
@@ -85,7 +84,7 @@ function Employee(props) {
     const [errString, seterrString] = useState();
 
     const handleClose = () => {
-   
+
         // setIsView();
         setError();
         setIsOpen();
@@ -454,7 +453,7 @@ function Employee(props) {
 
 
         <>
-
+            <ToastContainer />
             {
                 (isOpen || isAdd) && (
                     <>
