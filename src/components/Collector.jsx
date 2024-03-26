@@ -1,31 +1,52 @@
-import { useEffect, useState } from "react"
-import Config from "../Config";
-import axios from "axios";
+import { useState, useEffect } from "react"
+import Config from '../Config'
+import axios from 'axios'
 import { useSelector } from "react-redux";
-import Box from '@mui/material/Box';
-import Modal from '@mui/material/Modal';
+import { UpdateButton, SaveButton, CloseButton, DeleteButton, AddButton } from "./Button";
+import Button from '@mui/material/Button';
+import { styled } from '@mui/material/styles';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import EditIcon from '@mui/icons-material/Edit';
+import CustomTable from "./Table";
+import AlertDialog from "./Alert";
+import React from "react";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import SelectDropdown from "./Dropdown"
+import { useDispatch } from "react-redux";
+import MultipleSelect from "./MultiDropdown";
+import AddIcon from '@mui/icons-material/Add';
+import { Typography, Container, Grid, Paper } from '@mui/material';
+import FormModal from "../utils/FormModal";
+import TextInput from "../utils/TextInput";
+import FileUploadComponent from "../utils/FileInput"
+import BasicDatePicker from "../utils/DatePicker";
+import PaginationController from "../utils/Pagination"
 
-
-
-
-const style = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    // width: 600,
-    // height: 600,
-    // bgcolor: 'background.paper',
-    // border: '2px solid #000',
-    // boxShadow: 24,
-    // p: 4,
-};
+const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+    '& .MuiDialogContent-root': {
+        padding: theme.spacing(2),
+    },
+    '& .MuiDialogActions-root': {
+        padding: theme.spacing(1),
+    },
+}));
 
 
 
 const emp_url = "contr-employees"
 
+
+
+
 function Collectors(props) {
+
+
     return (
         <>
             <Coll
@@ -43,26 +64,99 @@ export default Collectors
 
 function Coll(props) {
 
+
+    const collector = useSelector((state) => state?.collector?.value)?.filter((e) => e?.type?.code === "ADM");
+
+
+
     const { path } = props;
+
+    const wardlist = useSelector((state) => state?.ward?.value);
+
+    const getWardLabel = (data) => {
+        const listData = data ? data : []
+        const label = listData?.map((no) => (wardlist?.find((e) => e?.id === no)?.name)).join(',')
+        return label
+    }
 
     const component = {
         "house": <HouseCollector
             type="house"
-        />,
+            modalHeader="House Collector"
+            headersToShow={["Image", "Name", "Employee Id", "Contact No", "Ward No"]}
+            fields={{
+                'employee.image': (value) => value,
+                'employee.name': (value) => value,
+                'employee.emp_id': (value) => value,
+                'employee.phone_number': (value) => value,
+                'ward': (value) => getWardLabel(value),
+            }}
+            path={path}
+        // role={collector.find(item => item.name.toLowerCase() === modalHeader.toLowerCase())}
 
-        "street": <StreetCollector
+        />,
+        "street": <HouseCollector
             type="street"
+            modalHeader="Street Collector"
+            headersToShow={["Image", "Name", "Employee Id", "Contact No", "Ward No", "Tractor No"]}
+            fields={{
+                'employee.image': (value) => value,
+                'employee.name': (value) => value,
+                'employee.emp_id': (value) => value,
+                'employee.phone_number': (value) => value,
+                'ward': (value) => getWardLabel(value),
+                "tractor_no": (value) => value
+            }}
+            path={path}
+        // role={collector[1]}
+
+        />,
+        "shop": <HouseCollector
+            type="shop"
+            modalHeader="Shop Collector"
+            headersToShow={["Image", "Name", "Employee Id", "Contact No", "Ward No"]}
+            fields={{
+                'employee.image': (value) => value,
+                'employee.name': (value) => value,
+                'employee.emp_id': (value) => value,
+                'employee.phone_number': (value) => value,
+                'ward': (value) => getWardLabel(value),
+            }}
+            path={path}
+        // role={collector[0]}
+
+        />,
+        "overall-weighing": <HouseCollector
+
+            type="Overall"
+            modalHeader="Overall Collector"
+            headersToShow={["Image", "Name", "Employee Id", "Contact No",]}
+            fields={{
+                'employee.image': (value) => value,
+                'employee.name': (value) => value,
+                'employee.emp_id': (value) => value,
+                'employee.phone_number': (value) => value,
+                // 'ward': (value) => getWardLabel(value),
+            }}
+            path={path}
+        // role={collector[0]}
+
         />,
 
-        "shop":
-            <ShopCollector
-                type="shop"
-            />,
 
-        "overall-weighing":
-            <OverallCollector
-                type="overall"
-            />
+        // "street": <StreetCollector
+        //     type="street"
+        // />,
+
+        // "shop":
+        //     <ShopCollector
+        //         type="shop"
+        //     />,
+
+        // "overall-weighing":
+        //     <OverallCollector
+        //         type="overall"
+        //     />
 
     }
 
@@ -72,2311 +166,409 @@ function Coll(props) {
 
 
 
+
+// -------------------------------------------------------------------------------------------------------------------------------
+
+
 function HouseCollector(props) {
 
-    const { type } = props
+    const { modalHeader, headersToShow, fields, path } = props
 
-    const roles = useSelector((state) => state?.collector?.value);
-    const wards = useSelector((state) => state?.ward?.value);
+    const dispatch = useDispatch()
 
-    const [housecollector, setHouseCollector] = useState([]);
+    // const modalHeader = "House Collector";
 
-    const [collector, setCollector] = useState();
-    const [viewCollector, setViewCollector] = useState();
+    const user = useSelector((state) => state?.user?.value);
+    const wardlist = useSelector((state) => state?.ward?.value);
+    const panchayatList = useSelector((state) => state?.panchayat?.value);
+    const districtList = useSelector((state) => state?.district?.value);
+    const cityList = useSelector((state) => state?.city?.value);
 
-    const [ward, setWard] = useState();
-    const [role, setRole] = useState();
-    const [isView, setIsView] = useState();
-    const [isAdd, setIsAdd] = useState();
-    const [edit, setIsEdit] = useState();
-    const [image, setImage] = useState();
+    const collector = useSelector((state) => state?.collector?.value)?.filter((e) => e?.type?.code === "EMP");
+    const role = collector?.find(item => item?.name.toLowerCase() === modalHeader?.toLowerCase())
+    // const role = ""
+    console.log(role, "role")
+    // meta StATE
+    const [listInstanceData, setListInstanceData] = useState([])
+    const [instanceData, setInstanceData] = useState(
+        {
 
-    const [error, setError] = useState();
+            "employee": {
+                "image": "",
+                "name": "",
+                "phone_number": "",
+            },
+            "ward": [
 
-
-
-    const handleClose = () => setIsView(false);
-
-    const handleAddClose = () => {
-        setCollector()
-        setIsAdd(false)
-        setError(false)
-        setImage()
-        setIsView()
-
-
-    }
-
-
-    useEffect(() => {
-        setRole(roles?.find((e) => e?.name === type))
-    })
-
-
-    // fetch all data
-    useEffect(() => {
-
-        getHouseCollectors()
-    }, [])
-
-
-    const getHouseCollectors = () => {
-
-        axios.get(`${Config.BASE_URL}house-collector`,
-            Config?.config
-        )
-            .then(function (response) {
-                if (response.status === 200) {
-                    console.log(response);
-                    setHouseCollector(response?.data)
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-
-    }
-
-    // console.log(role, roles)
-
-
-
-
-    // handle add values
-    const handleChange = (e, name) => {
-
-        if (name === "image") {
-            const check = Config?.fileType(e.target.files[0].name)
-
-            if (!check) {
-                console.log("not supported")
-                return
-            }
-            console.log(e.target.files[0].name)
-            let value = e.target.files[0]
-            setImage(value)
-            // setCollector((prevstate) => {
-            //     return {
-            //         ...prevstate, [name]: value
-            //     }
-
-            // })
+            ]
         }
-        else {
-
-            const { value } = e.target
-            setCollector((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
-
-            })
-
-        }
-
-
-
-    }
-
-
-    // handle edit values
-    const handleEditChange = (e, name) => {
-        console.log("trigger")
-
-
-        if (name === "image") {
-            let value = e.target.files[0]
-
-            const check = Config?.fileType(value.name)
-
-            if (!check) {
-                console.log("not supported")
-                return
-            }
-            setImage(value)
-            // setViewCollector((prevstate) => ({
-            //     ...prevstate,
-            //     employee_info: {
-            //         ...prevstate.employee_info,
-            //         [name]: value
-            //     }
-
-            // }))
-        }
-        else {
-            const { value } = e.target
-            setViewCollector((prevstate) => ({
-                ...prevstate,
-                employee_info: {
-                    ...prevstate.employee_info,
-                    [name]: value
-                }
-
-            }))
-        }
-
-    }
-
-
-    const checkValidation = () => {
-
-        if (!collector?.name || !collector?.phone_number || !collector?.start_date || !ward) {
-            console.log("please fill required fields")
-            setError(true)
-            return false
-
-        }
-        else {
-            setError(false)
-            return true
-        }
-
-    }
-
-
-    // handle add employees
-
-    const addContractEmployee = () => {
-
-        const check = checkValidation()
-
-        if (!check) {
-            return
-        }
-
-        const data = new FormData()
-
-        data.append("name", collector?.name)
-        // data.append("ward", ward)
-        data.append("phone_number", collector?.phone_number)
-        data.append("start_date", collector?.start_date)
-        data.append("role", role?.id)
-       data.append("is_collector", true) 
-       
-
-        if (image) {
-            data.append("image", image)
-        }
-
-
-
-        axios.post(`${Config.BASE_URL}contr-employees/`,
-            data,Config?.config
-        )
-            .then(function (response) {
-                if (response.status === 201) {
-                    console.log(response);
-                    addHouse(response?.data?.id)
-                    setCollector()
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-
-    }
-
-
-
-    // add housecollector
-    const addHouse = (id) => {
-
-        const data = new FormData()
-
-        data.append("employee", id)
-        data.append("ward", ward)
-
-        axios.post(`${Config.BASE_URL}house-collector/`,
-            data,Config?.config
-        )
-            .then(function (response) {
-                if (response.status === 201) {
-                    console.log(response);
-                    setHouseCollector((prevstate) => {
-                        return [...prevstate, response?.data]
-                    })
-                    setIsAdd(false)
-                    // $('#myModal').hide();
-                    // $('.modal-backdrop').hide();
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-
-    }
-
-    // delete housecollector
-    const deleteHouseCollector = (id) => {
-        console.log("deleting")
-
-        axios.delete(`${Config.BASE_URL}house-collector/${id}/`,
-        Config?.config
-
-        )
-            .then(function (response) {
-                if (response.status === 204) {
-                    console.log(response);
-                    setHouseCollector(housecollector?.filter((e) => e.id !== id))
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-
-    }
-
-
-
-    const validate = () => {
-
-        if (!viewCollector?.employee_info?.name || !viewCollector?.employee_info?.phone_number || !viewCollector?.employee_info?.start_date || !ward) {
-            console.log("please fill required fields")
-            setError(true)
-            return false
-
-        }
-        else {
-            setError(false)
-            return true
-        }
-
-    }
-
-
-    // update employee details
-    const updateEmployee = (id, edit) => {
-
-        const check = validate()
-
-        if (!check) {
-            return
-        }
-
-        console.log(viewCollector, "enter")
-        const data = new FormData()
-
-        data.append("name", viewCollector?.employee_info?.name)
-        data.append("ward", ward)
-        data.append("phone_number", viewCollector?.employee_info?.phone_number)
-        data.append("start_date", viewCollector?.employee_info?.start_date)
-        data.append("role", role?.id)
-        if (image) {
-            data.append("image", image)
-        }
-
-
-
-        // axios.put(`${Config.BASE_URL}contr-employees/${viewCollector?.employee_info?.id}/`,
-        axios.patch(`${Config.BASE_URL}contr-employees/${viewCollector?.employee_info?.id}/`,
-            data ,Config?.config ,Config?.config
-        )
-            .then(function (response) {
-                if (response.status === 200) {
-                    console.log(response);
-                    updateWard()
-
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-    }
-
-
-    // update ward
-    const updateWard = (id, edit) => {
-        console.log(viewCollector, "enter")
-        const data = new FormData()
-
-        data.append("ward", ward)
-        data.append("employee", viewCollector?.employee)
-        axios.patch(`${Config.BASE_URL}house-collector/${viewCollector?.id}/`,
-            data ,Config?.config
-        )
-            .then(function (response) {
-                if (response.status === 200) {
-                    console.log(response);
-                    setHouseCollector(prevArray => {
-                        const index = prevArray.findIndex(obj => obj?.id === viewCollector?.id);
-                        if (index !== -1) {
-                            return [
-                                ...prevArray.slice(0, index),
-                                { ...prevArray[index], ...response.data },
-                                ...prevArray.slice(index + 1),
-                            ];
-                        }
-                        return prevArray;
-                    });
-
-
-                    setIsView(false)
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-    }
-
-
-
-    // get single collector
-    const getHouseCollector = (id, edit) => {
-        console.log("getting")
-
-        axios.get(`${Config.BASE_URL}house-collector/${id}/`
-        ,Config?.config
-
-        )
-            .then(function (response) {
-                if (response.status === 200) {
-                    console.log(response?.data);
-                    setViewCollector(response?.data)
-                    setWard(response?.data?.ward)
-                    setIsView(true);
-                    setIsEdit(edit)
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-
-    }
-
-
-
-    console.log(ward)
-    // console.log(viewCollector, collector)
-
-
-    return (
-        <div class="content">
-            <div class="page-header">
-                <div class="page-title">
-                    <h4>House Collector Details</h4>
-                </div>
-                <div class="page-btn">
-                    <button class="btn btn-primary" onClick={() => setIsAdd(true)}>
-                        <span class="glyphicon glyphicon-user"></span> Add House collector
-                    </button>
-
-
-                    {/* modal content */}
-
-                    {isAdd && (
-
-                        <>
-
-                            <Modal
-                                // keepMounted
-                                open={open}
-                                onClose={handleClose}
-                                aria-labelledby="keep-mounted-modal-title"
-                                aria-describedby="keep-mounted-modal-description"
-                            >
-                                <Box
-                                    sx={style}
-                                >
-
-                                    <div class="modal-content">
-
-                                        <h3 style={{ marginLeft: 20 }}>House collector Details</h3>
-                                        <div class="modal-body">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <div class="row">
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">House collector Name :
-                                                                    <span class="form-required">*</span></label>
-                                                                <input type="text" class="form-control" onChange={(e) => handleChange(e, "name")} defaultValue={collector?.name}
-                                                                    name="name" />
-                                                                {(error && !collector?.name) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Ward No : <span
-                                                                    class="form-required">*</span></label>
-                                                                <select name="WARD" id=""
-                                                                    className="custom-dropdown" onChange={(e) => setWard(e?.target?.value)}
-                                                                // defaultValue={ward || ""}
-                                                                >
-
-                                                                    <option disabled selected value >-----------</option>
-                                                                    {wards?.map((e) => (
-                                                                        <option value={e?.id}>{e?.ward_no}</option>
-                                                                    ))}
-
-
-                                                                </select>
-                                                                {(error && !ward) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Contact No : <span
-                                                                    class="form-required">*</span></label>
-                                                                <input type="number" class="form-control" onChange={(e) => handleChange(e, "phone_number")} defaultValue={collector?.phone_number || ""}
-                                                                    name="phone_number" />
-                                                                {(error && !collector?.phone_number) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Image :
-                                                                    <span class="form-required">*</span></label>
-                                                                <input type="file" class="form-control"
-                                                                    defaultValue={collector?.image || ""}
-                                                                    onChange={(e) => handleChange(e, "image")}
-
-                                                                    name="category_name" />
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Description :</label>
-                                                                <input type="text" class="form-control" onChange={(e) => handleChange(e, "description")}
-                                                                    name="description" />
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Period of Time : <span class="form-required">*</span></label>
-                                                                <input type="Date" class="form-control" name="start_date" defaultValue={collector?.start_date || ""}
-                                                                    onChange={(e) => handleChange(e, "start_date")}
-                                                                    required />
-
-                                                                {(error && !collector?.start_date) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-success" onClick={addContractEmployee}>Save</button>
-                                            <button type="button" class="btn btn-danger"
-                                                onClick={handleAddClose}
-                                            // data-dismiss="modal"
-                                            >Close</button>
-                                        </div>
-
-                                    </div>
-
-                                </Box>
-                            </Modal>
-
-                        </>
-                    )}
-
-
-
-
-
-                    {isView && (
-
-                        <>
-
-                            <Modal
-                                // keepMounted
-                                open={open}
-                                onClose={handleClose}
-                                aria-labelledby="keep-mounted-modal-title"
-                                aria-describedby="keep-mounted-modal-description"
-                            >
-                                <Box
-                                    sx={style}
-                                >
-                                    <div class="modal-content">
-                                        <h3 style={{ marginLeft: 20 }}>House collector Details</h3>
-                                        <div class="modal-body">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <div class="row">
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">House collector Name :
-                                                                    <span class="form-required">*</span></label>
-                                                                <input type="text" class="form-control"
-                                                                    onChange={(e) => handleEditChange(e, "name")} defaultValue={viewCollector?.employee_info?.name || ""}
-                                                                    disabled={!edit}
-
-                                                                    name="category_name" />
-
-                                                                {(error && !viewCollector?.employee_info?.name) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Ward No : <span
-                                                                    class="form-required">*</span></label>
-                                                                <select name="" id=""
-                                                                    className="custom-dropdown" onChange={(e) => setWard(e?.target?.value)}
-                                                                    disabled={!edit}
-                                                                    // defaultValue={viewCollector?.ward?.id || ""}
-                                                                    // value={viewCollector?.ward}
-
-                                                                >
-                                                                    <option value={viewCollector?.ward}>{viewCollector?.ward}</option>
-
-                                                                    <option disabled selected value >-----------</option>
-                                                                    
-                                                                    {wards?.map((e) => (
-                                                                        <option value={e?.id}>{e?.ward_no}</option>
-                                                                    ))}
-
-
-                                                                </select>
-
-
-                                                                {(error && !viewCollector?.ward?.id) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Contact No : <span
-                                                                    class="form-required">*</span></label>
-                                                                <input type="number" class="form-control"
-                                                                    onChange={(e) => handleEditChange(e, "phone_number")} defaultValue={viewCollector?.employee_info?.phone_number || ""}
-                                                                    disabled={!edit}
-                                                                    name="category_code" />
-
-                                                                {(error && !viewCollector?.employee_info?.phone_number) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Image :
-                                                                    <span class="form-required">*</span></label>
-                                                                <input type="file" class="form-control"
-                                                                    onChange={(e) => handleEditChange(e, "image")}
-                                                                    name="category_name" />
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Description :</label>
-                                                                <input type="text" class="form-control" onChange={(e) => handleEditChange(e, "description")}
-                                                                    disabled={!edit}
-                                                                    name="category_desc" />
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Period of Time : <span class="form-required">*</span></label>
-                                                                <input type="Date" class="form-control" name="category_name" defaultValue={viewCollector?.employee_info?.start_date || ""}
-                                                                    disabled={!edit}
-                                                                    onChange={(e) => handleEditChange(e, "start_date")}
-                                                                    required />
-
-                                                                {(error && !viewCollector?.employee_info?.start_date) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            {edit && (
-                                                <button type="submit" class="btn btn-success" onClick={updateEmployee}>Save</button>
-                                            )}
-                                            <button type="button" class="btn btn-danger" onClick={handleClose}
-                                                data-dismiss="modal">Close</button>
-                                        </div>
-
-                                    </div>
-
-
-
-
-                                </Box>
-                            </Modal>
-
-
-                        </>
-                    )}
-
-
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr class="table-info">
-                                    <th  >S.No</th>
-                                    <th>Image</th>
-                                    <th  >Name</th>
-                                    <th  >Contact No</th>
-                                    <th  >Ward No</th>
-                                    <th  >Description</th>
-                                    <th  >Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-
-                                {housecollector?.map((e, index) =>
-
-                                (
-                                    <tr key={index}>
-                                        <td>{index + 1}</td>            
-                                        <td><img src={e?.employee_info?.image ?
-                                            Config.MEDIA_URL +
-                                            e?.employee_info?.image
-                                            : "assets/img/profiles/no_avatar.jpg"} className="emp-thumb" /></td>
-                                        {/* <td><img src={e?.employee_info?.image} className="emp-thumb" /></td> */}
-                                        <td>{e?.employee_info?.name}</td>
-                                        <td>{e?.employee_info?.phone_number}</td>
-                                        <td>{e?.ward}</td>
-                                        <td>House Collector</td>
-                                        <td>
-                                            <button class="btn btn-success" onClick={() => getHouseCollector(e?.id, true)}>
-                                                <span class="glyphicon glyphicon-pencil" ></span> Edit
-                                            </button>
-                                            <button class="btn btn-info" onClick={() => getHouseCollector(e?.id, false)}>
-                                                <span class="glyphicon glyphicon-eye-open" ></span> View
-                                            </button>
-                                            <button class="btn btn-danger" onClick={() => deleteHouseCollector(e?.id)}>
-                                                <span class="glyphicon glyphicon-trash" ></span> Delete
-                                            </button>
-                                        </td>
-                                    </tr>)
-
-                                )}
-
-
-
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
 
     )
-}
 
-
-
-
-
-
-
-
-function ShopCollector(props) {
-
-
-    const { type } = props
-
-    const title = "Shop"
-    const url = "shop-collector"
-
-    const roles = useSelector((state) => state?.collector?.value);
-    const wards = useSelector((state) => state?.ward?.value);
-
-    const [collectorList, setCollectorList] = useState();
-
-    const [collector, setCollector] = useState();
-    const [viewCollector, setViewCollector] = useState();
+    const [isOpen, setIsOpen] = useState();
+    const [isedit, setisEdit] = useState();
+    const [isAdd, setisAdd] = useState();
+    const [error, setError] = useState(false);
     const [image, setImage] = useState();
+    const [loader, setLoader] = useState();
 
-    const [ward, setWard] = useState();
-    const [role, setRole] = useState();
-    const [isView, setIsView] = useState();
-    const [isAdd, setIsAdd] = useState();
-    const [edit, setIsEdit] = useState();
-
-    const [error, setError] = useState();
-
-    const handleClose = () => setIsView(false);
-
-    const handleAddClose = () => {
-        setCollector()
-        setIsAdd(false)
-        setError(false)
-        setImage()
-        setIsView()
+    const [hide, setHide] = useState(true);
 
 
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+    const [lazyLoading, setLazyLoading] = useState(true);
+
+
+    const [page, setPage] = useState(1);
+    const [count, setCount] = useState();
+
+    const handlePageChange = (event, value) => {
+        setPage(value)
+    }
+
+    const getWardLabel = (data) => {
+        const listData = data ? data : []
+        const label = listData?.map((no) => (wardlist?.find((e) => e?.id === no)?.name)).join(',')
+        return label
     }
 
 
-    useEffect(() => {
-        setRole(roles?.find((e) => e?.name === type))
-    })
-
-
-    // fetch all data
-    useEffect(() => {
-
-        getAllCollectors()
-    }, [])
-
-
-    const getAllCollectors = () => {
-
-        axios.get(`${Config.BASE_URL + url}`,
-            Config?.config
-        )
-            .then(function (response) {
-                if (response.status === 200) {
-                    console.log(response);
-                    setCollectorList(response?.data)
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-
-    }
-
-    console.log(role, roles)
-
-
-    // handle add values
-    const handleChange = (e, name) => {
-
-        if (name === "image") {
-            const check = Config?.fileType(e.target.files[0].name)
-
-            if (!check) {
-                console.log("not supported")
-                return
+    const getWardLabe = (data) => {
+        const wardNames = [];
+        const listData = data ? data : []
+        listData?.forEach(id => {
+            const ward = wardlist.find(item => item.id === id);
+            if (ward) {
+                wardNames.push(ward.name);
+            } else {
+                wardNames.push('Not Found');
             }
-            console.log(e.target.files[0].name)
-            let value = e.target.files[0]
-            // setCollector((prevstate) => {
-            //     return {
-            //         ...prevstate, [name]: setImage
-            //     }
+        });
 
-            // })
-            setImage(value)
-        }
-        else {
+        return wardNames;
+    };
 
-            const { value } = e.target
-            setCollector((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
 
-            })
+    const getUrl = "collector";
+    const getListUrl = "collector";
+    const postUrl = "collector/";
+    const updateUrl = "collector";
+    const deleteUrl = "collector";
 
-        }
 
 
-
-    }
-
-
-
-
-
-    // check validation
-    const checkValidation = () => {
-
-        if (!collector?.name || !collector?.phone_number || !collector?.start_date || !ward) {
-            console.log("please fill required fields")
-            setError(true)
-            return false
-
-        }
-        else {
-            setError(false)
-            return true
-
-        }
-
-    }
-
-
-    // handle add contract employees
-
-    const addContractEmployee = () => {
-
-
-        const check = checkValidation()
-
-        if (!check) {
-            return
-        }
-        const data = new FormData()
-
-        data.append("name", collector?.name)
-        // data.append("ward", ward)
-        data.append("phone_number", collector?.phone_number)
-        data.append("start_date", collector?.start_date)
-        data.append("role", role?.id)
-        data.append("is_collector", true) 
-        if (image) {
-            data.append("image", image)
-        }
-
-        axios.post(`${Config.BASE_URL + emp_url}/`,
-            data ,Config?.config
-        )
-            .then(function (response) {
-                if (response.status === 201) {
-                    console.log(response);
-                    createCollector(response?.data?.id)
-                    setCollector()
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-
-    }
-
-
-
-    // add collector
-    const createCollector = (id) => {
-
-        const data = new FormData()
-
-        data.append("employee", id)
-        data.append("ward", ward)
-
-        axios.post(`${Config.BASE_URL + url}/`,
-            data ,Config?.config
-        )
-            .then(function (response) {
-                if (response.status === 201) {
-                    console.log(response);
-                    setCollectorList((prevstate) => {
-                        return [...prevstate, response?.data]
-                    })
-                    setIsAdd(false)
-                    // $('#myModal').hide();
-                    // $('.modal-backdrop').hide();
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-
-    }
-
-    // delete collectorList
-    const deleteCollector = (id) => {
-        console.log("deleting")
-
-        axios.delete(`${Config.BASE_URL + url}/${id}/`
-        ,Config?.config
-
-        )
-            .then(function (response) {
-                if (response.status === 204) {
-                    console.log(response);
-                    setCollectorList(collectorList?.filter((e) => e.id !== id))
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-
-    }
-
-
-
-
-
-    // handle edit values
-    const handleEditChange = (e, name) => {
-        console.log("trigger")
-
-
-        if (name === "image") {
-            let value = e.target.files[0]
-
-            const check = Config?.fileType(value.name)
-
-            if (!check) {
-                console.log("not supported")
-                return
-            }
-            setImage(value)
-        }
-        else {
-            const { value } = e.target
-            setViewCollector((prevstate) => ({
-                ...prevstate,
-                employee_info: {
-                    ...prevstate.employee_info,
-                    [name]: value
-                }
-
-            }))
-        }
-
-    }
-
-
-
-    // update employee details
-    const updateEmployee = (id, edit) => {
-
-
-        if (!viewCollector?.employee_info?.name || !viewCollector?.employee_info?.phone_number || !viewCollector?.employee_info?.start_date || !ward) {
-            console.log("please fill required fields")
-            setError(true)
-            return
-        }
-        setError(false)
-
-
-        console.log(viewCollector, "enter")
-        const data = new FormData()
-
-        data.append("name", viewCollector?.employee_info?.name)
-        data.append("ward", ward)
-        data.append("phone_number", viewCollector?.employee_info?.phone_number)
-        data.append("start_date", viewCollector?.employee_info?.start_date)
-        data.append("role", role?.id)
-
-        if (image) {
-            data.append("image", image)
-        }
-
-        axios.patch(`${Config.BASE_URL + emp_url}/${viewCollector?.employee_info?.id}/`,
-            data ,Config?.config
-        )
-            .then(function (response) {
-                if (response.status === 200) {
-                    console.log(response);
-                    updateWard()
-
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-    }
-
-
-    // update ward
-    const updateWard = (id, edit) => {
-        console.log(viewCollector, "enter")
-        const data = new FormData()
-
-        data.append("ward", ward)
-        data.append("employee", viewCollector?.employee)
-        axios.patch(`${Config.BASE_URL + url}/${viewCollector?.id}/`,
-            data ,Config?.config
-        )
-            .then(function (response) {
-                if (response.status === 200) {
-                    console.log(response);
-                    setCollectorList(prevArray => {
-                        const index = prevArray.findIndex(obj => obj?.id === viewCollector?.id);
-                        if (index !== -1) {
-                            return [
-                                ...prevArray.slice(0, index),
-                                { ...prevArray[index], ...response.data },
-                                ...prevArray.slice(index + 1),
-                            ];
-                        }
-                        return prevArray;
-                    });
-
-
-                    setIsView(false)
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-    }
-
-
-
-    // get single collector
-    const getCollector = (id, edit) => {
-        console.log("getting")
-
-        axios.get(`${Config.BASE_URL + url}/${id}/`,
-        Config?.config
-
-        )
-            .then(function (response) {
-                if (response.status === 200) {
-                    console.log(response?.data);
-                    setViewCollector(response?.data)
-                    setWard(response?.data?.ward)
-                    setIsView(true);
-                    setIsEdit(edit)
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-
-    }
-
-
-
-
-    console.log(viewCollector, collector)
-
-
-    return (
-        <div class="content">
-            <div class="page-header">
-                <div class="page-title">
-                    <h4>{title}  Collector Details</h4>
-                </div>
-                <div class="page-btn">
-                    <button class="btn btn-primary" onClick={() => setIsAdd(true)}>
-                        <span class="glyphicon glyphicon-user"></span> Add {title}  collector
-                    </button>
-
-
-                    {/* modal content */}
-
-                    {isAdd && (
-
-                        <>
-
-                            <Modal
-
-                                open={open}
-                                onClose={handleClose}
-                                aria-labelledby="keep-mounted-modal-title"
-                                aria-describedby="keep-mounted-modal-description"
-                            >
-                                <Box
-                                    sx={style}
-                                >
-
-                                    <div class="modal-content">
-
-                                        <h3 style={{ marginLeft: 20 }}>{title}  Collector Details</h3>
-                                        <div class="modal-body">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <div class="row">
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">{title}  collector Name :
-                                                                    <span class="form-required">*</span></label>
-                                                                <input type="text" class="form-control" onChange={(e) => handleChange(e, "name")} defaultValue={collector?.name}
-                                                                    name="name" />
-                                                                {(error && !collector?.name) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Ward No : <span
-                                                                    class="form-required">*</span></label>
-                                                                <select name="ward" id=""
-                                                                    className="custom-dropdown" onChange={(e) => setWard(e.target.value)}
-
-                                                                >
-
-                                                                    <option disabled selected value >-----------</option>
-                                                                    {wards?.map((e) => (
-                                                                        <option value={e?.id}>{e?.ward_no}</option>
-                                                                    ))}
-
-
-                                                                </select>
-                                                                {(error && !ward) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Contact No : <span
-                                                                    class="form-required">*</span></label>
-                                                                <input type="number" class="form-control" onChange={(e) => handleChange(e, "phone_number")} defaultValue={collector?.phone_number || ""}
-                                                                    name="phone_number" />
-                                                                {(error && !collector?.phone_number) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Image :
-                                                                    <span class="form-required">*</span></label>
-                                                                <input type="file" class="form-control"
-                                                                    defaultValue={collector?.image || ""}
-                                                                    onChange={(e) => handleChange(e, "image")}
-
-                                                                    name="category_name" />
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Description :</label>
-                                                                <input type="text" class="form-control" onChange={(e) => handleChange(e, "description")}
-                                                                    name="description" />
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Period of Time : <span class="form-required">*</span></label>
-                                                                <input type="Date" class="form-control" name="start_date" defaultValue={collector?.start_date || ""}
-                                                                    onChange={(e) => handleChange(e, "start_date")}
-                                                                    required />
-
-                                                                {(error && !collector?.start_date) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-success" onClick={addContractEmployee}>Save</button>
-                                            <button type="button" class="btn btn-danger"
-                                                onClick={handleAddClose}
-
-                                            >Close</button>
-                                        </div>
-
-                                    </div>
-
-                                </Box>
-                            </Modal>
-
-                        </>
-                    )}
-
-
-
-
-
-                    {isView && (
-
-                        <>
-
-                            <Modal
-                                // keepMounted
-                                open={open}
-                                onClose={handleClose}
-                                aria-labelledby="keep-mounted-modal-title"
-                                aria-describedby="keep-mounted-modal-description"
-                            >
-                                <Box
-                                    sx={style}
-                                >
-                                    <div class="modal-content">
-                                        <h3 style={{ marginLeft: 20 }}>{title}  collector Details</h3>
-                                        <div class="modal-body">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <div class="row">
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">{title}  collector Name :
-                                                                    <span class="form-required">*</span></label>
-                                                                <input type="text" class="form-control"
-                                                                    onChange={(e) => handleEditChange(e, "name")} defaultValue={viewCollector?.employee_info?.name || ""}
-                                                                    disabled={!edit}
-                                                                    name="name" />
-
-                                                                {(error && !viewCollector?.employee_info?.name) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Ward No : <span
-                                                                    class="form-required">*</span></label>
-                                                                <select name="ward" id=""
-                                                                    className="custom-dropdown" onChange={(e) => setWard(e.target.value)}
-                                                                    disabled={!edit}
-                                                                    value={viewCollector?.ward?.id}
-
-                                                                >
-                                                                    {/* <option value={viewCollector?.ward?.id}>{viewCollector?.ward?.ward}</option> */}
-
-                                                                    <option disabled selected value >-----------</option>
-                                                                    {wards?.map((e) => (
-                                                                        <option value={e?.id}>{e?.ward_no}</option>
-                                                                    ))}
-
-
-                                                                </select>
-
-
-                                                                {(error && !ward) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-
-
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Contact No : <span
-                                                                    class="form-required">*</span></label>
-                                                                <input type="number" class="form-control"
-                                                                    onChange={(e) => handleEditChange(e, "phone_number")} defaultValue={viewCollector?.employee_info?.phone_number || ""}
-                                                                    disabled={!edit}
-                                                                    name="phone_number" />
-                                                            </div>
-
-                                                            {(error && !viewCollector?.employee_info?.phone_number) && (
-                                                                <span className="req-text">This field is required</span>
-                                                            )}
-                                                        </div>
-
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Image :
-                                                                    <span class="form-required">*</span></label>
-                                                                <input type="file" class="form-control"
-
-                                                                    onChange={(e) => handleEditChange(e, "image")}
-
-                                                                    name="category_name" />
-                                                            </div>
-                                                        </div>
-
-
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Description :</label>
-                                                                <input type="text" class="form-control" onChange={(e) => handleEditChange(e, "description")}
-                                                                    disabled={!edit}
-                                                                    name="description" />
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Period of Time : <span class="form-required">*</span></label>
-                                                                <input type="Date" class="form-control" name="start_date" defaultValue={viewCollector?.employee_info?.start_date || ""}
-                                                                    disabled={!edit}
-                                                                    onChange={(e) => handleEditChange(e, "start_date")}
-                                                                    required />
-
-                                                                {(error && !viewCollector?.employee_info?.start_date) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            {edit && (
-                                                <button type="submit" class="btn btn-success" onClick={updateEmployee}>Save</button>
-                                            )}
-                                            <button type="button" class="btn btn-danger" onClick={handleClose}
-                                                data-dismiss="modal">Close</button>
-                                        </div>
-
-                                    </div>
-
-
-
-
-                                </Box>
-                            </Modal>
-
-
-                        </>
-                    )}
-
-
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr class="table-info">
-                                    <th  >S.No</th>
-                                    <th>Image</th>
-                                    <th  >Name</th>
-                                    <th  >Contact No</th>
-                                    <th  >Ward No</th>
-                                    <th  >Description</th>
-                                    <th  >Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-
-                                {collectorList?.map((e, index) =>
-
-                                (
-                                    <tr key={index}>
-                                        <td>{index + 1}</td>
-                                        <td><img src={e?.employee_info?.image ?
-                                            Config.MEDIA_URL +
-                                            e?.employee_info?.image : "assets/img/profiles/no_avatar.jpg"} className="emp-thumb" /></td>
-                                        {/* <td><img src={e?.employee_info?.image} className="emp-thumb" /></td> */}
-                                        <td>{e?.employee_info?.name}</td>
-                                        <td>{e?.employee_info?.phone_number}</td>
-                                        <td>{e?.ward}</td>
-                                        <td>{title}  Collector</td>
-                                        <td>
-                                            <button class="btn btn-success" onClick={() => getCollector(e?.id, true)}>
-                                                <span class="glyphicon glyphicon-pencil" ></span> Edit
-                                            </button>
-                                            <button class="btn btn-info" onClick={() => getCollector(e?.id, false)}>
-                                                <span class="glyphicon glyphicon-eye-open" ></span> View
-                                            </button>
-                                            <button class="btn btn-danger" onClick={() => deleteCollector(e?.id)}>
-                                                <span class="glyphicon glyphicon-trash" ></span> Delete
-                                            </button>
-                                        </td>
-                                    </tr>)
-
-                                )}
-
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    )
-}
-// --------------------------------------------------------------------------------
-
-function StreetCollector(props) {
-
-
-    const { type } = props
-
-    const title = "Street"
-    const url = "street-collector"
-
-    const roles = useSelector((state) => state?.collector?.value);
-    const wards = useSelector((state) => state?.ward?.value);
-
-    const [collectorList, setCollectorList] = useState();
-
-    const [collector, setCollector] = useState();
-    const [viewCollector, setViewCollector] = useState();
-    const [image, setImage] = useState();
-
-
-    const [ward, setWard] = useState();
-    const [role, setRole] = useState();
-    const [isView, setIsView] = useState();
-    const [isAdd, setIsAdd] = useState();
-    const [edit, setIsEdit] = useState();
-
-    const [error, setError] = useState();
-
-    const handleClose = () => setIsView(false);
-
-    const handleAddClose = () => {
-        setCollector()
-        setIsAdd(false)
-        setError(false)
-        setImage()
-        setIsView()
-
-
-    }
-
-
-    useEffect(() => {
-        setRole(roles?.find((e) => e?.name === type))
-    })
-
-
-    // fetch all data
-    useEffect(() => {
-
-        getAllCollectors()
-    }, [])
-
-
-    const getAllCollectors = () => {
-
-        axios.get(`${Config.BASE_URL + url}`,
-            Config?.config
-        )
-            .then(function (response) {
-                if (response.status === 200) {
-                    console.log(response);
-                    setCollectorList(response?.data)
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-
-    }
-
-
-
-
-    // handle add values
-    const handleChange = (e, name) => {
-
-        if (name === "image") {
-            const check = Config?.fileType(e.target.files[0].name)
-
-            if (!check) {
-                console.log("not supported")
-                return
-            }
-            console.log(e.target.files[0].name)
-            let value = e.target.files[0]
-            setImage(value)
-        }
-        else {
-
-            const { value } = e.target
-            setCollector((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
-
-            })
-
-        }
-
-
-
-    }
-
-
-    // check validation
-
-    const checkValidation = () => {
-
-        if (!collector?.name || !collector?.phone_number || !collector?.start_date || !ward) {
-            console.log("please fill required fields")
-            setError(true)
-            return false
-
-        }
-        else {
-            setError(false)
-            return true
-        }
-
-    }
-
-
-
-    // handle add contract employees
-
-    const addContractEmployee = () => {
-
-        const check = checkValidation()
-
-        if (!check) {
-            return
-        }
-
-
-        const data = new FormData()
-
-        data.append("name", collector?.name)
-        // data.append("ward", ward)
-        data.append("phone_number", collector?.phone_number)
-        data.append("start_date", collector?.start_date)
-        data.append("role", role?.id)
-        data.append("is_collector", true) 
-
-        if (image) {
-            data.append("image", image)
-        }
-        axios.post(`${Config.BASE_URL + emp_url}/`,
-            data ,
-            Config?.config
-        )
-            .then(function (response) {
-                if (response.status === 201) {
-                    console.log(response);
-                    createCollector(response?.data?.id)
-                    setCollector()
-
-                    // setCollectorList((prevstate) => {
-                    //     return [...prevstate, response?.data]
-                    // })
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-
-    }
-
-
-
-
-
-    // handle edit employee
-    // const handleEditChange = (e, name) => {
-    //     console.log("trigger")
-    //     const { value } = e.target
-
-    //     if (name === "tractor_no") {
-    //         setViewCollector((prevstate) => {
-    //             return { ...prevstate, [name]: value }
-    //         })
-
-    //         return
-    //     }
-
-    //     setViewCollector((prevstate) => ({
-    //         ...prevstate,
-    //         employee_info: {
-    //             ...prevstate.employee_info,
-    //             [name]: value
-    //         }
-
-    //     }))
-
+    // META DATA
+    // const headersToShow = ["Image", "Name", "Contact No", "Ward No"]
+    const tableData = listInstanceData
+    const fieldsToShow = []
+    // const fields = {
+    //     'employee.image': (value) => value,
+    //     'employee.name': (value) => value,
+    //     'employee.phone_number': (value) => value,
+    //     'ward': (value) => getWardLabel(value),
     // }
 
 
-    // handle edit employee details
-    const handleEditChange = (e, name) => {
-        console.log("trigger")
+    const handleClose = () => {
+        setIsOpen(false);
+        setisAdd(false);
+        setisEdit(false);
+        setInstanceData({
+            "employee": {
+                "image": "",
+                "name": "",
+                "phone_number": "",
+            },
+            "ward": [
+
+            ]
+
+        });
+        setError(false);
+
+        setErrorMsg({});
+        seterrString();
+        setImage();
 
 
-        if (name === "image") {
-            let value = e.target.files[0]
 
-            const check = Config?.fileType(value.name)
+    }
 
-            if (!check) {
-                console.log("not supported")
-                return
+
+    useEffect(() => {
+        if (role) {
+            fetchListData();
+        }
+
+    }, [role,page])
+
+
+
+
+    const fetchListData = async () => {
+        try {
+
+            const response = await fetch(Config.BASE_URL + getListUrl + `?page=${page}&employee__role=${role?.id ?? ""}`, Config?.config)
+            const data = await response.json()
+           if (response.status ===200){
+            setListInstanceData(data?.results ? data?.results : data);
+            setCount(data?.count)
+           }
+        } catch (error) {
+            console.error('Error fetching data:', error)
+        }
+    }
+
+
+
+
+
+
+    const getInstanceData = (id, edit) => {
+        axios
+            .get(`${Config.BASE_URL}${getUrl}/${id}/`, Config.config)
+            .then(function (response) {
+                if (response.status === 200) {
+                    setInstanceData(response?.data)
+                    setIsOpen(true);
+                }
+            })
+            .catch(function (error) {
+                console.log(error)
+            })
+    }
+
+
+    console.log(instanceData, "fdj")
+
+    //add new
+    // Check form field validation
+    const checkValidation = () => {
+
+        const wardCheck = path === "overall-weighing" ? false : !instanceData?.ward.length
+
+        console.log(wardCheck)
+
+        if (!instanceData?.employee?.name || wardCheck
+            || !instanceData?.employee?.phone_number || !instanceData?.employee?.start_date) {
+
+            console.log("please fill required fields")
+            setError(true)
+            return false
+
+
+
+        }
+        else {
+            if (instanceData?.employee?.phone_number.length != 10) {
+                seterrString("Phone Number Should be in 10 Characters")
+                setError(true)
+                return false
             }
 
-            setImage(value)
-        }
+            else {
+                setError(false)
+                seterrString();
+                return true
+            }
 
-        else if (name === "tractor_no") {
-            setViewCollector((prevstate) => {
-                return { ...prevstate, [name]: value }
-            })
-
-            return
-        }
-
-        else {
-            const { value } = e.target
-            setViewCollector((prevstate) => ({
-                ...prevstate,
-                employee_info: {
-                    ...prevstate.employee_info,
-                    [name]: value
-                }
-
-            }))
         }
 
     }
 
 
-    // update employee details
-    const updateEmployee = (id, edit) => {
+    const addNewInstance = async (e) => {
 
+        const check = checkValidation()
 
-        if (!viewCollector?.employee_info?.name || !viewCollector?.employee_info?.phone_number || !viewCollector?.employee_info?.start_date || !ward) {
-            console.log("please fill required fields")
-            setError(true)
+        if (!check) {
             return
-
-
         }
-        setError(false)
 
-        console.log(viewCollector, "enter")
-        const data = new FormData()
+        const data = new FormData();
+        // const employeeData=new FormData();
 
-        data.append("name", viewCollector?.employee_info?.name)
-        data.append("ward", ward)
-        data.append("phone_number", viewCollector?.employee_info?.phone_number)
-        data.append("start_date", viewCollector?.employee_info?.start_date)
-        data.append("role", role?.id)
+        const employeeData = {
+            // image:instanceData?.image,
+            start_date: instanceData?.employee?.start_date,
+            phone_number: instanceData?.employee?.phone_number,
+            name: instanceData?.employee?.name,
+            is_collector: true,
+            role: role?.id,
+        }
+
+        const wardListdata = instanceData?.ward
+        // if (path != "overall-weighing") {
+        //     data.append("ward", wardListdata)
+        // }
+        if (wardListdata?.length > 0) {
+            // instanceData?.collector?.ward?.map((e)=>(
+            data.append("ward", wardListdata)
+            // ))
+        }
+
+        // data.append("ward", instanceData?.collector?.ward)
+        data.append("employee", JSON.stringify(employeeData))
+        data.append("description", instanceData?.description)
+
         if (image) {
             data.append("image", image)
         }
-        axios.patch(`${Config.BASE_URL + emp_url}/${viewCollector?.employee_info?.id}/`,
-            data,
-            Config?.config
-        )
-            .then(function (response) {
-                if (response.status === 200) {
-                    console.log(response);
-                    updateCollector()
+
+        if (instanceData?.tractor_no) {
+            data.append("tractor_no", instanceData?.tractor_no)
+        }
+
+        // data.append("role", role?.id)
+        try {
+            const response = await axios.post(`${Config.BASE_URL}${postUrl}`,
+                data,
+                Config.config,
+
+            );
+
+            Config?.toastalert("Submitted Successfully", "success")
+            // setListInstanceData((prevstate) => {
+            //     return [...prevstate, response?.data]
+            // })
+
+            setListInstanceData([response?.data, ...instanceData.slice(0, -1)])
+            setCount(count + 1)
 
 
-                }
+            handleClose();
 
-            })
-            .catch(function (error) {
+        } catch (error) {
+            if (error?.response?.status === 400) {
                 console.log(error);
+                setErrorMsg(error?.response?.data)
+                Config?.toastalert("Submission Failed", "warn")
+            }
 
-            });
-    }
+            else {
+                Config?.toastalert("Something Went Wrong", "error")
+            }
+        }
+
+
+    };
 
 
 
+    //UPDATE REQUESTS
 
+    const updateInstance = (id) => {
+        const check = checkValidation()
 
-
-    // add collector
-    const createCollector = (id) => {
+        if (!check) {
+            return
+        }
 
         const data = new FormData()
-
-        data.append("employee", id)
-        data.append("ward", ward)
-        data.append("tractor_no", collector?.tractor_no)
-
-        axios.post(`${Config.BASE_URL + url}/`,
-            data,
-            Config?.config
-        )
-            .then(function (response) {
-                if (response.status === 201) {
-                    console.log(response);
-                    setCollectorList((prevstate) => {
-                        return [...prevstate, response?.data]
-                    })
-                    setIsAdd(false)
-                    // $('#myModal').hide();
-                    // $('.modal-backdrop').hide();
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-
-    }
-
-    // delete collectorList
-    const deleteCollector = (id) => {
-        console.log("deleting")
-
-        axios.delete(`${Config.BASE_URL + url}/${id}/`,
-        Config?.config
-
-        )
-            .then(function (response) {
-                if (response.status === 204) {
-                    console.log(response);
-                    setCollectorList(collectorList?.filter((e) => e.id !== id))
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-
-    }
+        const employeeData = {
+            // image:instanceData?.image,
+            start_date: instanceData?.employee?.start_date,
+            phone_number: instanceData?.employee?.phone_number,
+            name: instanceData?.employee?.name,
+            is_collector: true,
+        }
 
 
+        const wardListdata = instanceData?.ward
+        if (wardListdata?.length > 0) {
+            // instanceData?.collector?.ward?.map((e)=>(
+            data.append("ward", wardListdata)
+            // ))
+        }
 
+        if (image) {
+            data.append("image", image)
+        }
 
-    // update collector
-    const updateCollector = (id, edit) => {
-        console.log(viewCollector, "enter")
-        const data = new FormData()
+        data.append("employee", JSON.stringify(employeeData))
+        data.append("description", instanceData?.description)
+        if (instanceData?.tractor_no) {
+            data.append("tractor_no", instanceData?.tractor_no)
+        }
+        // if (path != "overall-weighing"){
+        //     data.append("ward", wardListdata)
+        // }
 
-        data.append("ward", ward)
-        data.append("employee", viewCollector?.employee)
-        data.append("tractor_no", viewCollector?.tractor_no)
-        axios.patch(`${Config.BASE_URL + url}/${viewCollector?.id}/`,
-            data,
-            Config?.config
-        )
+        axios
+            .patch(`${Config.BASE_URL}${updateUrl}/${id}/`, data, Config.config)
             .then(function (response) {
                 if (response.status === 200) {
-                    console.log(response);
-                    setCollectorList(prevArray => {
-                        const index = prevArray.findIndex(obj => obj?.id === viewCollector?.id);
+
+                    Config?.toastalert("Updated Successfully", "success")
+
+                    setListInstanceData((prevArray) => {
+                        const index = prevArray.findIndex((obj) => obj.id === id)
                         if (index !== -1) {
                             return [
                                 ...prevArray.slice(0, index),
                                 { ...prevArray[index], ...response.data },
                                 ...prevArray.slice(index + 1),
-                            ];
+                            ]
                         }
-                        return prevArray;
-                    });
+                        return prevArray
+                    })
 
+                    handleClose()
 
-                    setIsView(false)
 
                 }
-
             })
             .catch(function (error) {
-                console.log(error);
 
-            });
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
+            })
     }
 
+    //DELETE REQUESTS
+
+    const deleteInstance = (id) => {
 
 
-    // get single collector
-    const getCollector = (id, edit) => {
-        console.log("getting")
-
-        axios.get(`${Config.BASE_URL + url}/${id}/`,
-        Config?.config
-
-        )
+        axios.delete(`${Config.BASE_URL}${deleteUrl}/${id}/`, Config.config)
             .then(function (response) {
-                if (response.status === 200) {
-                    console.log(response?.data);
-                    setViewCollector(response?.data)
-                    setWard(response?.data?.ward)
-                    setIsView(true);
-                    setIsEdit(edit)
+                if (response.status === 204) {
+                    Config?.toastalert("Deleted Successfully", "info")
+                    setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
+                    setCount(count - 1)
+                    handleClose();
 
                 }
-
             })
             .catch(function (error) {
-                console.log(error);
-
-            });
-
-    }
-
-
-
-
-    console.log(viewCollector, collector)
-
-
-    return (
-        <div class="content">
-            <div class="page-header">
-                <div class="page-title">
-                    <h4>{title}  Collector Details</h4>
-                </div>
-                <div class="page-btn">
-                    <button class="btn btn-primary" onClick={() => setIsAdd(true)}>
-                        <span class="glyphicon glyphicon-user"></span> Add {title}  collector
-                    </button>
-
-
-                    {/* modal content */}
-
-                    {isAdd && (
-
-                        <>
-
-                            <Modal
-
-                                open={open}
-                                onClose={handleClose}
-                                aria-labelledby="keep-mounted-modal-title"
-                                aria-describedby="keep-mounted-modal-description"
-                            >
-                                <Box
-                                    sx={style}
-                                >
-
-                                    <div class="modal-content">
-
-                                        <h3 style={{ marginLeft: 20 }}>{title}  Collector Details</h3>
-                                        <div class="modal-body">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <div class="row">
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">{title}  collector Name :
-                                                                    <span class="form-required">*</span></label>
-                                                                <input type="text" class="form-control" onChange={(e) => handleChange(e, "name")} defaultValue={collector?.name}
-                                                                    name="name" />
-                                                                {(error && !collector?.name) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Ward No : <span
-                                                                    class="form-required">*</span></label>
-                                                                <select name="ward" id=""
-                                                                    className="custom-dropdown" onChange={(e) => setWard(e.target.value)}
-
-                                                                >
-
-                                                                    <option disabled selected value >-----------</option>
-                                                                    {wards?.map((e) => (
-                                                                        <option value={e?.id}>{e?.ward_no}</option>
-                                                                    ))}
-
-
-                                                                </select>
-                                                                {(error && !ward) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Contact No : <span
-                                                                    class="form-required">*</span></label>
-                                                                <input type="number" class="form-control" onChange={(e) => handleChange(e, "phone_number")} defaultValue={collector?.phone_number || ""}
-                                                                    name="phone_number" />
-                                                                {(error && !collector?.phone_number) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Image :
-                                                                    <span class="form-required">*</span></label>
-                                                                <input type="file" class="form-control"
-                                                                    defaultValue={collector?.image || ""}
-                                                                    onChange={(e) => handleChange(e, "image")}
-
-                                                                    name="category_name" />
-                                                            </div>
-                                                        </div>
-
-
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Tractor No : <span class="form-required">*</span></label>
-                                                                <input type="text" class="form-control" name="tractor_no" onChange={(e) => handleChange(e, "tractor_no")} />
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Description :</label>
-                                                                <input type="text" class="form-control" onChange={(e) => handleChange(e, "description")}
-                                                                    name="description" />
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Period of Time : <span class="form-required">*</span></label>
-                                                                <input type="Date" class="form-control" name="start_date" defaultValue={collector?.start_date || ""}
-                                                                    onChange={(e) => handleChange(e, "start_date")}
-                                                                    required />
-
-                                                                {(error && !collector?.start_date) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-success" onClick={addContractEmployee}>Save</button>
-                                            <button type="button" class="btn btn-danger"
-                                                onClick={handleAddClose}
-
-                                            >Close</button>
-                                        </div>
-
-                                    </div>
-
-                                </Box>
-                            </Modal>
-
-                        </>
-                    )}
-
-
-
-
-
-                    {isView && (
-
-                        <>
-
-                            <Modal
-                                // keepMounted
-                                open={open}
-                                onClose={handleClose}
-                                aria-labelledby="keep-mounted-modal-title"
-                                aria-describedby="keep-mounted-modal-description"
-                            >
-                                <Box
-                                    sx={style}
-                                >
-                                    <div class="modal-content">
-                                        <h3 style={{ marginLeft: 20 }}>{title}  collector Details</h3>
-                                        <div class="modal-body">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <div class="row">
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">{title}  collector Name :
-                                                                    <span class="form-required">*</span></label>
-                                                                <input type="text" class="form-control"
-                                                                    onChange={(e) => handleEditChange(e, "name")} defaultValue={viewCollector?.employee_info?.name || ""}
-                                                                    disabled={!edit}
-                                                                    name="name" />
-
-                                                                {(error && !viewCollector?.employee_info?.name) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-
-                                                            </div>
-                                                        </div>
-
-
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Ward No : <span
-                                                                    class="form-required">*</span></label>
-                                                                <select name="ward" id=""
-                                                                    className="custom-dropdown" onChange={(e) => setWard(e.target.value)}
-                                                                    disabled={!edit}
-                                                                    value={viewCollector?.ward?.id}
-
-
-                                                                >
-                                                                    {/* <option value={viewCollector?.ward?.id}>{viewCollector?.ward?.ward}</option> */}
-
-                                                                    <option disabled selected value >-----------</option>
-                                                                    {wards?.map((e) => (
-                                                                        <option value={e?.id}>{e?.ward_no}</option>
-                                                                    ))}
-
-
-                                                                </select>
-
-                                                                {(error && !ward) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-
-
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Contact No : <span
-                                                                    class="form-required">*</span></label>
-                                                                <input type="number" class="form-control"
-                                                                    onChange={(e) => handleEditChange(e, "phone_number")} defaultValue={viewCollector?.employee_info?.phone_number || ""}
-                                                                    disabled={!edit}
-                                                                    name="phone_number" />
-
-
-                                                                {(error && !viewCollector?.employee_info?.phone_number) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-
-                                                            </div>
-                                                        </div>
-
-
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Image :
-                                                                    <span class="form-required">*</span></label>
-                                                                <input type="file" class="form-control"
-                                                                    // defaultValue={viewCollector?.employee_info?.image || ""}
-                                                                    onChange={(e) => handleEditChange(e, "image")}
-
-                                                                    name="category_name" />
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Tractor No : <span class="form-required">*</span></label>
-                                                                <input type="text" class="form-control" name="tractor_no"
-                                                                    defaultValue={viewCollector?.tractor_no || ""}
-                                                                    onChange={(e) => handleEditChange(e, "tractor_no")} />
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Description :</label>
-                                                                <input type="text" class="form-control" onChange={(e) => handleEditChange(e, "description")}
-                                                                    disabled={!edit}
-                                                                    name="description" />
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Period of Time : <span class="form-required">*</span></label>
-                                                                <input type="Date" class="form-control" name="start_date" defaultValue={viewCollector?.employee_info?.start_date || ""}
-                                                                    disabled={!edit}
-                                                                    onChange={(e) => handleEditChange(e, "start_date")}
-                                                                    required />
-
-                                                                {(error && !viewCollector?.employee_info?.start_date) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-
-
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            {edit && (
-                                                <button type="submit" class="btn btn-success" onClick={updateEmployee}>Save</button>
-                                            )}
-                                            <button type="button" class="btn btn-danger" onClick={handleClose}
-                                                data-dismiss="modal">Close</button>
-                                        </div>
-
-                                    </div>
-
-
-
-
-                                </Box>
-                            </Modal>
-
-
-                        </>
-                    )}
-
-
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr class="table-info">
-                                    <th  >S.No</th>
-                                    <th>Image</th>
-                                    <th  >Name</th>
-                                    <th  >Contact No</th>
-                                    <th  >Ward No</th>
-                                    <th>Tractor No</th>
-                                    <th  >Description</th>
-                                    <th  >Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-
-                                {collectorList?.map((e, index) =>
-
-                                (
-                                    <tr key={index}>
-                                        <td>{index + 1}</td>
-                                        <td><img src={e?.employee_info?.image ?
-                                            Config.MEDIA_URL + 
-                                            e?.employee_info?.image : "assets/img/profiles/no_avatar.jpg"} className="emp-thumb" /></td>
-                                        {/* <td><img src={e?.employee_info?.image} className="emp-thumb" /></td> */}
-
-                                        <td>{e?.employee_info?.name}</td>
-                                        <td>{e?.employee_info?.phone_number}</td>
-                                        <td>
-                                            {e?.ward?.map((i, index) => (
-                                                <span>{i}</span>
-
-                                            ))}
-                                        </td>
-                                        <td>{e?.tractor_no}</td>
-
-                                        <td>{title} Collector</td>
-                                        <td>
-                                            <button class="btn btn-success" onClick={() => getCollector(e?.id, true)}>
-                                                <span class="glyphicon glyphicon-pencil" ></span> Edit
-                                            </button>
-                                            <button class="btn btn-info" onClick={() => getCollector(e?.id, false)}>
-                                                <span class="glyphicon glyphicon-eye-open" ></span> View
-                                            </button>
-                                            <button class="btn btn-danger" onClick={() => deleteCollector(e?.id)}>
-                                                <span class="glyphicon glyphicon-trash" ></span> Delete
-                                            </button>
-                                        </td>
-                                    </tr>)
-
-                                )}
-
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    )
-}
-
-
-function OverallCollector(props) {
-
-
-    const { type } = props
-
-    const title = "Overall"
-    const url = "overall-collector"
-
-    const roles = useSelector((state) => state?.collector?.value);
-    const wards = useSelector((state) => state?.ward?.value);
-
-    const [collectorList, setCollectorList] = useState();
-
-    const [collector, setCollector] = useState();
-    const [viewCollector, setViewCollector] = useState();
-    const [image, setImage] = useState();
-
-    const [ward, setWard] = useState();
-    const [role, setRole] = useState();
-    const [isView, setIsView] = useState();
-    const [isAdd, setIsAdd] = useState();
-    const [edit, setIsEdit] = useState();
-
-    const [error, setError] = useState();
-
-    const handleClose = () => setIsView(false);
-
-    const handleAddClose = () => {
-        setCollector()
-        setIsAdd(false)
-        setError(false)
-        setImage()
-        setIsView()
-
-
-    }
-
-
-    useEffect(() => {
-        setRole(roles?.find((e) => e?.name === type))
-    })
-
-
-    // fetch all data
-    useEffect(() => {
-
-        getAllCollectors()
-    }, [])
-
-
-    const getAllCollectors = () => {
-
-        axios.get(`${Config.BASE_URL + url}`,
-            Config?.config
-        )
-            .then(function (response) {
-                if (response.status === 200) {
-                    console.log(response);
-                    setCollectorList(response?.data)
-
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
                 }
 
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-
     }
 
 
 
 
-    // handle add values
-    const handleChange = (e, name) => {
+    // handle new instance
 
+    const handleChange = (e) => {
+
+        const { name, value } = e.target;
         if (name === "image") {
             const check = Config?.fileType(e.target.files[0].name)
 
@@ -2386,665 +578,347 @@ function OverallCollector(props) {
             }
             console.log(e.target.files[0].name)
             let value = e.target.files[0]
+
             setImage(value)
+
+            // setInstanceData(prevState => ({
+            //     ...prevState,
+            //     employee: {
+            //         ...prevState.employee,
+            //         [name]: value // Replace existing array with a new array containing the updated value
+            //     }
+            // }));
         }
         else {
 
-            const { value } = e.target
-            setCollector((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
+            setInstanceData(prevState => ({
+                ...prevState,
+                employee: {
+                    ...prevState.employee,
+                    [name]: value // Replace existing array with a new array containing the updated value
                 }
-
-            })
+            }));
 
         }
 
-
-
     }
 
-
-
-    // handle edit values
-    // const handleEditChange = (e, name) => {
-    //     console.log("trigger")
-    //     const { value } = e.target
-
-    //     if (name === "tractor_no") {
-    //         setViewCollector((prevstate) => {
-    //             return { ...prevstate, [name]: value }
-    //         })
-
-    //         return
-    //     }
-
-    //     setViewCollector((prevstate) => ({
-    //         ...prevstate,
-    //         employee_info: {
-    //             ...prevstate.employee_info,
-    //             [name]: value
-    //         }
-
-    //     }))
-
-    // }
-
-
-    const handleEditChange = (e, name) => {
-        console.log("trigger")
-
-
-        if (name === "image") {
-            let value = e.target.files[0]
-
-            const check = Config?.fileType(value.name)
-
-            if (!check) {
-                console.log("not supported")
-                return
+    const handleMainChange = (e) => {
+        const { name, value } = e.target;
+        setInstanceData((prevstate) => {
+            return {
+                ...prevstate, [name]: value
             }
 
-            setImage(value)
-        }
-        else {
-            const { value } = e.target
-            setViewCollector((prevstate) => ({
-                ...prevstate,
-                employee_info: {
-                    ...prevstate.employee_info,
-                    [name]: value
-                }
+        })
 
-            }))
-        }
 
     }
 
-    // check validation
-    const checkValidation = () => {
-
-        if (!collector?.name || !collector?.phone_number || !collector?.start_date) {
-            console.log("please fill required fields")
-            setError(true)
-            return false
-
-        }
-        else {
-            setError(false)
-            // addContractEmployee()
-            return true
-        }
-
-    }
-
-
-    // handle add contract employees
-
-    const addContractEmployee = () => {
-
-        const check = checkValidation()
-
-        if (!check) {
-            return
-        }
-        const data = new FormData()
-
-        data.append("name", collector?.name)
-        // data.append("ward", ward)
-        data.append("phone_number", collector?.phone_number)
-        data.append("start_date", collector?.start_date)
-        data.append("role", role?.id)
-        data.append("is_collector", true) 
-
-        if (image) {
-            data.append("image", image)
-        }
-
-
-        axios.post(`${Config.BASE_URL + emp_url}/`,
-            data,Config?.config
-        )
-            .then(function (response) {
-                if (response.status === 201) {
-                    console.log(response);
-                    createCollector(response?.data?.id)
-                    setCollector()
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-
-    }
-
-
-    // update employee details
-    const updateEmployee = (id, edit) => {
-
-        if (!viewCollector?.employee_info?.name || !viewCollector?.employee_info?.phone_number || !viewCollector?.employee_info?.start_date) {
-            console.log("please fill required fields")
-            setError(true)
-            return
-
-
-        }
-
-        setError(false)
-
-        console.log(viewCollector, "enter")
-        const data = new FormData()
-
-        data.append("name", viewCollector?.employee_info?.name)
-        // data.append("ward", ward)
-        data.append("phone_number", viewCollector?.employee_info?.phone_number)
-        data.append("start_date", viewCollector?.employee_info?.start_date)
-        data.append("role", role?.id)
-
-        if (image) {
-            data.append("image", image)
-        }
-
-        axios.patch(`${Config.BASE_URL + emp_url}/${viewCollector?.employee_info?.id}/`,
-        Config?.config, data
-        )
-            .then(function (response) {
-                if (response.status === 200) {
-                    console.log(response);
-                    updateCollector()
-
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-    }
-
-
-
-
-
-
-    // add collector
-    const createCollector = (id) => {
-
-        const data = new FormData()
-
-        data.append("employee", id)
-        // data.append("ward", ward)
-        // data.append("tractor_no", collector?.tractor_no)
-
-        axios.post(`${Config.BASE_URL + url}/`,
-            data,Config?.config
-        )
-            .then(function (response) {
-                if (response.status === 201) {
-                    console.log(response);
-                    setCollectorList((prevstate) => {
-                        return [...prevstate, response?.data]
-                    })
-                    setIsAdd(false)
-                    // $('#myModal').hide();
-                    // $('.modal-backdrop').hide();
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-
-    }
-
-    // delete collectorList
-    const deleteCollector = (id) => {
-        console.log("deleting")
-
-        axios.delete(`${Config.BASE_URL + url}/${id}/`,
-        Config?.config
-
-        )
-            .then(function (response) {
-                if (response.status === 204) {
-                    console.log(response);
-                    setCollectorList(collectorList?.filter((e) => e.id !== id))
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-
-    }
-
-
-
-
-    // update collector
-    const updateCollector = (id, edit) => {
-        console.log(viewCollector, "enter")
-        const data = new FormData()
-
-        // data.append("ward", ward)
-        data.append("employee", viewCollector?.employee)
-        // data.append("tractor_no", viewCollector?.tractor_no)
-        axios.patch(`${Config.BASE_URL + url}/${viewCollector?.id}/`,
-            data,
-            Config?.config
-        )
-            .then(function (response) {
-                if (response.status === 200) {
-                    console.log(response);
-                    setCollectorList(prevArray => {
-                        const index = prevArray.findIndex(obj => obj?.id === viewCollector?.id);
-                        if (index !== -1) {
-                            return [
-                                ...prevArray.slice(0, index),
-                                { ...prevArray[index], ...response.data },
-                                ...prevArray.slice(index + 1),
-                            ];
-                        }
-                        return prevArray;
-                    });
-
-
-                    setIsView(false)
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-    }
-
-
-
-    // get single collector
-    const getCollector = (id, edit) => {
-        console.log("getting")
-
-        axios.get(`${Config.BASE_URL + url}/${id}/`,
-        Config?.config
-
-        )
-            .then(function (response) {
-                if (response.status === 200) {
-                    console.log(response?.data);
-                    setViewCollector(response?.data)
-                    setIsView(true);
-                    setIsEdit(edit)
-
-                }
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-            });
-
-    }
-
-
-
-
-    console.log(viewCollector, collector)
 
 
     return (
-        <div class="content">
-            <div class="page-header">
-                <div class="page-title">
-                    <h4>{title}  Collector Details</h4>
-                </div>
-                <div class="page-btn">
-                    <button class="btn btn-primary" onClick={() => setIsAdd(true)}>
-                        <span class="glyphicon glyphicon-user"></span> Add {title}  collector
-                    </button>
-
-
-                    {/* modal content */}
-
-                    {isAdd && (
-
-                        <>
-
-                            <Modal
-
-                                open={open}
-                                onClose={handleClose}
-                                aria-labelledby="keep-mounted-modal-title"
-                                aria-describedby="keep-mounted-modal-description"
-                            >
-                                <Box
-                                    sx={style}
-                                >
-
-                                    <div class="modal-content">
-
-                                        <h3 style={{ marginLeft: 20 }}>{title}  Collector Details</h3>
-                                        <div class="modal-body">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <div class="row">
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">{title}  collector Name :
-                                                                    <span class="form-required">*</span></label>
-                                                                <input type="text" class="form-control" onChange={(e) => handleChange(e, "name")} defaultValue={collector?.name}
-                                                                    name="name" />
-                                                                {(error && !collector?.name) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-
-                                                            </div>
-                                                        </div>
-                                                        {/* <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Ward No : <span
-                                                                    class="form-required">*</span></label>
-                                                                <select name="ward" id=""
-                                                                    className="custom-dropdown" onChange={(e) => setWard(e.target.value)}
-
-                                                                >
-                                                                    <option >-------------</option>
-                                                                    {wards?.map((e) => (
-                                                                        <option value={e?.id}>{e?.ward_no}</option>
-                                                                    ))}
-
-
-                                                                </select>
-                                                                {(error && !ward) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-
-                                                            </div>
-                                                        </div> */}
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Contact No : <span
-                                                                    class="form-required">*</span></label>
-                                                                <input type="number" class="form-control" onChange={(e) => handleChange(e, "phone_number")} defaultValue={collector?.phone_number || ""}
-                                                                    name="phone_number" />
-                                                                {(error && !collector?.phone_number) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                        {/* <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Tractor No : <span class="form-required">*</span></label>
-                                                                <input type="text" class="form-control" name="tractor_no" onChange={(e) => handleChange(e, "tractor_no")} />
-                                                            </div>
-                                                        </div> */}
-                                                        {/* <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Description :</label>
-                                                                <input type="text" class="form-control" onChange={(e) => handleChange(e, "description")}
-                                                                    name="description" />
-                                                            </div>
-                                                        </div> */}
-
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Image :
-                                                                    <span class="form-required">*</span></label>
-                                                                <input type="file" class="form-control"
-                                                                    defaultValue={collector?.image || ""}
-                                                                    onChange={(e) => handleChange(e, "image")}
-
-                                                                    name="category_name" />
-                                                            </div>
-                                                        </div>
 
 
 
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Period of Time : <span class="form-required">*</span></label>
-                                                                <input type="Date" class="form-control" name="start_date" defaultValue={collector?.start_date || ""}
-                                                                    onChange={(e) => handleChange(e, "start_date")}
-                                                                    required />
+        <>
 
-                                                                {(error && !collector?.start_date) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-success" onClick={addContractEmployee}>Save</button>
-                                            <button type="button" class="btn btn-danger"
-                                                onClick={handleAddClose}
+            <ToastContainer />
 
-                                            >Close</button>
-                                        </div>
+            {/* {
+                        (isOpen || isAdd) && (
 
-                                    </div>
+                            <WardDialogs
+                                setIsOpen={setIsOpen}
+                                isAdd={isAdd}
+                                error={error}
 
-                                </Box>
-                            </Modal>
+                                setListData={tableData}
+                                instanceData={instanceData}
+                                setInstanceData={setInstanceData}
+                                handleClose={handleClose}
 
-                        </>
+                                // functions
+                                addInstance={addNewInstance}
+                                updateInstance={updateInstance}
+                                deleteInstance={deleteInstance}
+                                handleChange={handleChange}
+                                handleMainChange={handleMainChange}
+                                wardlist={wardlist}
+                                panchayatList={panchayatList}
+                                districtList={districtList}
+
+                                // requestTypeList={complaintTypeList}
+                                modalHeader={modalHeader}
+
+                            // setImage={setImage}
+                            // image={image}
+
+
+                            />
+                        )
+                    } */}
+
+
+            {
+                (isOpen || isAdd) && (
+
+                    <FormModal
+                        modalHeader={modalHeader}
+                        lazyLoading={lazyLoading}
+                        setIsOpen={setIsOpen}
+                        isAdd={isAdd}
+                        isedit={isedit}
+                        setisEdit={setisEdit}
+                        error={error}
+                        errorMsg={errorMsg}
+
+                        setListData={tableData}
+                        instanceData={instanceData}
+                        setInstanceData={setInstanceData}
+
+                        handleClose={handleClose}
+
+                        // functions
+                        addInstance={addNewInstance}
+                        updateInstance={updateInstance}
+                        deleteInstance={deleteInstance}
+                        handleChange={handleChange}
+                        handleMainChange={handleMainChange}
+
+
+
+                        child={<Child
+                            lazyLoading={lazyLoading}
+                            setIsOpen={setIsOpen}
+                            isAdd={isAdd}
+                            isedit={isedit}
+
+                            error={error}
+                            errorMsg={errorMsg}
+                            errString={errString}
+
+                            setListData={tableData}
+                            instanceData={instanceData}
+                            setInstanceData={setInstanceData}
+
+                            handleClose={handleClose}
+                            handleChange={handleChange}
+                            handleMainChange={handleMainChange}
+
+                            wardlist={wardlist}
+                            panchayatList={panchayatList}
+                            districtList={districtList}
+                            image={image}
+                            setImage={setImage}
+
+                            path={path}
+
+                        />}
+
+                    />
+
+                )
+            }
+
+
+            <Grid item xs={12} sm={6}>
+                <Typography variant="h6">{modalHeader}s Details</Typography>
+            </Grid>
+            <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+                <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
+                    Create
+                </Button>
+            </Grid>
+
+
+            <Grid item xs={12}>
+                <CustomTable
+                    headers={headersToShow}
+                    data={tableData}
+                    fieldsToShow={fieldsToShow}
+                    fields={fields}
+                    getInstanceData={getInstanceData}
+                    loader={loader}
+                    setLoader={setLoader}
+                />
+            </Grid>
+
+
+            <Grid item xs={12}>
+                <PaginationController
+                    page={page}
+                    setPage={setPage}
+                    handlePageChange={handlePageChange}
+                    count={count}
+                    data={tableData}
+
+                />
+
+            </Grid>
+        </>
+    )
+
+
+}
+
+
+
+const Child = (props) => {
+
+    const { lazyLoading, setIsOpen, isAdd, isedit,
+        errorMsg, errString, error,
+        instanceData, setList, setInstanceData,
+        handleChange, handleClose, handleMainChange,
+        wardlist, districtList, panchayatList, streetList, image, setImage,
+        path
+
+    } = props
+
+
+    return (
+
+        <>
+
+            <Grid container spacing={2}>
+                {/* First Name */}
+                <Grid item xs={12} md={6} sm={6}>
+                    <Grid >
+
+                    </Grid>
+                    <TextInput
+
+                        label="Name"
+                        placeholder="Name"
+                        name={"name"}
+                        value={instanceData?.employee?.name}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"name"}
+
+                    />
+
+
+                </Grid>
+
+                {path != "overall-weighing" && (
+                    <Grid item xs={12} md={6} sm={6}>
+                        <MultipleSelect
+                            data={wardlist}
+                            onchange={handleMainChange}
+                            value={instanceData?.ward}
+                            showname={"name"}
+                            name={"ward"}
+                            disabled={!isedit && !isAdd}
+                            error={error}
+                            label={"Select Ward "}
+
+                        />
+                        {(error && !instanceData?.ward?.length) && (
+                            <span className="req-text">This field is required</span>
+                        )}
+                    </Grid>
+
+                )}
+
+
+
+
+                <Grid item xs={12} md={6} sm={6}>
+                    <TextInput
+                        label="Phone Number"
+                        placeholder="Name"
+                        name="phone_number"
+                        value={instanceData?.employee?.phone_number}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"phone"}
+                        type={"Number"}
+
+                    />
+                    {errString && (
+                        <span className="req-text">{errString}</span>
                     )}
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <FileUploadComponent
+                        filelabel="Image"
+                        name="image"
+                        value={instanceData?.employee?.image}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        image={image}
+                        setImage={setImage}
+                        errorMsg={errorMsg}
+                        errorField={"image"}
+                    />
+
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <BasicDatePicker
+                        label="Join Date"
+                        placeholder="Join Date"
+                        name="start_date"
+                        value={instanceData?.employee?.start_date}
+                        required={true}
+                        handleChange={handleChange}
+                        // handleDateChange={handleDateChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"start_date"}
+
+                    />
+                </Grid>
+
+
+
+                {path === "street" && (
+
+                    <Grid item xs={12} md={6} sm={6}>
+
+                        <TextInput
+                            label="Tractor No"
+                            placeholder="Tractor No"
+                            name="tractor_no"
+                            value={instanceData?.tractor_no}
+                            required={true}
+                            handleChange={handleMainChange}   //for main element change
+                            disabled={!isedit && !isAdd}
+                            error={error}
+                            // errorMsg={errorMsg}
+                            errorField={"tractor_no"}
+
+
+                        />
+                        {errString && (
+                            <span className="req-text">{errString}</span>
+                        )}
+                    </Grid>
+
+                )}
+
+            </Grid>
 
 
 
 
-
-                    {isView && (
-
-                        <>
-
-                            <Modal
-                                // keepMounted
-                                open={open}
-                                onClose={handleClose}
-                                aria-labelledby="keep-mounted-modal-title"
-                                aria-describedby="keep-mounted-modal-description"
-                            >
-                                <Box
-                                    sx={style}
-                                >
-                                    <div class="modal-content">
-                                        <h3 style={{ marginLeft: 20 }}>{title}  collector Details</h3>
-                                        <div class="modal-body">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <div class="row">
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">{title}  collector Name :
-                                                                    <span class="form-required">*</span></label>
-                                                                <input type="text" class="form-control"
-                                                                    onChange={(e) => handleEditChange(e, "name")} defaultValue={viewCollector?.employee_info?.name || ""}
-                                                                    disabled={!edit}
-                                                                    name="name" />
-
-                                                                {(error && !viewCollector?.employee_info?.name) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-
-                                                            </div>
-                                                        </div>
+        </>
 
 
-
-                                                        {/* <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Ward No : <span
-                                                                    class="form-required">*</span></label>
-                                                                <select name="ward" id=""
-                                                                    className="custom-dropdown" onChange={(e) => setWard(e.target.value)}
-                                                                    disabled={!edit}
-
-
-                                                                >
-                                                                    <option value={viewCollector?.ward?.id}>{viewCollector?.ward?.ward}</option>
-                                                                    <option disabled>-------------</option>
-                                                                    {wards?.map((e) => (
-                                                                        <option value={e?.id}>{e?.ward_no}</option>
-                                                                    ))}
-
-
-                                                                </select>
-
-                                                            </div>
-                                                        </div> */}
-
-
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Contact No : <span
-                                                                    class="form-required">*</span></label>
-                                                                <input type="number" class="form-control"
-                                                                    onChange={(e) => handleEditChange(e, "phone_number")} defaultValue={viewCollector?.employee_info?.phone_number || ""}
-                                                                    disabled={!edit}
-                                                                    name="phone_number" />
-
-                                                                {(error && !viewCollector?.employee_info?.phone_number) && (
-                                                                    <span className="req-text">This field is required</span>
-                                                                )}
-
-
-                                                            </div>
-                                                        </div>
-
-
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Image :
-                                                                    <span class="form-required">*</span></label>
-                                                                <input type="file" class="form-control"
-
-                                                                    onChange={(e) => handleEditChange(e, "image")}
-
-                                                                    name="category_name" />
-                                                            </div>
-                                                        </div>
-
-                                                        {/* <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Tractor No : <span class="form-required">*</span></label>
-                                                                <input type="text" class="form-control" name="tractor_no"
-                                                                    defaultValue={viewCollector?.tractor_no || ""}
-                                                                    onChange={(e) => handleEditChange(e, "tractor_no")} />
-                                                            </div>
-                                                        </div> */}
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Description :</label>
-                                                                <input type="text" class="form-control" onChange={(e) => handleEditChange(e, "description")}
-                                                                    disabled={!edit}
-                                                                    name="description" />
-                                                            </div>
-                                                        </div>
-                                                        {/* <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Period of Time : <span class="form-required">*</span></label>
-                                                                <input type="Date" class="form-control" name="start_date" defaultValue={viewCollector?.employee_info?.start_date || ""}
-                                                                    disabled={!edit}
-                                                                    onChange={(e) => handleEditChange(e, "start_date")}
-                                                                    required />
-                                                            </div>
-                                                        </div> */}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            {edit && (
-                                                <button type="submit" class="btn btn-success" onClick={updateEmployee}>Save</button>
-                                            )}
-                                            <button type="button" class="btn btn-danger" onClick={handleClose}
-                                                data-dismiss="modal">Close</button>
-                                        </div>
-
-                                    </div>
-
-
-
-
-                                </Box>
-                            </Modal>
-
-
-                        </>
-                    )}
-
-
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr class="table-info">
-                                    <th  >S.No</th>
-                                    <th>Image</th>
-                                    {/* <th  >Ward No</th> */}
-                                    <th  >Name</th>
-                                    {/* <th>Tractor No</th> */}
-                                    <th  >Contact No</th>
-                                    {/* <th  >Description</th> */}
-                                    <th  >Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-
-                                {collectorList?.map((e, index) =>
-
-                                (
-                                    <tr key={index}>
-                                        <td>{index + 1}</td>
-                                        <td><img src={e?.employee_info?.image ?
-                                             Config.MEDIA_URL +
-                                            e?.employee_info?.image : "assets/img/profiles/no_avatar.jpg"} className="emp-thumb" /></td>
-                                        {/* <td><img src={e?.employee_info?.image} className="emp-thumb" /></td> */}
-                                        {/* <td>    
-                                            {e?.ward?.map((e, index) => (
-                                                <span>{e?.ward}</span>
-
-                                            ))}
-                                        </td> */}
-                                        <td>{e?.employee_info?.name}</td>
-                                        {/* <td>{e?.tractor_no}</td> */}
-                                        <td>{e?.employee_info?.phone_number}</td>
-                                        {/* <td>{title} Collector</td> */}
-                                        <td>
-                                            <button class="btn btn-success" onClick={() => getCollector(e?.id, true)}>
-                                                <span class="glyphicon glyphicon-pencil" ></span> Edit
-                                            </button>
-                                            <button class="btn btn-info" onClick={() => getCollector(e?.id, false)}>
-                                                <span class="glyphicon glyphicon-eye-open" ></span> View
-                                            </button>
-                                            <button class="btn btn-danger" onClick={() => deleteCollector(e?.id)}>
-                                                <span class="glyphicon glyphicon-trash" ></span> Delete
-                                            </button>
-                                        </td>
-                                    </tr>)
-
-                                )}
-
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
 
     )
 }
@@ -3052,3 +926,277 @@ function OverallCollector(props) {
 
 
 
+
+
+
+function WardDialogs(props) {
+
+    const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader,
+        deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, districtList, panchayatList,
+        handleMainChange
+        // setError, setImage, image 
+    } = props
+
+
+    const [isedit, setIsedit] = useState(false);
+    const [isdelete, setisDelete] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+
+    const handleClickOpen = () => {
+        setisDelete(true);
+    };
+
+    const handleClickClose = () => {
+        setisDelete(false);
+    };
+
+
+    return (
+        <React.Fragment>
+            {/* <Button variant="outlined" >
+        Open dialog
+      </Button> */}
+
+            {isdelete && (
+                <AlertDialog
+                    handleClose={handleClickClose}
+                    onClick={() => deleteInstance(instanceData?.id)}
+                    loading={loading}
+                    setLoading={setLoading}
+
+                />
+            )}
+
+
+
+            <BootstrapDialog
+                onClose={handleClose}
+                aria-labelledby="customized-dialog-title"
+                open={open}
+
+            >
+                <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title" >
+                    <h6>{modalHeader + "s"} Details
+
+                        {!isAdd && (
+                            // <EditIcon 
+                            // onClick={() => setIsedit(!isedit)}
+                            // />
+                            <button className="btn btn-sm" onClick={() => setIsedit(!isedit)}>  <EditIcon
+                                style={{ color: "blue" }}
+                            // onClick={() => setIsedit(!isedit)}
+                            />  </button>
+                        )}
+
+                    </h6>
+                </DialogTitle>
+
+                {/* {!isAdd && (<div>
+
+                    <button className="button btn-edit" onClick={() => setIsedit(!isedit)}>  Edit  </button>
+
+                </div>
+                )} */}
+
+                <IconButton
+                    aria-label="close"
+                    onClick={handleClose}
+                    sx={{
+                        position: 'absolute',
+                        right: 8,
+                        top: 8,
+                        color: (theme) => theme.palette.grey[500],
+                    }}
+                >
+                    <CloseIcon />
+                </IconButton>
+
+
+
+
+                <DialogContent dividers
+
+                    sx={Config.style}
+                >
+
+
+                    {/* <Typography gutterBottom>
+
+                    </Typography> */}
+
+                    {/* <div class="modal-body">
+                        <div class="card"> */}
+
+
+                    {/* ----------------modal data */}
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-6 col-sm-12 col-12">
+                                <div class="form-group">
+                                    <label class="form-label">House collector Name :
+                                        <span class="form-required">*</span></label>
+                                    <input type="text" class="form-control" name="name"
+                                        onChange={handleChange} defaultValue={instanceData?.employee?.name || ""}
+                                        disabled={!isedit && !isAdd}
+
+                                    />
+
+                                    {(error && !instanceData?.employee?.name) && (
+                                        <span className="req-text">This field is required</span>
+                                    )}
+
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-sm-12 col-12">
+                                <div class="form-group">
+                                    <label class="form-label">Ward No : <span
+                                        class="form-required">*</span></label>
+                                    {/* <SelectDropdown
+                                        list={wardlist}
+                                        onchange={handleChange}
+                                        selected={instanceData?.collector?.ward}
+                                        showname={"name"}
+                                        name={"ward"}
+                                        disabled={!isedit && !isAdd}
+                                        error={error}
+                                    /> */}
+
+                                    <MultipleSelect
+                                        data={wardlist}
+                                        onchange={handleMainChange}
+                                        value={instanceData?.ward}
+                                        showname={"name"}
+                                        name={"ward"}
+                                        disabled={!isedit && !isAdd}
+                                        error={error}
+
+                                    />
+
+
+                                    {(error && !instanceData?.ward) && (
+                                        <span className="req-text">This field is required</span>
+                                    )}
+
+                                </div>
+                            </div>
+
+
+                            <div class="col-lg-6 col-sm-12 col-12">
+                                <div class="form-group">
+                                    <label class="form-label">Contact No : <span
+                                        class="form-required">*</span></label>
+                                    <input type="text" class="form-control" name="phone_number"
+                                        onChange={handleChange} defaultValue={instanceData?.employee?.phone_number || ""}
+                                        disabled={!isedit && !isAdd}
+
+                                    />
+
+                                    {(error && !instanceData?.employee?.phone_number) && (
+                                        <span className="req-text">This field is required</span>
+                                    )}
+
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-sm-12 col-12">
+                                <div class="form-group">
+                                    <label class="form-label">Image :
+                                        <span class="form-required">*</span></label>
+                                    <input type="file" class="form-control" name="image"
+                                        onChange={handleChange}
+                                        disabled={!isedit && !isAdd}
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-sm-12 col-12">
+                                <div class="form-group">
+                                    <label class="form-label">Description :</label>
+                                    <input type="text" class="form-control"
+                                        onChange={handleMainChange} defaultValue={instanceData?.description || ""}
+                                        disabled={!isedit && !isAdd}
+
+                                        name="description" />
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-sm-12 col-12">
+                                <div class="form-group">
+                                    <label class="form-label">Period of Time : <span class="form-required">*</span></label>
+                                    <input type="Date" class="form-control" name="start_date"
+                                        onChange={handleChange} defaultValue={instanceData?.employee?.start_date || ""}
+                                        disabled={!isedit && !isAdd}
+
+                                        required />
+
+                                    {(error && !instanceData?.employee?.start_date) && (
+                                        <span className="req-text">This field is required</span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    {/* </div>
+                    </div> */}
+                    <Typography gutterBottom>
+
+                    </Typography>
+
+                </DialogContent>
+
+
+
+                <DialogActions  >
+                    {/* <Button autoFocus onClick={handleClose}>
+            Save changes
+          </Button> */}
+
+
+                    <div class="col-md-12">
+                        {
+                            !isAdd && (
+
+                                <div className="col">
+                                    <DeleteButton
+                                        loading={loading}
+                                        setLoading={setLoading}
+                                        onClick={handleClickOpen}
+                                    />
+                                </div>
+
+                            )
+                        }
+
+
+                        <div className="text-end">
+
+                            {isedit && (
+                                <UpdateButton
+                                    loading={loading}
+                                    setLoading={setLoading}
+                                    onClick={() => updateInstance(instanceData?.id)}
+                                />
+                            )}
+                            {isAdd && (
+                                <SaveButton
+                                    loading={loading}
+                                    setLoading={setLoading}
+                                    onClick={addInstance}
+                                />
+                            )}
+
+                            <CloseButton
+                                onClick={handleClose}
+                            />
+
+                        </div>
+                    </div>
+                </DialogActions>
+            </BootstrapDialog>
+        </React.Fragment>
+    );
+}

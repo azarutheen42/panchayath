@@ -7,8 +7,12 @@ import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
 import CustomTable from "./Table";
 import SelectDropdown from "./Dropdown";
-
-
+import { Typography, Container, Grid, Paper, IconButton } from '@mui/material';
+import { AddButton } from "./Button";
+import { padding } from "@mui/system";
+import SelectDropDown from "../utils/SelectDropDown"
+import MUIDataTable from "mui-datatables";
+import  PaginationController from "../utils/Pagination"
 
 
 
@@ -173,7 +177,15 @@ function Street() {
     const wardlist = useSelector((state) => state?.ward?.value);
 
     const [loader, setLoader] = useState(false);
-    const [trigger,setTrigger] =useState();
+    const [trigger, setTrigger] = useState();
+    const [page,setPage] =useState(1);
+
+
+    const handlePageChange =(event, value)=>{
+        setPage(value)
+    }
+
+    console.log(page)
 
     const actionShow = true;
 
@@ -183,7 +195,7 @@ function Street() {
 
         // gettempemployee()
 
-    }, [ward, startDate, endDate,trigger])
+    }, [ward, startDate, endDate, trigger,page])
 
     const getWardLabel = (id) => {
         const label = wardlist?.find((e) => e?.id === id)?.name
@@ -195,6 +207,7 @@ function Street() {
 
     const headersToShow = ["Date", "Ward No", "	Bio (kg)", "Non-Bio (Kg)", "Hazard (kg)"]
     const tableData = listInstanceData
+    const count=Math.ceil(listInstanceData?.count / tableData?.results?.length)
     const fieldsToShow = []
     const fields = {
         'date': (value) => value,
@@ -207,13 +220,13 @@ function Street() {
 
 
     const getWardReports = () => {
-        axios.get(`${Config.BASE_URL}collect-ward-garbage?ward=${ward}&start_date=${startDate}&end_date=${endDate}`,
+        axios.get(`${Config.BASE_URL}collect-ward-garbage?page=${page}&ward=${ward}&start_date=${startDate}&end_date=${endDate}`,
             Config?.config
         )
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response);
-                    setlistInstanceData(response?.data)
+                    setlistInstanceData(response?.data?.results ? response?.data?.results : response?.data)
 
                 }
 
@@ -227,166 +240,140 @@ function Street() {
     }
 
 
+    const options = {
+        filterType: 'checkbox',
+      };
+
+
+      const columns = [
+        {
+         name: "date",
+         label: "Date",
+         options: {
+          filter: true,
+          sort: true,
+         }
+        },
+        {
+         name: "ward",
+         label: "Ward No",
+         options: {
+          filter: true,
+          sort: false,
+         }
+        },
+        {
+         name: "bio",
+         label: "Bio (kg)",
+         options: {
+          filter: true,
+          sort: false,
+         }
+        },
+        {
+         name: "non_bio",
+         label: "Non-Bio (Kg)",
+         options: {
+          filter: true,
+          sort: false,
+         }
+        },
+        {
+            name: "hazard",
+            label: "Hazard (Kg)",
+            options: {
+             filter: true,
+             sort: false,
+            }
+           },
+       ];
+
 
     return (
-        <div class="content">
-            <div class="page-header">
-                <div class="page-title">
-                    <h4>Ward Report Details</h4>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body">
-                    <div class="row">
-                        {/* <div class="col-md-3 col-lg-3 col-xs-3 col-sm-6">
-                        <div class="form-group">
-                            <label 
-                            style={{fontWeight:"bold"}}
-                            
-                            >District :</label>
-                            <select name="" id=""   className="report-dropdown"
-                            
-                            >
-                                <option value="">Tirunelveli</option>
-                                <option value="">Tenkasi</option>
-                                <option value="">Thoothukudi</option>
-                            </select>
-                        </div>
-                    </div> */}
-                        {/* <div class="col-md-3 col-lg-3 col-xs-3 col-sm-6">
-                        <div class="form-group">
-                            <label style={{fontWeight:"bold"}}>City :</label>
-                            <select name="" id=""   className="report-dropdown"
-                            
-                            >
-                                <option value="">Ayikudy</option>
-                                <option value="">Melagaram</option>
-                                <option value="">Sengotai</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-lg-3 col-xs-3 col-sm-6">
-                        <div class="form-group">
-                            <label style={{fontWeight:"bold"}}>Panchayat :</label>
-                            <select name="" id=""  className="report-dropdown"
-                            
-                            >
-                                <option value="">Ayikudy</option>
-                                <option value="">Coutrallam</option>
-                                <option value="">Melagaram</option>
-                            </select>
-                        </div>
-                    </div> */}
-                        {/* <div class="col-md-3 col-lg-3 col-xs-3 col-sm-6">
-                            <div class="form-group">
-                                <label style={{ fontWeight: "bold" }}>Ward No :</label>
-                                <select name="WARD" id=""
-                                    className="custom-dropdown" onChange={(e) => setWard(e?.target?.value)}
-                                // defaultValue={ward || ""}
-                                >
 
-                                    <option disabled selected value >-----------</option>
-                                    {wardlist?.map((e) => (
-                                        <option value={e?.id}>{e?.ward_no}</option>
-                                    ))}
-
-
-                                </select>
-                            </div>
-                        </div> */}
-
-
-                        <div className="col-lg-6 col-sm-6 col-12">
-                            <div className="form-group">
-                                <label style={{ color: 'grey' }}>Ward <span className="form-required">*</span></label>
-
-                                <SelectDropdown
-                                    list={wardlist}
-                                    onchange={(e) => setWard(e?.target?.value)}
-                                    // selected={instanceData?.ward}
-                                    showname={"name"}
-                                    report={true}
-                                // name={"ward"}
-                                // disabled={!isedit && !isAdd}
-                                // error={error}
-                                />
-                                {/* {(!instanceData?.type && error) && (
-                                        <span className="req-text">This field is required</span>
-                                    )} */}
+        <>
 
 
 
-                            </div>
-                        </div>
+
+            <Grid item xs={12} >
+                <Typography variant="h6">Ward Report Details</Typography>
+            </Grid>
 
 
-                        {/* <div class="row" style={{ marginTop: 5 }}> */}
-                        <div class="col-md-2 col-lg-2 col-xs-3">
-                            <div class="form-group">
-                                <label for="fromDate" style={{ fontWeight: "bold" }}>From Date :</label>
-                                <input type="date" class="form-control" id="fromDate" onChange={(e) => setStartDate(e.target.value)} />
-                            </div>
-                        </div>
-                        <div class="col-md-2 col-lg-2 col-xs-3">
-                            <div class="form-group">
-                                <label for="toDate" style={{ fontWeight: "bold" }}>To Date :</label>
-                                <input type="date" class="form-control" id="toDate" onChange={(e) => setEndDate(e.target.value)} />
-                            </div>
-                        </div>
-                        <div class="col-md-2 col-lg-2 col-xs-3">
-                            <div class="form-group">
-                                <label for="search" style={{ fontWeight: "bold" }}>Search :</label>
-                                <button class="btn btn-success" onChange={(e) => setTrigger()}>Get Report</button>
-                            </div>
-                        </div>
-
-                        {/* </div> */}
-                        {/* <div class="row" style={{marginTop:5}}>
-                    <div class="col-md-2 col-lg-2 col-xs-3">
-                        <div class="form-group">
-                            <label for="fromDate" style={{fontWeight:"bold"}}>From Date :</label>
-                            <input type="date" class="form-control" id="fromDate" />
-                        </div>
-                    </div>
-                    <div class="col-md-2 col-lg-2 col-xs-3">
-                        <div class="form-group">
-                            <label for="toDate" style={{fontWeight:"bold"}}>To Date :</label>
-                            <input type="date" class="form-control" id="toDate" />
-                        </div>
-                    </div>
-                    <div class="col-md-2 col-lg-2 col-xs-3">
-                        <div class="form-group">
-                            <label for="search" style={{fontWeight:"bold"}}>Search :</label>
-                            <button class="btn btn-success" onclick="getReport()">Get Report</button>
-                        </div>
-                    </div> */}
-                        {/* <div class="col-md-4 col-lg-4 col-xs-6" style={{marginTop:5}}>
-                        <br /><button class="btn btn-secondary" onclick="exportToExcel()">Export to Excel</button>
-                        <button class="btn btn-secondary" onclick="exportToCSV()">Export to CSV</button>
-                    </div> */}
-                        {/* <div class="col-md-2 col-lg-2 col-xs-6" style={{marginTop:5}}>
-                        <br /><input type="text" class="form-control" id="searchInput" placeholder="Type to search" />
-                    </div> */}
-                    </div>
 
 
-                    <CustomTable
-                        headers={headersToShow}
-                        data={tableData}
-                        fieldsToShow={fieldsToShow}
-                        fields={fields}
-                        // getInstanceData={getInstanceData}
-                        loader={loader}
-                        setLoader={setLoader}
-                        actionShow={actionShow}
+
+
+
+            <Grid item xs={12} sm={4}>
+                <div class="form-group">
+                    <label for="fromDate" style={{ fontWeight: "bold" }}>Select Ward</label>
+                    <SelectDropdown
+                        list={wardlist}
+                        onchange={(e) => setWard(e?.target?.value)}
+                        // selected={instanceData?.ward}
+                        showname={"name"}
+                        report={true}
+                    // name={"ward"}
+                    // disabled={!isedit && !isAdd}
+                    // error={error}
                     />
-
-
                 </div>
-            </div>
-        </div>
+            </Grid>
+
+            <Grid item xs={12} sm={8} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+                <div class="form-group">
+                    <label for="fromDate" style={{ fontWeight: "bold" }}>From Date :</label>
+                    <input type="date" class="form-control" id="fromDate" onChange={(e) => setStartDate(e.target.value)} />
+                </div>
+
+                <div class="form-group">
+                    <label for="toDate" style={{ fontWeight: "bold" }}>To Date :</label>
+                    <input type="date" class="form-control" id="toDate" onChange={(e) => setEndDate(e.target.value)} />
+                </div>
+
+                <div class="form-group">
+                    <label for="search" style={{ fontWeight: "bold" }}>Search :</label>
+                    <button class="btn btn-success" onChange={(e) => setTrigger()}>Get Report</button>
+                </div>
+            </Grid>
+
+
+            <Grid item xs={12}>
+                <CustomTable
+                    headers={headersToShow}
+                    data={tableData}
+                    fieldsToShow={fieldsToShow}
+                    fields={fields}
+                    // getInstanceData={getInstanceData}
+                    loader={loader}
+                    setLoader={setLoader}
+                    actionShow={actionShow}
+                />
+
+            </Grid>
+   
+
+            <PaginationController 
+            page={page}
+            setPage={setPage}
+            handlePageChange={handlePageChange}
+            count={count}
+            data={tableData}
+            
+            />
+
+
+        </>
+
+
+
     )
 }
+
+
+
 
 
 
@@ -550,7 +537,7 @@ function Overall() {
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
 
-    const [trigger,setTrigger] =useState();
+    const [trigger, setTrigger] = useState();
 
     // const panchaytList = useSelector((state) => state?.panchayat?.value);
 
@@ -564,7 +551,7 @@ function Overall() {
 
         // gettempemployee()
 
-    }, [panchayat, startDate, endDate,trigger])
+    }, [panchayat, startDate, endDate, trigger])
 
     const getPanchayathLabel = (id) => {
         const label = panchaytList?.find((e) => e?.id === id)?.name
@@ -574,7 +561,7 @@ function Overall() {
 
 
 
-    const headersToShow = ["Date","Vechile", "Bio (kg)", "Non-Bio (Kg)", "Hazard (kg)"]
+    const headersToShow = ["Date", "Vechile", "Bio (kg)", "Non-Bio (Kg)", "Hazard (kg)"]
     const tableData = listInstanceData
     const fieldsToShow = []
     const fields = {
@@ -611,156 +598,53 @@ function Overall() {
 
 
     return (
-        <div class="content">
-            <div class="page-header">
-                <div class="page-title">
-                    <h4>Overall Report Details</h4>
+
+        <>
+
+
+            <Grid item xs={12}>
+                <Typography variant="h6">Overall Report Details</Typography>
+
+            </Grid>
+
+
+            <Grid item xs={6} display="flex" >
+                <div class="form-group" style={{ paddingLeft: 5 }}>
+                    <label for="fromDate" style={{ fontWeight: "bold" }}>From Date :</label>
+                    <input type="date" class="form-control" id="fromDate" onChange={(e) => setStartDate(e.target.value)} />
                 </div>
-            </div>
-            <div class="card">
-                <div class="card-body">
-                    <div class="row">
-                        {/* <div class="col-md-3 col-lg-3 col-xs-3 col-sm-6">
-                        <div class="form-group">
-                            <label 
-                            style={{fontWeight:"bold"}}
-                            
-                            >District :</label>
-                            <select name="" id=""   className="report-dropdown"
-                            
-                            >
-                                <option value="">Tirunelveli</option>
-                                <option value="">Tenkasi</option>
-                                <option value="">Thoothukudi</option>
-                            </select>
-                        </div>
-                    </div> */}
-                        {/* <div class="col-md-3 col-lg-3 col-xs-3 col-sm-6">
-                        <div class="form-group">
-                            <label style={{fontWeight:"bold"}}>City :</label>
-                            <select name="" id=""   className="report-dropdown"
-                            
-                            >
-                                <option value="">Ayikudy</option>
-                                <option value="">Melagaram</option>
-                                <option value="">Sengotai</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-lg-3 col-xs-3 col-sm-6">
-                        <div class="form-group">
-                            <label style={{fontWeight:"bold"}}>Panchayat :</label>
-                            <select name="" id=""  className="report-dropdown"
-                            
-                            >
-                                <option value="">Ayikudy</option>
-                                <option value="">Coutrallam</option>
-                                <option value="">Melagaram</option>
-                            </select>
-                        </div>
-                    </div> */}
-                        {/* <div class="col-md-3 col-lg-3 col-xs-3 col-sm-6">
-                            <div class="form-group">
-                                <label style={{ fontWeight: "bold" }}>Ward No :</label>
-                                <select name="WARD" id=""
-                                    className="custom-dropdown" onChange={(e) => setWard(e?.target?.value)}
-                                // defaultValue={ward || ""}
-                                >
 
-                                    <option disabled selected value >-----------</option>
-                                    {wardlist?.map((e) => (
-                                        <option value={e?.id}>{e?.ward_no}</option>
-                                    ))}
-
-
-                                </select>
-                            </div>
-                        </div> */}
-
-
-                        {/* <div className="col-lg-6 col-sm-6 col-12">
-                            <div className="form-group">
-                                <label style={{ color: 'grey' }}>Ward <span className="form-required">*</span></label>
-
-                                <SelectDropdown
-                                    list={panchaytList}
-                                    onchange={(e) => setPanchayat(e?.target?.value)}
-                                    // selected={instanceData?.ward}
-                                    showname={"name"}
-                                    report={true}
-                                // name={"ward"}
-                                // disabled={!isedit && !isAdd}
-                                // error={error}
-                                />
-                            </div>
-                        </div> */}
-
-
-                        {/* <div class="row" style={{ marginTop: 5 }}> */}
-                        <div class="col-md-2 col-lg-2 col-xs-3">
-                            <div class="form-group">
-                                <label for="fromDate" style={{ fontWeight: "bold" }}>From Date :</label>
-                                <input type="date" class="form-control" id="fromDate" onChange={(e) => setStartDate(e.target.value)} />
-                            </div>
-                        </div>
-                        <div class="col-md-2 col-lg-2 col-xs-3">
-                            <div class="form-group">
-                                <label for="toDate" style={{ fontWeight: "bold" }}>To Date :</label>
-                                <input type="date" class="form-control" id="toDate" onChange={(e) => setEndDate(e.target.value)} />
-                            </div>
-                        </div>
-                        <div class="col-md-2 col-lg-2 col-xs-3">
-                            <div class="form-group">
-                                <label for="search" style={{ fontWeight: "bold" }}>Search :</label>
-                                <button class="btn btn-success"  onChange={(e) => setTrigger()}>Get Report</button>
-                            </div>
-                        </div>
-
-                        {/* </div> */}
-                        {/* <div class="row" style={{marginTop:5}}>
-                    <div class="col-md-2 col-lg-2 col-xs-3">
-                        <div class="form-group">
-                            <label for="fromDate" style={{fontWeight:"bold"}}>From Date :</label>
-                            <input type="date" class="form-control" id="fromDate" />
-                        </div>
-                    </div>
-                    <div class="col-md-2 col-lg-2 col-xs-3">
-                        <div class="form-group">
-                            <label for="toDate" style={{fontWeight:"bold"}}>To Date :</label>
-                            <input type="date" class="form-control" id="toDate" />
-                        </div>
-                    </div>
-                    <div class="col-md-2 col-lg-2 col-xs-3">
-                        <div class="form-group">
-                            <label for="search" style={{fontWeight:"bold"}}>Search :</label>
-                            <button class="btn btn-success" onclick="getReport()">Get Report</button>
-                        </div>
-                    </div> */}
-                        {/* <div class="col-md-4 col-lg-4 col-xs-6" style={{marginTop:5}}>
-                        <br /><button class="btn btn-secondary" onclick="exportToExcel()">Export to Excel</button>
-                        <button class="btn btn-secondary" onclick="exportToCSV()">Export to CSV</button>
-                    </div> */}
-                        {/* <div class="col-md-2 col-lg-2 col-xs-6" style={{marginTop:5}}>
-                        <br /><input type="text" class="form-control" id="searchInput" placeholder="Type to search" />
-                    </div> */}
-                    </div>
-
-
-                    <CustomTable
-                        headers={headersToShow}
-                        data={tableData}
-                        fieldsToShow={fieldsToShow}
-                        fields={fields}
-                        // getInstanceData={getInstanceData}
-                        loader={loader}
-                        setLoader={setLoader}
-                        actionShow={actionShow}
-                    />
-
-
+                <div class="form-group" style={{ paddingLeft: 5 }}>
+                    <label for="toDate" style={{ fontWeight: "bold" }}>To Date :</label>
+                    <input type="date" class="form-control" id="toDate" onChange={(e) => setEndDate(e.target.value)} />
                 </div>
-            </div>
-        </div>
+
+                <div class="form-group" style={{ paddingLeft: 5 }}>
+                    <label for="search" style={{ fontWeight: "bold" }}>Search :</label>
+                    <button class="btn btn-success" onChange={(e) => setTrigger()}>Get Report</button>
+                </div>
+            </Grid>
+
+
+            <Grid item xs={12}>
+
+                <CustomTable
+                    headers={headersToShow}
+                    data={tableData}
+                    fieldsToShow={fieldsToShow}
+                    fields={fields}
+                    // getInstanceData={getInstanceData}
+                    loader={loader}
+                    setLoader={setLoader}
+                    actionShow={actionShow}
+                />
+
+            </Grid>
+
+        </>
+
+
+
     )
 }
 

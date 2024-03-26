@@ -12,50 +12,36 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import Typography from '@mui/material/Typography';
+
 import EditIcon from '@mui/icons-material/Edit';
 import CustomTable from "./Table";
 import AlertDialog from "./Alert"
 
-
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
 import AddIcon from '@mui/icons-material/Add';
+import { Typography, Container, Grid, Paper } from '@mui/material';
+import SelectDropdown from "./Dropdown"
+import SelectDropDown from "../utils/SelectDropDown"
+
+import FormModal from "../utils/FormModal";
+import { toast, ToastContainer } from 'react-toastify';
+import  PaginationController from "../utils/Pagination"
 
 
 
 const style = {
-    // position: 'absolute',
-    // top: '50%',
-    // left: '50%',
-    // transform: 'translate(-50%, -50%)',
-    // width: 600,
-    // height: 600,
-    // // bgcolor: 'background.paper',
-    // // border: '2px solid #000',
-    // boxShadow: 24,
-    // p: 4,
 
-};
+}
 
-
-const Item = styled(Paper)(({ theme }) => ({
-    backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-    ...theme.typography.body2,
-    padding: theme.spacing(1),
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-}));
 
 
 function Employee(props) {
-    const [page, setPage] = React.useState(0);
+
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
-    const handleChangePage = (event, newPage) => {
-        setPage(newPage);
-    };
+    const modalHeader = "Permenant Employee"
+
+    const roles = useSelector((state) => state?.collector?.value)?.filter((e) => e?.type?.code === "ADM");
+
 
     const handleChangeRowsPerPage = (event) => {
         setRowsPerPage(+event.target.value);
@@ -67,7 +53,7 @@ function Employee(props) {
     // list all employees
     const [permEmployee, setPermEmployee] = useState();
     // const [tempEmployee, setTempEmployee] = useState()
-    const [roles, setRoles] = useState();
+    // const [roles, setRoles] = useState();
 
     // const panchayathList = useSelector((state) => state?.panchayath?.value);
 
@@ -83,8 +69,21 @@ function Employee(props) {
     const [lazyLoading, setLazyLoading] = useState(true);
 
 
+
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+
+    const [page, setPage] = useState(1);
+    const [count, setCount] = useState();
+
+
+    const handlePageChange = (event, value) => {
+        setPage(value)
+    }
+
+
     const handleClose = () => {
-        setImage();
+
         // setIsView();
         setError();
         setIsOpen();
@@ -93,27 +92,31 @@ function Employee(props) {
         setViewEmployee();
         setisAdd();
 
+        setErrorMsg({});
+        seterrString();
+        setImage();
+
 
     }
 
 
 
     useEffect(() => {
-
         getPermemployee()
-        getRoles()
+        // getRoles()
         // gettempemployee()
 
-    }, [])
+    }, [page])
 
 
     // META DATA
-    const headersToShow = ["Image", "Name", "Position", "Contact No", "Joined"]
+    const headersToShow = ["Image", "Name", "Employee Id", "Position", "Contact No", "Joined"]
     const tableData = permEmployee
     const fieldsToShow = []
     const fields = {
         'image': (value) => value,
         'name': (value) => value,
+        'emp_id': (value) => value,
         'role': (role) => getRoleLabel(role),
         'phone_number': (value) => value,
         'start_date': (value) => value,
@@ -123,7 +126,7 @@ function Employee(props) {
 
     // get rolw AND lABEL
     const getRoles = () => {
-        axios.get(`${Config.BASE_URL}roles/`,
+        axios.get(`${Config.BASE_URL}get-roles`,
             Config?.config
         )
             .then(function (response) {
@@ -151,13 +154,14 @@ function Employee(props) {
     //    GET ALL EMPLOYEES
 
     const getPermemployee = () => {
-        axios.get(`${Config.BASE_URL}permanentemployees/`,
+        axios.get(`${Config.BASE_URL}permanentemployees/?page=${page}`,
             Config?.config
         )
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response);
-                    setPermEmployee(response?.data)
+                    setPermEmployee(response?.data?.results ? response?.data?.results : response?.data)
+                    setCount(response?.data?.count)
                     setLazyLoading(false);
 
                 }
@@ -175,6 +179,9 @@ function Employee(props) {
     // Check form field validation
     const checkValidation = () => {
 
+        console.log(employee)
+
+
         if (!employee?.name || !employee?.phone_number || !employee?.start_date || !employee?.role) {
             console.log("please fill required fields")
             setError(true)
@@ -182,12 +189,23 @@ function Employee(props) {
 
         }
         else {
-            setError(false)
-            return true
+
+            if (employee?.phone_number.length != 10) {
+                seterrString("Phone Number Should be in 10 Characters")
+                setError(true)
+                return false
+            }
+
+            else {
+                setError(false)
+                seterrString();
+                return true
+            }
+
         }
 
-    }
 
+    }
 
 
     // ADD NEW EMPLOYEES
@@ -220,35 +238,38 @@ function Employee(props) {
             .then(function (response) {
                 if (response.status === 201) {
                     console.log(response);
-                    setPermEmployee((prevstate) => {
-                        return [...prevstate, response?.data]
-                    })
+                    // setPermEmployee((prevstate) => {
+                    //     return [...prevstate, response?.data]
+                    // })
 
-                    $('#myModal').hide();
-                    $('.modal-backdrop').hide();
-                    setEmployee()
+                    setPermEmployee([ response?.data, ...permEmployee.slice(0, -1)])
+                    // setPermEmployee([response?.data, ...permEmployee])
+                    setCount(count+1)
+                    Config?.toastalert("Submitted Successfully", "success")
+                    setEmployee();
                     handleClose();
 
                 }
 
             })
             .catch(function (error) {
-                console.log(error);
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Submission Failed", "warn")
+                }
 
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             });
 
     }
 
 
 
-    const handleChange = (e, name) => {
-        // const { value } = e.target
-        // setEmployee((prevstate) => {
-        //     return {
-        //         ...prevstate, [name]: value
-        //     }
-
-        // })
+    const handleChange = (e) => {
+        const { value, name } = e.target
 
         if (name === "image") {
             const check = Config?.fileType(e.target.files[0].name)
@@ -263,7 +284,7 @@ function Employee(props) {
         }
         else {
 
-            const { value } = e.target
+            // const { value } = e.target
             setEmployee((prevstate) => {
                 return {
                     ...prevstate, [name]: value
@@ -274,6 +295,18 @@ function Employee(props) {
         }
 
     }
+
+
+    const handleDateChange = (e) => {
+        const date = Config?.DateFormater(e)
+        setEmployee((prevstate) => {
+            return {
+                ...prevstate, start_date: date
+            }
+
+        })
+
+    };
 
     console.log(employee)
 
@@ -294,11 +327,7 @@ function Employee(props) {
                     // setViewEmployee(response?.data)
                     setisEdit(edit)
                     setIsOpen(true)
-                    // setLoader(false)
-
-                    // $('#myModal').modal('show')
-                    // $('.modal-backdrop').show();
-
+           
                 }
 
             })
@@ -345,7 +374,7 @@ function Employee(props) {
             .then(function (response) {
                 if (response.status === 200) {
                     // console.log(response);
-
+                    Config?.toastalert("Updated Successfully", "success")
                     setPermEmployee(prevArray => {
                         const index = prevArray.findIndex(obj => obj.id === id);
                         if (index !== -1) {
@@ -359,15 +388,19 @@ function Employee(props) {
                     });
                     // setIsOpen(false)
                     handleClose();
-
-                    // $('#myModal').modal('show')
-                    // $('.modal-backdrop').show();
-
                 }
 
             })
             .catch(function (error) {
-                console.log(error);
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
 
             });
 
@@ -387,6 +420,8 @@ function Employee(props) {
                 if (response.status === 204) {
                     console.log(response);
                     setPermEmployee(permEmployee?.filter((e) => e.id !== id))
+                    setCount(count-1)
+                    Config?.toastalert("Deleted Successfully", "info")
                     handleClose();
                     // setLoader()
 
@@ -395,9 +430,15 @@ function Employee(props) {
 
             })
             .catch(function (error) {
-                console.log(error);
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
+                }
 
-
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             });
 
     }
@@ -408,11 +449,14 @@ function Employee(props) {
 
 
         <>
-
+            <ToastContainer />
             {
                 (isOpen || isAdd) && (
+                    <>
 
-                    <CustomizedDialogs
+
+
+                        {/* <CustomizedDialogs
                         lazyLoading={lazyLoading}
                         setIsOpen={setIsOpen}
                         isAdd={isAdd}
@@ -436,7 +480,68 @@ function Employee(props) {
                     // image={image}
 
 
-                    />
+                    /> */}
+
+                        <FormModal
+                            modalHeader={modalHeader}
+                            lazyLoading={lazyLoading}
+                            setIsOpen={setIsOpen}
+                            isAdd={isAdd}
+                            isedit={isedit}
+                            setisEdit={setisEdit}
+                            error={error}
+                            errorMsg={errorMsg}
+
+                            // getRoleLabel={getRoleLabel}
+                            // roles={roles}
+
+                            // setListData={setPermEmployee}
+                            instanceData={employee}
+                            // setInstanceData={setEmployee}
+                            handleClose={handleClose}
+
+                            // functions
+                            addInstance={addEmployee}
+                            updateInstance={updateEmployee}
+                            deleteInstance={deleteEmployee}
+                            handleChange={handleChange}
+
+                            child={<Child
+                                lazyLoading={lazyLoading}
+                                setIsOpen={setIsOpen}
+                                isAdd={isAdd}
+                                isedit={isedit}
+                                error={error}
+                                errorMsg={errorMsg}
+                                errString={errString}
+
+                                getRoleLabel={getRoleLabel}
+                                roles={roles}
+
+                                setListData={setPermEmployee}
+                                instanceData={employee}
+                                setInstanceData={setEmployee}
+                                handleClose={handleClose}
+                                handleChange={handleChange}
+                                handleDateChange={handleDateChange}
+
+                                image={image}
+                                setImage={setImage}
+
+                            // functions
+                            // addInstance={addEmployee}
+                            // updateInstance={updateEmployee}
+                            // deleteInstance={deleteEmployee}
+                            // handleChange={handleChange}
+
+                            />}
+
+
+                        />
+
+
+
+                    </>
                 )
             }
 
@@ -449,20 +554,18 @@ function Employee(props) {
 
                 <>
 
-                    <Grid item xs={6}>
-                        <Typography variant="h6">Permanent Employee Details</Typography>
+                    <Grid item xs={12} sm={6}>
+                        <Typography variant="h6">Permanent Employees Details</Typography>
                     </Grid>
-                    <Grid item xs={6} display="flex" justifyContent="flex-end">
-                        <IconButton color="primary" aria-label="add">
-                            <AddButton
-                                onClick={() => setisAdd(true)}
-                                text={" Add Employee"}
-                            />
-                        </IconButton>
+                    <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+                        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
+                            Add Employee
+                        </Button>
                     </Grid>
 
-                    
-                     
+
+
+
                     <Grid item xs={12}>
                         <CustomTable
                             headers={headersToShow}
@@ -477,179 +580,24 @@ function Employee(props) {
 
 
 
+                    <PaginationController
+                        page={page}
+                        setPage={setPage}
+                        handlePageChange={handlePageChange}
+                        count={count}
+                        data={tableData}
 
-                    {/* <div class="content">
-                        <div class="page-header">
-                            <div class="page-title">
-                                <h4>Permanent Employee Details</h4>
-                            </div>
-                            <div class="page-btn">
-                                <AddButton
-                                    onClick={() => setisAdd(true)}
-                                    text={" Add Employee"}
-                                />
-
-                            </div>
-                        </div>
-
-
-                        <CustomTable
-                            headers={headersToShow}
-                            data={tableData}
-                            fieldsToShow={fieldsToShow}
-                            fields={fields}
-                            getInstanceData={getEmployee}
-                            loader={loader}
-                            setLoader={setLoader}
-                        />
-
-
-
-                    </div> */}
-
-
-
+                    />
 
                 </>
 
 
+
+
+
+
+
             )}
-
-            {props?.path === "contract" && (
-
-
-
-                <div class="content">
-                    <div class="page-header">
-                        <div class="page-title">
-                            <h4>Contract Employee Details</h4>
-                        </div>
-                        <div class="page-btn">
-                            <button class="btn btn-primary" data-toggle="modal" data-target="#myModal">
-                                <span class="glyphicon glyphicon-user"></span> Add Employee
-                            </button>
-                            <div id="myModal" class="modal fade" role="dialog">
-                                <div class="modal-dialog modal-lg modal-dialog-centered">
-
-                                    <div class="modal-content">
-
-                                        {/* <form action="" method="post" id=""> */}
-                                        <h3
-                                            style={{ marginLeft: 20 }}
-                                        >Contract Employee Details</h3>
-                                        <div class="modal-body">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <div class="row">
-
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Name : <span class="form-required">*</span></label>
-                                                                <input type="text" class="form-control" name="category_name" required />
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Role : <span class="form-required">*</span></label>
-                                                                <select name="" id="" class="form-control">
-                                                                    <option value="">Engineer</option>
-                                                                    <option value="">Supervisor</option>
-                                                                    <option value="">Member</option>
-                                                                </select>
-
-                                                                <input type="text" class="form-control" name="category_name" required />
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6 col-sm-12 col-12">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Contact No : <span class="form-required">*</span></label>
-                                                                <input type="text" class="form-control" name="category_name" required />
-                                                            </div>
-                                                        </div>
-
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-success">Sign up</button>
-                                            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                                        </div>
-                                        {/* </form> */}
-                                    </div>
-                                </div>
-                            </div>
-
-
-
-
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-body">
-
-                            <div class="table-responsive">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr class="table-info">
-                                            <th>S.No</th>
-                                            <th>Name</th>
-                                            <th>Role</th>
-                                            <th>Contact No</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>1.</td>
-                                            <td>jeeva</td>
-                                            <td>Worker</td>
-                                            <td>123456789</td>
-
-                                            <td>
-                                                <button class="btn btn-success">
-                                                    <span class="glyphicon glyphicon-pencil"></span> Edit
-                                                </button>
-                                                <button class="btn btn-info">
-                                                    <span class="glyphicon glyphicon-eye-open"></span> View
-                                                </button>
-                                                <button class="btn btn-danger">
-                                                    <span class="glyphicon glyphicon-trash"></span> Delete
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>1.</td>
-                                            <td>Siva</td>
-                                            <td>Worker</td>
-                                            <td>123456789</td>
-
-                                            <td>
-                                                <button class="btn btn-success">
-                                                    <span class="glyphicon glyphicon-pencil"></span> Edit
-                                                </button>
-                                                <button class="btn btn-info">
-                                                    <span class="glyphicon glyphicon-eye-open"></span> View
-                                                </button>
-                                                <button class="btn btn-danger">
-                                                    <span class="glyphicon glyphicon-trash"></span> Delete
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <br />
-                        </div>
-                    </div>
-                </div>
-            )}
-
-
-
-
-
-
 
         </>
     )
@@ -710,7 +658,7 @@ function CustomizedDialogs(props) {
 
 
 
-            <BootstrapDialog
+            <Dialog
                 onClose={handleClose}
                 aria-labelledby="customized-dialog-title"
                 open={open}
@@ -916,7 +864,7 @@ function CustomizedDialogs(props) {
                         </div>
                     </div>
                 </DialogActions>
-            </BootstrapDialog>
+            </Dialog>
         </React.Fragment>
     );
 }
@@ -928,3 +876,141 @@ function CustomizedDialogs(props) {
 
 
 export default Employee;
+
+
+import InputBox from "../utils/NumberInput";
+import { TextField } from '@mui/material';
+import TextInput from "../utils/TextInput";
+import FileUploadComponent from "../utils/FileInput"
+import BasicDatePicker from "../utils/DatePicker";
+
+
+const Child = (props) => {
+
+    const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader, isedit, handleDateChange, image, setImage, errorMsg, errString,
+        deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, districtList, panchayatList, streetList, buildingType, child,
+        // setError, setImage, image 
+    } = props
+
+
+    return (
+
+
+        <>
+
+            <Grid container spacing={2}>
+                {/* First Name */}
+                <Grid item xs={12} md={6} sm={6}>
+                    <Grid >
+
+                    </Grid>
+                    <TextInput
+
+                        label="Name"
+                        placeholder="Name"
+                        name={"name"}
+                        value={instanceData?.name}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"name"}
+
+                    />
+
+
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+
+
+                    <SelectDropDown
+                        list={roles}
+                        handleChange={handleChange}
+                        selected={instanceData?.role}
+                        showname={"name"}
+                        name={"role"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"role"}
+                        label="Select Role"
+                    />
+
+
+                </Grid>
+                <Grid item xs={12} md={6} sm={6}>
+
+
+                    <TextInput
+                        label="Phone Number"
+                        placeholder="Name"
+                        name="phone_number"
+                        value={instanceData?.phone_number}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"phone"}
+                        type={"Number"}
+
+                    />
+                    {errString && (
+                        <span className="req-text">{errString}</span>
+                    )}
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <FileUploadComponent
+                        filelabel="Image"
+                        name="image"
+                        value={instanceData?.image}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        image={image}
+                        setImage={setImage}
+                        errorMsg={errorMsg}
+                        errorField={"image"}
+
+
+
+                    />
+
+                </Grid>
+
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <BasicDatePicker
+                        label="Join Date"
+                        placeholder="Join Date"
+                        name="start_date"
+                        value={instanceData?.start_date}
+                        required={true}
+                        handleChange={handleChange}
+                        handleDateChange={handleDateChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"start_date"}
+
+                    />
+                </Grid>
+
+            </Grid>
+
+
+
+
+        </>
+
+    )
+}
+
+
+

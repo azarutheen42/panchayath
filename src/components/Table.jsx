@@ -15,24 +15,25 @@ import { useSelector } from "react-redux";
 import ButtonWithLoader from "./Button";
 import { CircularProgress } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
+import { Typography } from '@mui/material';
 
 
-// Define the styled component for the image thumbnail
-const StyledSmallImageThumbnail = styled('img')({
-    width: 50, // Adjust the width to make the thumbnail smaller
-    height: 'auto', // Maintain aspect ratio
-    borderRadius: 4, // Add rounded corners
-    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', // Add a shadow for depth
-    cursor: 'pointer', // Add cursor pointer for clickable behavior
+
+export const StyledSmallImageThumbnail = styled('img')({
+    width: 50,
+    height: 'auto', 
+    borderRadius: 4, 
+    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', 
+    cursor: 'pointer',
     // border: '1px solid #000',
 });
 
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    // padding: "5px 15px", // Remove padding from the cell
+    // padding: "5px 15px",
     padding: '8px',
     // '&.noPadding': {
-    //     padding: 0, // Apply the global CSS class to remove padding
+    //     padding: 0,
     //   },
     border: '.5px solid #ccc',
 
@@ -61,14 +62,14 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
         // border: 0,
     },
     '&:hover': {
-        backgroundColor: '#f5f5f5', // Change background color on hover
+        backgroundColor: '#f5f5f5',
     },
 }));
 
 const StyledTableHead = styled(TableHead)({
-    position: 'sticky', // Set the table head to sticky position
-    top: '0', // Stick to the top of the table
-    zIndex: '100', // Ensure the header stays above the content
+    position: 'sticky',
+    top: '0', 
+    zIndex: '100', 
 
     // backgroundColor: theme.palette.common.black,
     // color: theme.palette.common.white,
@@ -81,10 +82,10 @@ const StyledTableHead = styled(TableHead)({
 
 
 const StyledTable = styled(Table)(({ theme }) => ({
-    // borderCollapse: 'separate', // Separate borders for cells
-    borderSpacing: '0px', // No spacing between cells
-    borderRadius: '5px', // Curved border radius
-    minWidth: '100%', // Ensure the table takes full width of its container
+    // borderCollapse: 'separate', 
+    borderSpacing: '0px',
+    borderRadius: '5px', 
+    minWidth: '100%', 
 }));
 
 
@@ -98,8 +99,8 @@ const ActionCell = {
 
 
 const StyledTableContainer = styled(TableContainer)({
-    maxHeight: '100%', // Ensure the container takes full height of its parent
-    overflow: 'auto', // Enable scrollable overflow for the container
+    maxHeight: '100%', 
+    overflow: 'auto',
 });
 
 
@@ -137,96 +138,120 @@ function CustomTable(props) {
 
     }
 
-    console.log(lazyLoading, "lazy loading true")
+ 
 
 
 
+    const [page,setPage] =useState(1);
+
+
+    const handlePageChange =(event, value)=>{
+        setPage(value)
+    }
+
+    
+
+
+    // const tdata = data?.results ?? data
+    // const count=tdata?.count
+
+
+    console.log(data,"pppppppppppppppppppppppp")
 
 
     return (
         <>
 
-            {mui && (
-                <StyledTableContainer
-                // component={Paper}
+
+            <StyledTableContainer
+            component={Paper}
+            >
+
+
+                <StyledTable
+                //      sx={{ minWidth: 700 }} 
+                // aria-label="customized table" 
+                // className='mt-2' 
                 >
+                    <StyledTableHead >
+                        {/* <StyledTableRow> */}
+                        <StyledTableCell style={siCell}>Si.No</StyledTableCell>
+
+                        {headers?.map((header, index) => (
+
+                            <StyledTableCell key={index}>{header}</StyledTableCell>
+                        ))}
+
+                        {!actionShow && <StyledTableCell>Action</StyledTableCell>}
 
 
-                    <StyledTable
-                    //      sx={{ minWidth: 700 }} 
-                    // aria-label="customized table" 
-                    // className='mt-2' 
-                    >
-                        <StyledTableHead >
-                            {/* <StyledTableRow> */}
-                            <StyledTableCell style={siCell}>Si.No</StyledTableCell>
-
-                            {headers?.map((header, index) => (
-
-                                <StyledTableCell key={index}>{header}</StyledTableCell>
-                            ))}
-
-                            {!actionShow && <StyledTableCell>Action</StyledTableCell>}
+                        {/* </StyledTableRow> */}
+                    </StyledTableHead>
+                    <TableBody>
 
 
-                            {/* </StyledTableRow> */}
-                        </StyledTableHead>
-                        <TableBody>
+                        {(lazyLoading || !data) ? (
+                            <TableRowsLoader rowsNum={5} cellNo={headers?.length + 2} />
+                        )
+                            :
+                            (data?.map((row, rowIndex) => (
+                                <StyledTableRow key={rowIndex}>
+                                    <StyledTableCell style={siCell}>{rowIndex + 1}</StyledTableCell>
 
 
-                            {(lazyLoading || !data) ? (
-                                <TableRowsLoader rowsNum={5} cellNo={headers?.length + 2} />
-                            )
-                                :
-
-                                (data?.map((row, rowIndex) => (
-                                    <StyledTableRow key={rowIndex}>
-                                        <StyledTableCell style={siCell}>{rowIndex + 1}</StyledTableCell>
-
-
-                                        {Object.entries(fields).map(([fieldName, getValue]) => (
-                                            <StyledTableCell key={`${rowIndex}-${fieldName}`}>
-                                                {getValue(renderField(row, fieldName))}
-                                                {/* {renderField(row, fieldName)} */}
-                                            </StyledTableCell>
-                                        ))}
-
-                                        {!actionShow && <StyledTableCell style={ActionCell}>
-
-                                            <ButtonWithLoader
-                                                itemId={row?.id}
-                                                onClick={() => fetchData(row?.id, false, "view", rowIndex)}
-                                                class_name="btn btn-success"
-                                                text="View"
-                                                span_class="glyphicon glyphicon-pencil"
-                                                loader={loader}
-                                                index={rowIndex}
-                                            // setLoader={setLoader}
-                                            // key = {employee?.id}
-                                            />
-
-
+                                    {Object.entries(fields).map(([fieldName, getValue]) => (
+                                        <StyledTableCell key={`${rowIndex}-${fieldName}`}>
+                                            {getValue(renderField(row, fieldName))}
+                                            {/* {renderField(row, fieldName)} */}
                                         </StyledTableCell>
+                                    ))}
 
-                                        }
+                                    {!actionShow && <StyledTableCell style={ActionCell}>
 
-                                    </StyledTableRow>
-                                )))
+                                        <ButtonWithLoader
+                                            itemId={row?.id}
+                                            onClick={() => fetchData(row?.id, false, "view", rowIndex)}
+                                            class_name="btn btn-success"
+                                            text="View"
+                                            span_class="glyphicon glyphicon-pencil"
+                                            loader={loader}
+                                            index={rowIndex}
+                                        // setLoader={setLoader}
+                                        // key = {employee?.id}
+                                        />
 
-                            }
 
-                        </TableBody>
-                    </StyledTable>
+                                    </StyledTableCell>
+
+                                    }
+
+                                </StyledTableRow>
+                            )))
+
+                        }
+
+                    </TableBody>
+                </StyledTable>
 
 
-                    {!data?.length &&
-                       <div className="text-center p-5"> No data </div>
-                    }
 
 
-                </StyledTableContainer>
-            )}
+            </StyledTableContainer>
 
+            {!data?.length &&
+                <div className="text-center p-5"> No Data Available</div>
+            }
+
+
+
+            {/* <PaginationControlled
+                page={page}
+                setPage={setPage}
+                handlePageChange={handlePageChange}
+                count={count}
+                data={tdata}
+
+            /> */}
 
 
 
@@ -255,21 +280,21 @@ const nestedFieldExtractor = (obj, path) => {
 const renderField = (data, field) => {
     // Check if the field is nested
     if (field.includes('.')) {
-        const nestedFields = field.split('.'); // Split nested fields
+        const nestedFields = field.split('.'); 
         let value = data;
         for (let nestedField of nestedFields) {
-            value = value[nestedField]; // Traverse through nested structure
-            if (!value) return ''; // Return empty string if any nested field is undefined
+            value = value[nestedField]; 
+            if (!value) return ''; 
         }
-        return renderImageOrText(value); // Render the value as image or text
+        return renderImageOrText(value); 
     } else {
-        return renderImageOrText(data[field]); // Render the value as image or text
+        return renderImageOrText(data[field]); 
     }
 };
 
 // Function to render value as image or text
 const renderImageOrText = (value) => {
-    // Check if the value is an image URL
+   
     if (isImageUrl(value)) {
         var alt_name = getImageName(value);
         alt_name = Config.truncateText(alt_name, 7)
@@ -279,7 +304,6 @@ const renderImageOrText = (value) => {
         //     // className="emp-thumb"
         // // style={{ width: '100px', height: 'auto' }}
         // />;
-
 
         return <CustomTableCell imagePath={Config?.MEDIA_URL + value} altText={alt_name} />
 
@@ -292,7 +316,8 @@ const renderImageOrText = (value) => {
 
         }
         else {
-            return Config?.truncateText(value ? (value) : "", 20)
+            // return value ??""
+            return Config?.truncateText(value ? (value) : "", 30)
         }
     }
 
@@ -301,10 +326,10 @@ const renderImageOrText = (value) => {
 
 
 const getImageName = (imageUrl) => {
-    const imageNameWithExtension = imageUrl.split('/').pop(); // Get the last part of the URL (image name with extension)
-    const parts = imageNameWithExtension.split('.'); // Split by dot to separate name and extension
-    parts.pop(); // Remove the last part (extension)
-    return parts.join('.'); // Join the remaining parts back together
+    const imageNameWithExtension = imageUrl.split('/').pop(); 
+    const parts = imageNameWithExtension.split('.'); 
+    parts.pop(); 
+    return parts.join('.'); 
 };
 
 
@@ -315,7 +340,7 @@ const TableRowsLoader = ({ rowsNum, cellNo }) => {
         <StyledTableRow key={index}>
 
             {[...Array(cellNo)]?.map((e, index) => (
-                <StyledTableCell component="th" scope="row">
+                <StyledTableCell component="th" scope="row" key={index}>
                     <Skeleton animation="wave" variant="text" />
                 </StyledTableCell>
             ))}
@@ -377,9 +402,9 @@ const CustomTableCell = ({ imagePath, altText }) => {
                 maxWidth="sm" // Set the maximum width to sm (small)
                 PaperProps={{
                     style: {
-                        width: '50%', // Set the width to 50% of the screen
-                        margin: 'auto', // Center the modal horizontally
-                        padding: '20px', // Add padding on both sides
+                        width: '50%', 
+                        margin: 'auto', 
+                        padding: '20px',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -390,9 +415,9 @@ const CustomTableCell = ({ imagePath, altText }) => {
                     src={imagePath}
                     alt={altText}
                     style={{
-                        maxWidth: '100%', // Ensure the image fits within the modal
-                        height: 'auto', // Maintain aspect ratio
-                        objectFit: 'contain', // Fit the image without stretching
+                        maxWidth: '100%',
+                        height: 'auto', 
+                        objectFit: 'contain', 
                     }}
                 />
 
@@ -400,7 +425,7 @@ const CustomTableCell = ({ imagePath, altText }) => {
                     <Button
                         variant="contained"
                         color="primary"
-                        size="small" // Set the size of the download button to small
+                        size="small" 
                         onClick={handleDownload}
                     >
                         Download
@@ -423,3 +448,33 @@ const CustomTableCell = ({ imagePath, altText }) => {
 
 
 
+
+
+
+
+
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
+
+
+function PaginationControlled(props) {
+    const { page, setPage, handlePageChange, count, data } = props
+
+
+
+    return (
+
+        <>
+
+            {(data && count )&& (
+
+                <Stack spacing={2}>
+                    <Typography>Page: {page}</Typography>
+                    <Pagination count={Math.ceil(count / data?.length)} page={page} onChange={handlePageChange} />
+                </Stack>
+            )}
+        </>
+
+
+    );
+}

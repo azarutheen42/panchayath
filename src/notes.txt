@@ -1,92 +1,46 @@
-    <CustomTable
-                    headers={headersToShow}
-                    data={tableData}
-                    fieldsToShow={fieldsToShow}
-                    fields={fields}
-                    getInstanceData={getInstanceData}
-                    loader={loader}
-                    setLoader={setLoader}
-                />
+
+import  PaginationController from "../utils/Pagination"
 
 
+const [page,setPage] =useState(1);
+const [count,setCount] =useState();
 
 
-
-    // META DATA
-    const headersToShow = ["Image", "Name", "Position", "Contact No", "Joined"]
-    const tableData = listInstanceData
-    const fieldsToShow = []
-    const fields = {
-        'image': (value) => value,
-        'name': (value) => value,
-        'role': (role) => getRoleLabel(role),
-        'phone_number': (value) => value,
-        'start_date': (value) => value,
-    }
-    const [listInstanceData, setListInstanceData] = useState([])
-    const [instanceData, setInstanceData] = useState({})
-
-      const [isOpen, setIsOpen] = useState();
-  const [isedit, setisEdit] = useState();
-  const [isAdd, setisAdd] = useState();
-  const [error, setError] = useState(false);
-  const [image, setImage] = useState();
-
-
-
-   
-
- {
-                (isOpen || isAdd) && (
-
-                    <CustomizedDialogs
-                        setIsOpen={setIsOpen}
-                        isAdd={isAdd}
-                        error={error}
-
-                        setListData={tableData}
-                        instanceData={instanceData}
-                        setInstanceData={setInstanceData}
-                        handleClose={handleClose}
-
-                        // functions
-                        addInstance={addNewInstance}
-                        updateInstance={updateInstance}
-                        deleteInstance={deleteInstance}
-                        handleChange={handleChange}
-
-                    // setImage={setImage}
-                    // image={image}
-
-
-                    />
-                )
-            }
-
-
-
-            disabled={!isedit && !isAdd}
-
-
-
-    // Check form field validation
-    const checkValidation = () => {
-
-        if (!employee?.name || !employee?.phone_number || !employee?.start_date || !employee?.role) {
-            console.log("please fill required fields")
-            setError(true)
-            return false
-
-        }
-        else {
-            setError(false)
-            return true
-        }
-
+    const handlePageChange =(event, value)=>{
+        setPage(value)
     }
 
 
+setlistInstanceData(response?.data?.results ? response?.data?.results : response?.data)
+  setCount(data?.count)
 
-  {(!instanceData?.date && error) && (
-                                        <span className="req-text">This field is required</span>
-                                    )}  
+
+
+setlistInstanceData(data?.results ? data?.results : data)
+setCount(data?.count)
+
+
+
+setlistInstanceData([ response?.data, ...instanceData.slice(0, -1)])         
+setCount(count+1)
+
+
+
+
+ <PaginationController 
+            page={page}
+            setPage={setPage}
+            handlePageChange={handlePageChange}
+            count={count}
+            data={tableData}
+            
+            />
+
+
+
+
+
+
+
+     paginated_queryset = paginator.paginate_queryset(queryset, request) 
+     return paginator.get_paginated_response(serializer.data)

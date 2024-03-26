@@ -21,7 +21,7 @@ import SideBar from './listItems';
 import Chart from './Chart';
 import Deposits from './Deposits';
 import Orders from './Orders';
-import Content from "../components1/Content"
+import Content from "../components/Content"
 import CustomAppBar from './AppBar';
 
 

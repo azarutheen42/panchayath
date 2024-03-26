@@ -4,7 +4,7 @@ import axios from 'axios'
 import { useSelector } from "react-redux";
 import Box from '@mui/material/Box'
 import Modal from '@mui/material/Modal'
-import { UpdateButton, SaveButton, CloseButton, DeleteButton, AddButton } from "../components1/Button";
+import { UpdateButton, SaveButton, CloseButton, DeleteButton, AddButton } from "../components/Button";
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
@@ -15,13 +15,13 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 
 import EditIcon from '@mui/icons-material/Edit';
-import CustomTable from "../components1/Table";
-import AlertDialog from "../components1/Alert";
+import CustomTable from "../components/Table";
+import AlertDialog from "../components/Alert";
 import React from "react";
 
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import SelectDropdown from "../components1/Dropdown"
+import SelectDropdown from "../components/Dropdown"
 import { useDispatch } from "react-redux";
 import { setWard } from "../features/WardSlice"
 import { setStreet } from "../features/StreetSlice";

@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext } from 'react'
 import { React, Component } from 'react';
-// import './App.css'
 import Routers from "./route"
 import axios from 'axios'
 import Config from './Config'
@@ -17,17 +16,11 @@ import {setRequest} from "./features/RequestType.jsx"
 import {setComplaint} from "./features/ComplaintType.jsx"
 
 
-import "./assets/css/style.css"
+// import "./assets/css/style.css"
 import "./assets/css/custom.css"
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 // import "./assets/js/feather.min.js"
-
-
-
-
-// const UserContext = createContext()
-
 
 function App() {
 
@@ -124,7 +117,7 @@ function App() {
 
 console.log(Config.config)
   const getDistricts = () => {
-    axios.get(`${Config.BASE_URL}districts`,
+    axios.get(`${Config.BASE_URL}get-districts`,
       Config?.config
     )
       .then(function (response) {

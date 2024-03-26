@@ -133,14 +133,14 @@ import Stack from '@mui/material/Stack';
 
 export default function PaginationControlled(props) {
   const { page, setPage, handlePageChange, count, data } = props
- 
 
-  
+
+
   return (
 
     <>
 
-      {data && (
+      {data?.length > 0 && (
 
         <Stack spacing={2}>
           <Typography>Page: {page}</Typography>

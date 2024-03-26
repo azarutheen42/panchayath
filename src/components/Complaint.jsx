@@ -18,10 +18,21 @@ import EditIcon from '@mui/icons-material/Edit';
 import CustomTable from "./Table";
 import AlertDialog from "./Alert";
 import React from "react";
+import Grid from '@mui/material/Grid';
 
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SelectDropdown from "./Dropdown"
+
+
+import SelectDropDown from "../utils/SelectDropDown"
+import FormModal from "../utils/FormModal";
+import TextInput from "../utils/TextInput";
+import FileUploadComponent from "../utils/FileInput"
+import BasicDatePicker from "../utils/DatePicker";
+import InputBox from "../utils/NumberInput";
+import { TextField } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 
 const style = {
     position: 'absolute',
@@ -45,10 +56,11 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 
 function Complaint(props) {
 
-    const modalHeader="Complaint";
+    const modalHeader = "Complaint";
 
     const user = useSelector((state) => state?.user?.value);
     const wardlist = useSelector((state) => state?.ward?.value);
+    const streetList = useSelector((state) => state?.street?.value);
     const complaintTypeList = useSelector((state) => state?.complainttype?.value);
 
     // meta StATE
@@ -64,12 +76,33 @@ function Complaint(props) {
 
     const [hide, setHide] = useState(true);
 
+    const [requestId, setRequestId] = useState();
+    const [name, setName] = useState();
+    const [wardnum, setwardnum] = useState();
+    const [address, setAddress] = useState();
+    const [details, setDetails] = useState();
+    const [id, setId] = useState();
+    const [open, setOpen] = useState(false)
+    // const [wardlist, setWardlist] = useState();
+    const [request, setRequest] = useState();
+
+
+    const [isAddRequest, setIsAddRequest] = useState(false);
+
+    const [errorMsg, setErrorMsg] = useState({});
+    const [errString, seterrString] = useState();
+    const [lazyLoading, setLazyLoading] = useState(true);
+
 
     const getWardLabel = (id) => {
         const label = wardlist?.find((e) => e?.id === id)?.name
         return label
     }
 
+    const getStreetLabel = (id) => {
+        const label = streetList?.find((e) => e?.id === id)?.name
+        return label ?? "Nill"
+    }
 
 
     const getComplaintTypeLabel = (id) => {
@@ -78,7 +111,7 @@ function Complaint(props) {
     }
 
     // META DATA
-    const headersToShow = ["Complaint ID", "Date", "Name", "Ward", "Type", "Address", "Details","Status", "Image"]
+    const headersToShow = ["Complaint ID", "Date", "Name", "Ward", "Street", "Type", "Address", "Details", "Status", "Image"]
     const tableData = listInstanceData
     const fieldsToShow = []
     const fields = {
@@ -87,6 +120,7 @@ function Complaint(props) {
         'date': (value) => value,
         'name': (value) => value,
         'ward': (value) => getWardLabel(value),
+        'street': (value) => getStreetLabel(value),
         'type': (value) => getComplaintTypeLabel(value) ?? "Nill",
         'address': (value) => value,
         'details': (value) => value,
@@ -100,23 +134,14 @@ function Complaint(props) {
         setisAdd();
         setInstanceData();
         setError();
+        setisEdit(false);
+        setErrorMsg();
+        seterrString();
+        setImage();
+
 
 
     }
-
-
-    const [requestId, setRequestId] = useState();
-    const [name, setName] = useState();
-    const [wardnum, setwardnum] = useState();
-    const [address, setAddress] = useState();
-    const [details, setDetails] = useState();
-    const [id, setId] = useState();
-    const [open, setOpen] = useState(false)
-    // const [wardlist, setWardlist] = useState();
-    const [request, setRequest] = useState();
-
-
-    const [isAddRequest, setIsAddRequest] = useState(false);
 
     useEffect(() => {
         fetchrequests()
@@ -136,6 +161,7 @@ function Complaint(props) {
             // setWardList(data)
         } catch (error) {
             console.error('Error fetching data:', error)
+            Config?.toastalert("Something Went Wrong", "error")
         }
     }
 
@@ -154,6 +180,7 @@ function Complaint(props) {
             })
             .catch(function (error) {
                 console.log(error)
+                Config?.toastalert("Something Went Wrong", "error")
             })
     }
 
@@ -169,7 +196,8 @@ function Complaint(props) {
     // Check form field validation
     const checkValidation = () => {
 
-        if (!instanceData?.name || !instanceData?.phone_number || !instanceData?.ward || !instanceData?.address || instanceData?.type || instanceData?.details) {
+        if (!instanceData?.name || !instanceData?.phone_number || !instanceData?.ward ||
+            !instanceData?.address || !instanceData?.type || !instanceData?.details || !instanceData?.street) {
             console.log("please fill required fields")
             setError(true)
             return false
@@ -182,7 +210,7 @@ function Complaint(props) {
 
     }
 
-
+    console.log(instanceData)
     const addNewInstance = async (e) => {
 
         const check = checkValidation()
@@ -195,24 +223,36 @@ function Complaint(props) {
         data.append('name', instanceData?.name);
         data.append('phone_number', instanceData?.phone_number);
         data.append('ward', instanceData?.ward);
+        data.append('street', instanceData?.street);
         data.append('address', instanceData?.address);
         data.append('details', instanceData?.details);
-        data.append('image', instanceData?.image);
         data.append('type', instanceData?.type);
 
+        if (image) {
+            data.append('image', image);
+        }
+
         try {
-            const response = await axios.post(`${Config.BASE_URL}complaints/`, data, Config.config);
+            const response = await axios.post(`${Config.BASE_URL}complaints`, data, Config.config);
             console.log(response.data); // Handle success response
-            toast.success('Successfully submitted!');
+          
             // Clear form fields
+            Config?.toastalert("Submitted Successfully", "success")
             setListInstanceData((prevstate) => {
                 return [...prevstate, response?.data]
             })
 
             handleClose();
         } catch (error) {
-            console.error('Error occurred:', error); // Handle error
-            toast.error('Submission failed. Please try again.');
+            if (error?.response?.status === 400) {
+                console.log(error);
+                setErrorMsg(error?.response?.data)
+                Config?.toastalert("Submission Failed", "warn")
+            }
+
+            else {
+                Config?.toastalert("Something Went Wrong", "error")
+            }
         }
     };
 
@@ -221,11 +261,11 @@ function Complaint(props) {
     //UPDATE REQUESTS
 
     const updateInstance = (id) => {
-        // const check = checkSchemeValidation()
+        const check = checkValidation()
 
-        // if (!check) {
-        //   return
-        // }
+        if (!check) {
+            return
+        }
 
         const data = new FormData()
         // data.append('date', name)
@@ -233,15 +273,18 @@ function Complaint(props) {
         data.append('ward', instanceData?.ward);
         data.append('address', instanceData?.address);
         data.append('details', instanceData?.details);
-        // data.append('image', instanceData?.image);
+        if (image) {
+            data.append('image', image);
+        }
         data.append('type', instanceData?.type);
+        data.append('street', instanceData?.street);
 
         axios
             .put(`${Config.BASE_URL}complaintsedit/${id}/`, data, Config.config)
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response)
-
+                    Config?.toastalert("Updated Successfully", "success")
                     setListInstanceData((prevArray) => {
                         const index = prevArray.findIndex((obj) => obj.id === id)
                         if (index !== -1) {
@@ -253,33 +296,50 @@ function Complaint(props) {
                         }
                         return prevArray
                     })
-                    // setIsOpen(false)
+                   
                     handleClose()
 
-                    // $('#myModal').modal('show')
-                    // $('.modal-backdrop').show();
+                  
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Updation Failed", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
             })
     }
 
     //DELETE REQUESTS
 
     const deleteInstance = (id) => {
-        console.log('deleting')
+       
 
         axios.delete(`${Config.BASE_URL}complaintsdelete/${id}`, Config.config)
             .then(function (response) {
                 if (response.status === 204) {
                     console.log(response)
+                    Config?.toastalert("Deleted Successfully", "info")
+
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
                     handleClose();
                 }
             })
             .catch(function (error) {
-                console.log(error)
+                  if (error?.response?.status === 400) {
+                    console.log(error);
+                    setErrorMsg(error?.response?.data)
+                    Config?.toastalert("Failed to Delete", "warn")
+                }
+
+                else {
+                    Config?.toastalert("Something Went Wrong", "error")
+                }
                 handleClose();
             })
     }
@@ -299,13 +359,13 @@ function Complaint(props) {
             }
             console.log(e.target.files[0].name)
             let value = e.target.files[0]
-            // setImage(value)
-            setInstanceData((prevstate) => {
-                return {
-                    ...prevstate, [name]: value
-                }
+            setImage(value)
+            // setInstanceData((prevstate) => {
+            //     return {
+            //         ...prevstate, [name]: value
+            //     }
 
-            })
+            // })
         }
         else {
 
@@ -323,6 +383,19 @@ function Complaint(props) {
 
 
 
+    const handleDateChange = (e) => {
+        const date = Config?.DateFormater(e)
+        setInstanceData((prevstate) => {
+            return {
+                ...prevstate, start_date: date
+            }
+
+        })
+
+    };
+
+
+
 
     return (
 
@@ -331,421 +404,6 @@ function Complaint(props) {
         <>
 
             <ToastContainer />
-            {!hide &&
-                (<>
-
-                    {props?.path === "list" && (
-
-
-                        <>
-
-                            {isAddRequest && (
-
-                                <ViewModal />
-                            )}
-
-                            <div className="content">
-                                <div className="page-header">
-                                    <div class="page-title">
-                                        <h4>Request List</h4>
-                                    </div>
-                                    <div class="page-btn">
-                                        <button class="btn btn-primary" onClick={() => setIsAddRequest(true)}>
-                                            <span class="glyphicon glyphicon-user"></span> Add Request
-                                        </button>
-
-                                    </div>
-
-                                </div>
-
-                                {open && (
-                                    <Modal
-                                        // keepMounted
-                                        open={open}
-                                        onClose={handleClose}
-                                        aria-labelledby="keep-mounted-modal-title"
-                                        aria-describedby="keep-mounted-modal-description"
-                                    >
-                                        <Box sx={style}>
-                                            <div className="modal-content">
-                                                <h3 style={{ marginLeft: 20 }}>
-                                                    Request{' '}
-                                                </h3>
-                                                <div className="modal-body">
-                                                    <div className="card">
-                                                        <div className="card-body">
-                                                            <div className="row">
-                                                                <div className="col-lg-6 col-sm-6 col-12">
-                                                                    <div className="form-group">
-                                                                        <label style={{ color: 'grey' }}> Name : <span className="form-required">*</span></label>
-                                                                        <input type="text" className="form-control" name="name" onChange={(e) => setName(e?.target?.value)} defaultValue={name || ''} required />
-                                                                    </div>
-                                                                </div>
-                                                                <div className="col-lg-6 col-sm-6 col-12">
-                                                                    <div className="form-group">
-                                                                        <label style={{ color: 'grey' }}>
-                                                                            Ward No :
-                                                                        </label>
-                                                                        <select name="ward_no" id="" className="custom-dropdown" onChange={(e) => setwardnum(e?.target?.value)} defaultValue={wardnum || ''}>
-                                                                            <option disabled selected value>
-                                                                                -----------
-                                                                            </option>
-                                                                            {wardlist?.map((e) => (<option value={e?.id}>{e?.ward_no}</option>))}
-                                                                        </select>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div className="row">
-                                                                <div className="col-lg-6 col-sm-6 col-12">
-                                                                    <div className="form-group">
-                                                                        <label style={{ color: 'grey' }}>Request Address : <span className="form-required">*</span></label>
-                                                                        <textarea className="form-control" name="address" onChange={(e) => setAddress(e?.target?.value)} defaultValue={address || ''} required cols="30" rows="2"></textarea>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="col-lg-6 col-sm-6 col-12">
-                                                                    <div className="form-group">
-                                                                        <label style={{ color: 'grey' }}>Request Details :</label>
-                                                                        <textarea className="form-control" name="details" onChange={(e) => setDetails(e?.target?.value)} defaultValue={details || ''} required cols="30" rows="2"></textarea>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div className="row">
-                                                                <div className="col-lg-12 col-sm-12 col-12">
-                                                                    <div className="form-group">
-                                                                        <label style={{ color: 'grey' }}>Image : <span className="form-required">*</span></label>
-                                                                        <input type="file" className="form-control" id="fileInput" onChange={(e) => setImage(e?.target?.value)} defaultValue={image || ''} required multiple accept="image/*" />
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="modal-footer">
-                                                    {isedit && (
-                                                        <button
-                                                            type="submit"
-                                                            className="btn btn-success" onClick={() => updateInstance(id)}
-
-                                                        >
-                                                            Save
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-danger"
-                                                        data-dismiss="modal"
-                                                        onClick={handleClose}
-                                                    >
-                                                        Close
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </Box>
-                                    </Modal>
-                                )}
-
-                                <div className="card">
-                                    <div className="card-body">
-                                        <div className="row">
-                                            <div className="col-md-3 col-lg-3 col-xs-8">
-                                                <div className="form-group">
-                                                    <label for="fromDate">Ward No :</label>
-                                                    <select name="" id="" className="custom-dropdown">
-                                                        <option value="">01</option>
-                                                        <option value="">02</option>
-                                                        <option value="">03</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div className="col-md-2 col-lg-2 col-xs-4">
-
-                                                <div className="form-group">
-                                                    <label for="fromDate" style={{ color: "white" }}>Search :</label>
-                                                    <button className="btn btn-success" onclick="getReport()">Search</button>
-                                                </div>
-                                            </div>
-                                            <div className="col-md-2 col-lg-2 col-xs-6">
-                                                <div class="form-group">
-                                                    <label for="fromDate">From Date :</label>
-                                                    <input type="date" className="form-control" id="fromDate" />
-                                                </div>
-                                            </div>
-                                            <div className="col-md-2 col-lg-2 col-xs-6">
-                                                <div class="form-group">
-                                                    <label for="toDate">To Date :</label>
-                                                    <input type="date" class="form-control" id="toDate" />
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-3 col-lg-3 col-xs-6">
-
-                                                <div class="form-group">
-                                                    <label for="fromDate" style={{ color: "white" }}>Next :</label>
-                                                    <button class="btn btn-success" onclick="getReport()">Get</button>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                        <div class="table-responsive">
-                                            <table class="table table-bordered">
-                                                <thead>
-                                                    <tr class="table-info">
-                                                        <th>S NO</th>
-                                                        <th>Request ID</th>
-                                                        <th>Date</th>
-                                                        <th>Name</th>
-                                                        <th>Ward No</th>
-                                                        <th>Request Type</th>
-                                                        <th>Address </th>
-                                                        <th>Details </th>
-                                                        <th>Image</th>
-                                                        <th>Action</th>
-                                                    </tr>
-
-                                                </thead>
-                                                <tbody>
-                                                    {listInstanceData?.map((requests, e) => (
-                                                        <tr key={requests.id}>
-                                                            <td><td>{e + 1}</td></td>
-                                                            <td>{requests.request_id}</td>
-                                                            <td>{requests.date}</td>
-                                                            <td>{requests.name}</td>
-                                                            <td>{requests.ward}</td>
-                                                            <td>{requests.type}</td>
-                                                            <td>{requests.address}</td>
-
-                                                            <td>{requests.details}</td>
-                                                            <td><img src={Config.MEDIA_URL + requests.image} /></td>
-                                                            {/* <td>{requests.details}</td> */}
-                                                            <td>
-                                                                <button
-                                                                    class="btn btn-success"
-                                                                    onClick={() => getInstanceData(requests?.id, true)}
-
-                                                                >
-                                                                    <span class="glyphicon glyphicon-pencil"></span>{' '}
-                                                                    Edit
-                                                                </button>
-                                                                <button
-                                                                    class="btn btn-info" onClick={handleOpenEvent}
-
-                                                                >
-                                                                    <span class="glyphicon glyphicon-eye-open"></span>{' '}
-                                                                    View
-                                                                </button>
-                                                                <button class="btn btn-danger" onClick={() => deleteInstance(requests?.id)}>
-                                                                    <span
-                                                                        class="glyphicon glyphicon-trash"
-
-                                                                    ></span>{' '}
-                                                                    Delete
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-
-                        </>
-                    )}
-
-
-                    {props?.path === 'public-toilet' && (
-                        <div className="content">
-                            <div className="page-header">
-                                <div className="page-title">
-                                    <h4>Public Toilet Request</h4>
-                                </div>
-                            </div>
-                            <div className="tab-pane active" id="compl">
-                                <div className="tab-content">
-                                    <div className="tab-pane active" id="public">
-                                        <br />
-                                        <form onSubmit={handlePublicToiletSubmit}>
-                                            <div className="card">
-                                                <div className="card-body">
-                                                    <div className="row">
-                                                        <div className="col-lg-6 col-sm-6 col-12">
-                                                            <div className="form-group">
-                                                                <label style={{ color: 'grey' }}> Name : <span className="form-required">*</span></label>
-                                                                <input type="text" className="form-control" name="name" required value={publicToiletFormData.name} onChange={handlePublicToiletChange} />
-                                                            </div>
-                                                        </div>
-                                                        <div className="col-lg-6 col-sm-6 col-12">
-                                                            <div className="form-group">
-                                                                <label style={{ color: 'grey' }}>Ward No : <span className="form-required">*</span></label>
-                                                                <select name="wardnum" className="custom-dropdown" required value={publicToiletFormData.wardnum} onChange={handlePublicToiletChange}>
-                                                                    <option value="01">01</option>
-                                                                    <option value="02">02</option>
-                                                                    <option value="03">03</option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="row">
-                                                        <div className="col-lg-6 col-sm-6 col-12">
-                                                            <div className="form-group">
-                                                                <label style={{ color: 'grey' }}>Request Address : <span className="form-required">*</span></label>
-                                                                <textarea className="form-control" name="address" required value={publicToiletFormData.address} onChange={handlePublicToiletChange} cols="30" rows="2"></textarea>
-                                                            </div>
-                                                        </div>
-                                                        <div className="col-lg-6 col-sm-6 col-12">
-                                                            <div className="form-group">
-                                                                <label style={{ color: 'grey' }}>Request Details :</label>
-                                                                <textarea className="form-control" name="details" required value={publicToiletFormData.details} onChange={handlePublicToiletChange} cols="30" rows="2"></textarea>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="row">
-                                                        <div className="col-lg-12 col-sm-12 col-12">
-                                                            <div className="form-group">
-                                                                <label style={{ color: 'grey' }}>Image : <span className="form-required">*</span></label>
-                                                                <input type="file" className="form-control" id="fileInput" required multiple accept="image/*" onChange={handlePublicToiletFileChange} />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="card-footer">
-                                                <button type="submit" className="btn btn-success">Submit</button>
-                                                <button type="button" className="btn btn-danger">Cancel</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-
-
-                    {props?.path === "tank-cleaning" && (
-
-
-                        <div class="content">
-                            <div class="page-header">
-                                <div class="page-title">
-                                    <h4>Specific Tank Cleaning Request</h4>
-
-                                </div>
-
-                            </div>
-
-                            <div class="tab-pane active" id="compl">
-
-                                <div class="tab-content">
-                                    <div class="tab-pane active" id="public">
-                                        <br />
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <div class="row">
-                                                    <div class="col-lg-6 col-sm-6 col-12">
-                                                        <div class="form-group">
-                                                            <label style={{ color: "grey" }}> Name : <span class="form-required">*</span></label>
-                                                            <input type="hidden" class="form-control" name="" value="" />
-                                                            <input type="text" class="form-control" name="" value="" />
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-lg-6 col-sm-6 col-12">
-                                                        <div class="form-group">
-                                                            <label style={{ color: "grey" }}>Ward No : <span class="form-required">*</span></label>
-                                                            <select name="" id="" className="custom-dropdown"
-
-                                                            >
-                                                                <option value="">01</option>
-                                                                <option value="">02</option>
-                                                                <option value="">03</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-lg-6 col-sm-6 col-12">
-                                                        <div class="form-group">
-                                                            <label style={{ color: "grey" }}>Request Address : <span class="form-required">*</span></label>
-                                                            <textarea class="form-control" name="" id="" cols="30" rows="2"></textarea>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-lg-6 col-sm-6 col-12">
-                                                        <div class="form-group">
-                                                            <label style={{ color: "grey" }}>Request Details :</label>
-                                                            <textarea class="form-control" name="" id="" cols="30" rows="2"></textarea>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-lg-12 col-sm-12 col-12">
-                                                        <div class="form-group">
-                                                            <label style={{ color: "grey" }}>Request Images : <span class="form-required">*</span></label>
-                                                            <input type="file" class="form-control" id="fileInput" multiple accept="image/*" onchange="handleFiles(this.files)" />
-                                                            <div id="preview"></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                        <div class="card-footer">
-                                            <button class="btn btn-success">Submit</button>
-                                            <button class="btn btn-danger">Cancel</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                {/* <div class="tab-pane fade" id="specific">
-                            <br />
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-lg-6 col-sm-6 col-12">
-                                            <div class="form-group">
-                                                <label style={{ color: "grey" }}> Name : <span class="form-required">*</span></label>
-                                                <input type="hidden" class="form-control" name="" value="" />
-                                                <input type="text" class="form-control" name="" value="" />
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-6 col-sm-6 col-12">
-                                            <div class="form-group">
-                                                <label style={{ color: "grey" }}>Ward No : <span class="form-required">*</span></label>
-                                                <input type="text" class="form-control" name="" value="" />
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-6 col-sm-6 col-12">
-                                            <div class="form-group">
-                                                <label style={{ color: "grey" }}>Request Address : <span class="form-required">*</span></label>
-                                                <textarea class="form-control" name="" id="" cols="30" rows="2"></textarea>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-6 col-sm-6 col-12">
-                                            <div class="form-group">
-                                                <label style={{ color: "grey" }}>Request Details :</label>
-                                                <textarea class="form-control" name="" id="" cols="30" rows="2"></textarea>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-12 col-sm-12 col-12">
-                                            <div class="form-group">
-                                                <label style={{ color: "grey" }}>Request Images : <span class="form-required">*</span></label>
-                                                <input type="file" class="form-control" id="fileInput" multiple accept="image/*" onchange="handleFiles(this.files)" />
-                                                <div id="preview"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card-footer">
-                                    <button class="btn btn-success">Submit</button>
-                                    <button class="btn btn-danger">Cancel</button>
-                                </div>
-                            </div>
-                        </div> */}
-
-                            </div>
-                        </div>
-
-                    )}
-
-                </>)}
 
 
 
@@ -756,14 +414,43 @@ function Complaint(props) {
                     {
                         (isOpen || isAdd) && (
 
-                            <CustomizedDialogs
+                            // <CustomizedDialogs
+                            //     setIsOpen={setIsOpen}
+                            //     isAdd={isAdd}
+                            //     error={error}
+
+                            //     setListData={tableData}
+                            //     instanceData={instanceData}
+                            //     setInstanceData={setInstanceData}
+                            //     handleClose={handleClose}
+
+                            //     // functions
+                            //     addInstance={addNewInstance}
+                            //     updateInstance={updateInstance}
+                            //     deleteInstance={deleteInstance}
+                            //     handleChange={handleChange}
+                            //     wardlist={wardlist}
+                            //     requestTypeList={complaintTypeList}
+                            //     modalHeader ={modalHeader}
+
+                            // // setImage={setImage}
+                            // // image={image}
+                            // />
+
+                            <FormModal
+                                modalHeader={modalHeader}
+                                lazyLoading={lazyLoading}
                                 setIsOpen={setIsOpen}
                                 isAdd={isAdd}
+                                isedit={isedit}
+                                setisEdit={setisEdit}
                                 error={error}
+                                errorMsg={errorMsg}
 
                                 setListData={tableData}
                                 instanceData={instanceData}
                                 setInstanceData={setInstanceData}
+
                                 handleClose={handleClose}
 
                                 // functions
@@ -771,33 +458,51 @@ function Complaint(props) {
                                 updateInstance={updateInstance}
                                 deleteInstance={deleteInstance}
                                 handleChange={handleChange}
-                                wardlist={wardlist}
-                                requestTypeList={complaintTypeList}
-                                modalHeader ={modalHeader}
 
-                            // setImage={setImage}
-                            // image={image}
+                                child={<Child
+                                    lazyLoading={lazyLoading}
+                                    setIsOpen={setIsOpen}
+                                    isAdd={isAdd}
+                                    isedit={isedit}
+
+                                    error={error}
+                                    errorMsg={errorMsg}
+                                    errString={errString}
+
+                                    setListData={tableData}
+                                    instanceData={instanceData}
+                                    setInstanceData={setInstanceData}
+
+                                    handleClose={handleClose}
+                                    handleChange={handleChange}
+                                    // handleMainChange={handleMainChange}
+
+                                    wardlist={wardlist}
+                                    streetList={streetList}
+                                    complaintTypeList={complaintTypeList}
+                                    image={image}
+                                    setImage={setImage}
 
 
+                                />}
                             />
+
+
+
                         )
                     }
-                    <div className="content">
-                        <div className="page-header">
-                            <div className="page-title">
-                                <h4>{modalHeader}s Details</h4>
-                            </div>
-                            <div className="page-btn">
-                                <AddButton
-                                    onClick={() => setisAdd(true)}
-                                    text={"Create " +modalHeader}
-                                />
+
+                    <Grid item xs={12} sm={6}>
+                        <Typography variant="h6">{modalHeader}s Details</Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+                        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
+                            Create {modalHeader}
+                        </Button>
+                    </Grid>
 
 
-                            </div>
-                        </div>
-
-
+                    <Grid item xs={12}>
                         <CustomTable
                             headers={headersToShow}
                             data={tableData}
@@ -807,7 +512,7 @@ function Complaint(props) {
                             loader={loader}
                             setLoader={setLoader}
                         />
-                    </div>
+                    </Grid>
                 </>
             )}
 
@@ -828,246 +533,203 @@ export default Complaint;
 
 
 
-function ViewModal(props) {
-
-    const { setIsOpen, viewEmployee, getRoleLabel, edit, setViewEmployee, setPermEmployee, roles, handleClose, setError, setImage, image } = props
 
 
 
-    const [publicToiletFormData, setPublicToiletFormData] = useState({
-        request_id: '3',
-        name: '',
-        wardnum: '',
-        address: '',
-        details: '',
-        image: null,
-        type: '21'
-    });
+const Child = (props) => {
 
-    const [instanceData, setTankCleaningFormData] = useState({
-        request_id: '4',
-        name: '',
-        wardnum: '',
-        address: '',
-        details: '',
-        image: null,
-        type: '22'
-    });
-
-    const handlePublicToiletChange = (e) => {
-        const { name, value } = e.target;
-        setPublicToiletFormData({ ...publicToiletFormData, [name]: value });
-    };
-
-    const handleTankCleaningChange = (e) => {
-        const { name, value } = e.target;
-        setTankCleaningFormData({ ...tankCleaningFormData, [name]: value });
-    };
-
-    const handlePublicToiletFileChange = (e) => {
-        setPublicToiletFormData({ ...publicToiletFormData, image: e.target.files });
-    };
-
-    const handleTankCleaningFileChange = (e) => {
-        setTankCleaningFormData({ ...tankCleaningFormData, image: e.target.files });
-    };
+    const { lazyLoading, setIsOpen, isAdd, isedit,
+        errorMsg, errString, error,
+        instanceData, setList, setInstanceData,
+        handleChange, handleClose,
+        wardlist, streetList, image, setImage, complaintTypeList
 
 
+    } = props
 
-
-
-    const handlePublicToiletSubmit = async (e) => {
-        e.preventDefault();
-        const data = new FormData();
-        data.append('name', publicToiletFormData.name);
-        data.append('wardnum', publicToiletFormData.wardnum);
-        data.append('address', publicToiletFormData.address);
-        data.append('details', publicToiletFormData.details);
-        if (publicToiletFormData.image) {
-            for (let i = 0; i < publicToiletFormData.image.length; i++) {
-                const file = publicToiletFormData.image[i];
-                // Check if the file format is allowed
-                if (file.type === 'image/png' || file.type === 'image/jpeg' || file.type === 'image/jpg') {
-                    data.append('image', file);
-                } else {
-                    // Display alert for disallowed file format
-                    alert('Only PNG, JPG, and JPEG formats are allowed for images.');
-                    return; // Prevent form submission
-                }
-            }
-        }
-
-        try {
-            const response = await axios.post(`${Config.BASE_URL}request/`, data);
-            console.log(response.data); // Handle success response
-            toast.success('Successfully submitted!');
-            setPublicToiletFormData({
-                request_id: '3',
-                name: '',
-                wardnum: '',
-                address: '',
-                details: '',
-                image: null,
-                type: '21'
-            });
-        } catch (error) {
-            console.error('Error occurred:', error); // Handle error
-            toast.error('Submission failed. Please try again.');
-        }
-    };
-
-
-    const handleTankCleaningSubmit = async (e) => {
-        e.preventDefault();
-        const data = new FormData();
-        data.append('name', tankCleaningFormData.name);
-        data.append('wardnum', tankCleaningFormData.wardnum);
-        data.append('address', tankCleaningFormData.address);
-        data.append('details', tankCleaningFormData.details);
-
-        // Check if an image is selected
-        if (tankCleaningFormData.image) {
-            for (let i = 0; i < tankCleaningFormData.image.length; i++) {
-                const image = tankCleaningFormData.image[i];
-                const allowedFormats = ['image/png', 'image/jpeg', 'image/jpg'];
-
-                // Check if the format of the selected image is allowed
-                if (!allowedFormats.includes(image.type)) {
-                    // If not allowed, show an alert and prevent form submission
-                    alert('Unsupported file format. Please select an image in PNG, JPEG, or JPG format.');
-                    return;
-                }
-
-                // If the format is allowed, append the image to the FormData
-                data.append('image', image);
-            }
-        }
-
-        try {
-            const response = await axios.post(`${Config.BASE_URL}request/`, data);
-            console.log(response.data); // Handle success response
-            toast.success('Successfully submitted!');
-            // Clear form fields
-            setTankCleaningFormData({
-                request_id: '4',
-                name: '',
-                wardnum: '',
-                address: '',
-                details: '',
-                image: null,
-                type: '22'
-            });
-        } catch (error) {
-            console.error('Error occurred:', error); // Handle error
-            toast.error('Submission failed. Please try again.');
-        }
-    };
 
     return (
-        <div>
 
-            <Modal
-                // keepMounted
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="keep-mounted-modal-title"
-                aria-describedby="keep-mounted-modal-description"
-            >
-                <Box
-                    sx={style}
-                >
-                    <div class="modal-content"  >
-                        <h3
-                            style={{ marginLeft: 20 }}
-                        >Request</h3>
-                        <div class="modal-body">
+        <>
 
+            <Grid container spacing={2}>
+                {/* First Name */}
+                <Grid item xs={12} md={6} sm={6}>
+                    <TextInput
 
-                            <div className="content">
+                        label="Name"
+                        placeholder="Name"
+                        name={"name"}
+                        value={instanceData?.name}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"name"}
 
-
-
-                                <form onSubmit={handlePublicToiletSubmit}>
-                                    <div className="card">
-                                        <div className="card-body">
-                                            <div className="row">
-                                                <div className="col-lg-6 col-sm-6 col-12">
-                                                    <div className="form-group">
-                                                        <label style={{ color: 'grey' }}> Name : <span className="form-required">*</span></label>
-                                                        <input type="text" className="form-control" name="name" required value={publicToiletFormData.name} onChange={handlePublicToiletChange} />
-                                                    </div>
-                                                </div>
-                                                <div className="col-lg-6 col-sm-6 col-12">
-                                                    <div className="form-group">
-                                                        <label style={{ color: 'grey' }}>Ward No : <span className="form-required">*</span></label>
-                                                        <select name="wardnum" className="custom-dropdown" required value={publicToiletFormData.wardnum} onChange={handlePublicToiletChange}>
-                                                            <option value="01">01</option>
-                                                            <option value="02">02</option>
-                                                            <option value="03">03</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="row">
-                                                <div className="col-lg-6 col-sm-6 col-12">
-                                                    <div className="form-group">
-                                                        <label style={{ color: 'grey' }}>Request Address : <span className="form-required">*</span></label>
-                                                        <textarea className="form-control" name="address" required value={publicToiletFormData.address} onChange={handlePublicToiletChange} cols="30" rows="2"></textarea>
-                                                    </div>
-                                                </div>
-                                                <div className="col-lg-6 col-sm-6 col-12">
-                                                    <div className="form-group">
-                                                        <label style={{ color: 'grey' }}>Request Details :</label>
-                                                        <textarea className="form-control" name="details" required value={publicToiletFormData.details} onChange={handlePublicToiletChange} cols="30" rows="2"></textarea>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="row">
-                                                <div className="col-lg-12 col-sm-12 col-12">
-                                                    <div className="form-group">
-                                                        <label style={{ color: 'grey' }}>Image : <span className="form-required">*</span></label>
-                                                        <input type="file" className="form-control" id="fileInput" required multiple accept="image/*" onChange={handlePublicToiletFileChange} />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
+                    />
+                </Grid>
 
 
+                <Grid item xs={12} md={6} sm={6}>
+                    <TextInput
+                        label="Contact Number"
+                        placeholder="Name"
+                        name="phone_number"
+                        value={instanceData?.phone_number}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"phone_number"}
+                        type={"Number"}
 
-                            </div>
-                        </div>
-
-                        <div class="modal-footer">
-                            {edit && (
-                                <button type="submit" class="btn btn-success" onClick={() => updateEmployee(viewEmployee?.id)} >Save</button>
-                            )}
-
-                            <button type="button" class="btn btn-danger" data-dismiss="modal" onClick={handleClose}>Close</button>
-                        </div>
-
-                    </div>
+                    />
+                    {errString && (
+                        <span className="req-text">{errString}</span>
+                    )}
+                </Grid>
 
 
+                <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={wardlist}
+                        handleChange={handleChange}
+                        selected={instanceData?.ward}
+                        showname={"name"}
+                        name={"ward"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"ward"}
+                        label="Select Ward"
+                    />
+                </Grid>
 
 
+                <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={streetList}
+                        handleChange={handleChange}
+                        selected={instanceData?.street}
+                        showname={"name"}
+                        name={"street"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"street"}
+                        label="Select Street"
+                    />
+
+                </Grid>
 
 
-                </Box>
-            </Modal>
-
+                <Grid item xs={12} md={6} sm={6}>
+                    <SelectDropDown
+                        list={complaintTypeList}
+                        handleChange={handleChange}
+                        selected={instanceData?.type}
+                        showname={"type"}
+                        name={"type"}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"type"}
+                        label="Select Complaint Type"
+                    />
+                </Grid>
 
 
 
-        </div>
-    );
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <FileUploadComponent
+                        filelabel="Image"
+                        name="image"
+                        value={instanceData?.image}
+                        required={true}
+                        handleChange={handleChange}
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        image={image}
+                        setImage={setImage}
+                        errorMsg={errorMsg}
+                        errorField={"image"}
+                    />
+
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                    <TextInput
+                        label="Address"
+                        placeholder="Address"
+                        name="address"
+                        value={instanceData?.address}
+                        required={true}
+                        handleChange={handleChange}   //for main element change
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        errorMsg={errorMsg}
+                        errorField={"address"}
+                        multiline={true}
+                        rows={2}
+
+                    />
+
+                </Grid>
+
+                <Grid item xs={12} md={6} sm={6}>
+
+                </Grid>
+
+
+                <Grid item xs={12} md={12} sm={12}>
+
+                    <TextInput
+                        label="Details"
+                        placeholder="details"
+                        name="details"
+                        value={instanceData?.details}
+                        required={true}
+                        handleChange={handleChange}   //for main element change
+                        disabled={!isedit && !isAdd}
+                        error={error}
+                        // errorMsg={errorMsg}
+                        errorField={"details"}
+                        multiline={true}
+                        rows={4}
+
+                    />
+
+                </Grid>
+
+
+
+            </Grid>
+
+
+
+
+        </>
+
+
+
+    )
 }
+
+
+
+
+
 
 
 function CustomizedDialogs(props) {
 
-    const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd,modalHeader,
+    const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader,
         deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, requestTypeList
         // setError, setImage, image 
     } = props
@@ -1114,7 +776,7 @@ function CustomizedDialogs(props) {
 
             >
                 <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title" >
-                    <h6>{modalHeader+"s"} Details
+                    <h6>{modalHeader + "s"} Details
 
                         {!isAdd && (
                             // <EditIcon 

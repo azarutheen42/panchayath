@@ -5,6 +5,7 @@ import { useContext, createContext } from 'react';
 
 
 
+
 import * as React from 'react';
 import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -94,8 +95,6 @@ export default function SideBar(props) {
 
   };
 
-
-
   const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
     ({ theme, open }) => ({
       '& .MuiDrawer-paper': {
@@ -133,6 +132,8 @@ export default function SideBar(props) {
 
   const handlenavigate = (e) => {
 
+
+
     navigate("?" + e)
 
   }
@@ -163,8 +164,8 @@ export default function SideBar(props) {
             px: [1],
           }}
         >
-          <div class="header-left active">
-            <img src="assets/img/logo.png" alt />
+          <div>
+            <img src="assets/img/logo.png" alt="vinsup" className="img-fluid" />
           </div>
           <IconButton onClick={toggleDrawer}>
 
@@ -198,7 +199,9 @@ export default function SideBar(props) {
 
 
           {/* COLLECTORS */}
-          <ListItemButton onClick={() => handleClick("collector")}>
+          <ListItemButton onClick={() => handleClick("collector")} 
+          // className={show?.collector && "bg-info"}
+          >
             <ListItemIcon>
               <BarChartIcon />
             </ListItemIcon>
@@ -454,7 +457,7 @@ export default function SideBar(props) {
 
           <Collapse in={show?.masters} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-{/* 
+              {/* 
               <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=masters&s=panchayath")}>
                 <ListItemIcon>
                   <StarBorder />
