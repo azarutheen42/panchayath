@@ -19,12 +19,16 @@ import TextField from '@mui/material/TextField';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { ToastContainer } from "react-toastify";
+import { AccountCircle } from "@mui/icons-material";
 
 
 
 function Login() {
     const [phone, setPhone] = useState()
     const [password, setPassword] = useState()
+
+    // const [phone, setPhone] = useState(9715636823)
+    // const [password, setPassword] = useState("azar3255")
 
     const [error, setError] = useState()
     const [visible, setVisible] = useState(false)
@@ -60,6 +64,7 @@ function Login() {
         data.append("phone", phone)
         data.append("password", password)
 
+
         axios.post(`${Config.BASE_URL + Config.LOGIN_URL}`,
             data
         )
@@ -94,8 +99,7 @@ function Login() {
                     // setError(error?.response?.data)
                     Config?.toastalert("Invalid Credential", "warn")
                 }
-                else if (error?.response?.status === 400){
-      
+                else if (error?.response?.status === 400) {
                     Config?.toastalert(error?.response?.data?.detail[0], "warn")
 
                 }
@@ -107,119 +111,134 @@ function Login() {
     }
 
 
+    const handlePhoneNumberChange = (e) => {
+        const { name, value } = e.target
+
+        const inputValue = e.target.value;
+        if (inputValue.length <= 10) {
+            setPhone(value)
+        }
+    }
 
 
+    const [showPassword, setShowPassword] = React.useState(false);
 
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+  
 
     return (
         <>
 
             <ToastContainer />
 
-            <div class="auth-page-wrapper pt-5">
-                <div class="container">
-                    <div class="row justify-content-center">
-                        <div class="col-md-8 col-lg-6 col-xl-5">
-                            <div class="card">
+            <div className="auth-page-wrapper pt-5">
+                <div className="container">
+                    <div className="row justify-content-center">
+                        <div className="col-md-8 col-lg-6 col-xl-5">
+                            <div className="card">
 
-                                <div class="card-body p-4">
-                                    <div class="text-center mt-2">
-                                        <h5 class="text-primary">Welcome Back !</h5>
-                                        <p class="text-muted">Sign in to continue to vinsup.</p>
+                                <div className="card-body p-4">
+                                    <div className="text-center mt-2">
+                                        <h5 className="text-primary">Welcome Back !</h5>
+                                        <p className="text-muted">Sign in to continue to vinsup.</p>
                                     </div>
-                                    <div class="p-2 mt-4">
+                                    <div className="p-2 mt-4">
 
 
-                                        <div class="mb-3">
-                                            {/* <label for="username" class="form-label">Phone Number</label>
-                                            <input type="number" class="form-control" id="username" placeholder="Enter Phone number" onChange={(e) => setPhone(e.target.value)}
-                                            />
-                                            <p>{error || " "}</p> */}
+                                        {/* <div className="mb-3"> */}
 
-
-                                            <FormControl fullWidth variant="outlined">
-                                                <label htmlFor="outlined-adornment-phone">Phone</label>
-                                                <TextField
-                                                    id="outlined-adornment-phone"
-                                                    value={phone}
-                                                    onChange={(e) => setPhone(e.target.value)}
-                                                    fullWidth
-                                                    style={{ minHeight: 50 }}
-                                                    size='small'
-                                                    inputprops={{
-                                                        style: {
-                                                            // height: '40px', // Set a fixed height
-                                                            transition: 'none' // Disable transitions
-                                                        }
-                                                    }}
-                                                    variant="outlined"
-
-                                                    type="number"
-                                                />
-                                            </FormControl>
-                                            <span>{error || " "}</span>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            {/* <div class="float-end">
-                                                <a href="/password-reset" class="text-muted">Forgot password?</a>
-                                            </div> */}
-                                            {/* <label class="form-label" for="password-input">Password</label>
-                                            <div class="position-relative auth-pass-inputgroup mb-3">
-                                                <input type={visible ? "text" : "password"} class="form-control pe-5 password-input" placeholder="Enter password" id="password-input" onChange={(e) => setPassword(e.target.value)} />
-                                                <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted shadow-none password-addon" type="button" id="password-addon"
-                                                    onClick={() => { setVisible(!visible) }}
-
-                                                ><i class="ri-eye-fill align-middle"></i></button>
-                                            </div> */}
-
-
-                                            <FormControl fullWidth variant="outlined">
-                                                <label htmlFor="outlined-adornment-password">Password</label>
-                                                <OutlinedInput
-                                                    id="outlined-adornment-password"
-                                                    value={password}
-                                                    onChange={(e) => setPassword(e.target.value)}
-                                                    fullWidth
-                                                    size='small'
-                                                    // style={{ minHeight: 50 }}
-                                                    inputprops={{
-                                                        style: {
-                                                            height: '50px',
-                                                            transition: 'none'
-                                                        }
-                                                    }}
-                                                    // variant="outlined"
-
-                                                    type={visible ? 'text' : 'password'}
-                                                    endAdornment={
-                                                        <InputAdornment position="end"  >
-                                                            <IconButton
-                                                                aria-label="toggle password visibility"
-                                                                onClick={() => { setVisible(!visible) }}
-                                                                onMouseDown={handleMouseDownPassword}
-                                                                edge="end"
-                                                            >
-                                                                {visible ? <VisibilityOff /> : <Visibility />}
-                                                            </IconButton>
+                                        <FormControl fullWidth variant="outlined">
+                                            <label htmlFor="outlined-adornment-phone">Phone</label>
+                                            <TextField
+                                                id="outlined-adornment-phone"
+                                                value={phone}
+                                                onChange={handlePhoneNumberChange}
+                                                fullWidth
+                                                style={{ minHeight: 50 }}
+                                                size='small'
+                                                inputprops={{
+                                                    style: {
+                                                        transition: 'none'
+                                                    },
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <AccountCircle />
                                                         </InputAdornment>
+                                                    ),
+                                                }}
+
+
+                                                variant="outlined"
+                                                type="number"
+                                                disableUnderline={false}
+                                                // margin="normal"
+                                                placeholder="Phone Number"
+                                                autoFocus
+                                                required
+
+                                            />
+
+                                        </FormControl>
+                                        <span>{error || " "}</span>
+                                        {/* </div> */}
+
+                                        {/* <div className="mb-3"> */}
+                                        <div className="float-end">
+                                            <a href="/password-reset" className="text-muted">Forgot password?</a>
+                                        </div>
+
+                                        <FormControl fullWidth variant="outlined">
+                                            <label htmlFor="outlined-adornment-password">Password</label>
+                                            <OutlinedInput
+                                                id="outlined-adornment-password"
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                fullWidth
+                                                size='small'
+                                                style={{ minHeight: 45 }}
+                                                inputprops={{
+                                                    style: {
+                                                        // height: '45px',
+                                                        transition: 'none',
+                                                        border: 'none', "& fieldset": { border: 'none' }
                                                     }
+                                                }}
+                                                // variant="outlined"
+                                                type={visible ? 'text' : 'password'}
+                                                endAdornment={
+                                                    <InputAdornment position="end"   >
+                                                        <IconButton
+                                                            aria-label="toggle password visibility"
+                                                            onClick={() => { setVisible(!visible) }}
+                                                            onMouseDown={handleMouseDownPassword}
+                                                            edge="end"
 
-                                                />
-                                            </FormControl>
 
+                                                        >
+                                                            {visible ? <VisibilityOff /> : <Visibility />}
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                                }
+                                            />
+
+                                           
+                                        </FormControl>
+
+                                        {/* </div> */}
+
+                                        <div className="form-check">
+                                            <input className="form-check-input" type="checkbox" value="" id="auth-remember-check" />
+                                            <label className="form-check-label" htmlFor="auth-remember-check">Remember me</label>
                                         </div>
 
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="" id="auth-remember-check" />
-                                            <label class="form-check-label" for="auth-remember-check">Remember me</label>
+                                        <div className="mt-4">
+                                            <button className="btn btn-success w-100" type="submit" onClick={validate}
+
+                                                disabled={!phone || !password}
+                                            >{loader && Config?.loader}Sign In</button>
                                         </div>
 
-                                        <div class="mt-4">
-                                            <button class="btn btn-success w-100" type="submit" onClick={validate}>{loader && Config?.loader}Sign In</button>
-                                        </div>
-
-                                        <div class="mt-1 text-center p-1">
+                                        <div className="mt-1 text-center p-1">
                                             {notify && (
                                                 <>
                                                     <span className="req-text">{notify}</span>
@@ -235,8 +254,8 @@ function Login() {
                             </div>
 
 
-                            {/* <div class="mt-4 text-center">
-                                <p class="mb-0">Don't have an account ? <a href="/sign-up" class="fw-semibold text-primary text-decoration-underline"> Signup </a> </p>
+                            {/* <div className="mt-4 text-center">
+                                <p className="mb-0">Don't have an account ? <a href="/sign-up" className="fw-semibold text-primary text-decoration-underline"> Signup </a> </p>
                             </div> */}
 
                         </div>
@@ -268,15 +287,15 @@ function Login() {
                     />
                 </FormControl> */}
 
-                <footer class="footer">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="text-center">
-                                    <p class="mb-0 text-muted">&copy;
+                <footer className="footer">
+                    <div className="container">
+                        <div className="row">
+                            <div className="col-lg-12">
+                                <div className="text-center">
+                                    <p className="mb-0 text-muted">&copy;
                                         <script>
                                             document.write(new Date().getFullYear())
-                                        </script> vinsup. Crafted with <i class="mdi mdi-heart text-danger"></i> by vinsup
+                                        </script> vinsup. Crafted with <i className="mdi mdi-heart text-danger"></i> by vinsup
                                     </p>
                                 </div>
                             </div>

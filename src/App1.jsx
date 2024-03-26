@@ -37,16 +37,18 @@ function App() {
   useEffect(() => {
 
     if (Config?.userState) {
-      getUser()
+      getUser();
+
+      getCollectorRoles();
+      getDistricts();
+      getWards();
+      getCities();
+      getPanchayaths();
+      getRequestType();
+      getCompalintType();
+      getStreet();
     }
-    getCollectorRoles();
-    getDistricts();
-    getWards();
-    getCities();
-    getPanchayaths();
-    getRequestType();
-    getCompalintType();
-    getStreet();
+   
 
   }, [])
 
