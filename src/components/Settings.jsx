@@ -41,6 +41,7 @@ import InputBox from "../utils/NumberInput";
 import { TextField } from '@mui/material';
 import MultipleSelect from "./MultiDropdown";
 import AddIcon from '@mui/icons-material/Add';
+import PaginationController from "../utils/Pagination";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -416,6 +417,15 @@ export default function settings(props) {
     const [errString, seterrString] = useState();
     const [lazyLoading, setLazyLoading] = useState(true);
 
+    //     const [page,setPage] =useState(1);
+    // const [count,setCount] =useState();
+    //  const [total, setTotal] = useState();
+
+
+    //     const handlePageChange =(event, value)=>{
+    //         setPage(value)
+    //     }
+
 
     const getPermissionName = (data) => {
 
@@ -472,8 +482,11 @@ export default function settings(props) {
 
     useEffect(() => {
         fetchListData();
+
         fetchRoleData();
         fetchPermissionData();
+
+
 
     }, [])
 

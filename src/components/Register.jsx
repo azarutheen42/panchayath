@@ -488,10 +488,10 @@ function UserRegister() {
             }
 
 
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={8}>
                 <Typography variant="h6">User Details</Typography>
             </Grid>
-            <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+            <Grid item xs={12} md={4} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
                 <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
                     Add User
                 </Button>

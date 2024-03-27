@@ -35,7 +35,8 @@ import { TextField } from '@mui/material';
 import MultipleSelect from "./MultiDropdown";
 
 import AddIcon from '@mui/icons-material/Add';
-import TimePicker from "../utils/TimePicker"
+import TimePicker from "../utils/TimePicker";
+import PaginationController from "../utils/Pagination"
 
 
 
@@ -139,6 +140,16 @@ function MinutesOfMeeting() {
     const [lazyLoading, setLazyLoading] = useState(true);
 
 
+    const [page, setPage] = useState(1);
+    const [count, setCount] = useState();
+    const [total, setTotal] = useState();
+
+
+    const handlePageChange = (event, value) => {
+        setPage(value)
+    }
+
+
 
     // META DATA
     const headersToShow = ["Date", "Time", "subject", "Place", "Held by", "Details"]
@@ -174,7 +185,7 @@ function MinutesOfMeeting() {
 
     useEffect(() => {
         fetchListData();
-    }, [])
+    }, [page])
 
 
 
@@ -182,10 +193,17 @@ function MinutesOfMeeting() {
     const fetchListData = async () => {
         try {
 
-            const response = await fetch(Config.BASE_URL + 'meeting', Config?.config)
+            const response = await fetch(Config.BASE_URL + `minutes-of-meeting?page=${page}`, Config?.config)
             const data = await response.json()
             console.log(data)
-            setListInstanceData(data)
+            if (response.status === 200) {
+                // setListInstanceData(data)
+                setListInstanceData(data?.results ? data?.results : data)
+                if (!total) {
+                    setTotal(Math.ceil(data?.count / data?.results?.length))
+                }
+                setCount(data?.count)
+            }
 
         } catch (error) {
             console.error('Error fetching data:', error)
@@ -246,19 +264,23 @@ function MinutesOfMeeting() {
         data.append('place', instanceData?.place)
         data.append('held_by', instanceData?.held_by)
         data.append('details', instanceData?.details)
-        if(image){
+        if (image) {
             data.append('image', image)
         }
-        
+
         try {
             const response = await axios.post(`${Config.BASE_URL}meeting/`, data, Config.config);
             console.log(response.data);
 
             Config?.toastalert("Submitted Successfully", "success")
 
-            setListInstanceData((prevstate) => {
-                return [...prevstate, response?.data]
-            })
+            // setListInstanceData((prevstate) => {
+            //     return [...prevstate, response?.data]
+            // })
+            // setListInstanceData([response?.data, ...listInstanceData.slice(0, -1)])
+            // setCount(count + 1)
+
+            fetchListData()
 
             handleClose();
         } catch (error) {
@@ -292,7 +314,7 @@ function MinutesOfMeeting() {
         data.append('place', instanceData?.place)
         data.append('held_by', instanceData?.held_by)
         data.append('details', instanceData?.details)
-        if(image){
+        if (image) {
             data.append('image', image)
         }
 
@@ -343,6 +365,7 @@ function MinutesOfMeeting() {
                     console.log(response)
                     Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
+                    setCount(count - 1)
                     handleClose();
                 }
             })
@@ -401,7 +424,7 @@ function MinutesOfMeeting() {
 
         <>
 
-     
+
 
             {hide && (
                 <>
@@ -488,10 +511,10 @@ function MinutesOfMeeting() {
                     }
 
 
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={8}>
                         <Typography variant="h6">{modalHeader + "s"} Details</Typography>
                     </Grid>
-                    <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+                    <Grid item xs={12} sm={4} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
                         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
                             Create
                         </Button>
@@ -507,6 +530,20 @@ function MinutesOfMeeting() {
                             getInstanceData={getInstanceData}
                             loader={loader}
                             setLoader={setLoader}
+                        />
+                    </Grid>
+
+
+                    <Grid item xs={12}>
+
+                        <PaginationController
+                            page={page}
+                            setPage={setPage}
+                            handlePageChange={handlePageChange}
+                            count={count}
+                            data={tableData}
+                            total={total}
+
                         />
                     </Grid>
                 </>
@@ -1037,6 +1074,17 @@ function Scheme() {
     const [lazyLoading, setLazyLoading] = useState(true);
 
 
+    const [page, setPage] = useState(1);
+    const [count, setCount] = useState();
+    const [total, setTotal] = useState();
+
+
+    const handlePageChange = (event, value) => {
+        setPage(value)
+    }
+
+
+
 
     // META DATA
     const headersToShow = ["Date", "Scheme Name", "Scheme period", "Announced by", "Details"]
@@ -1073,7 +1121,7 @@ function Scheme() {
 
 
         fetchListData();
-    }, [])
+    }, [page])
 
 
 
@@ -1081,10 +1129,17 @@ function Scheme() {
     const fetchListData = async () => {
         try {
 
-            const response = await fetch(Config.BASE_URL + getListUrl, Config?.config)
+            const response = await fetch(Config.BASE_URL + `get-scheme?page=${page}`, Config?.config)
             const data = await response.json()
             console.log(data)
-            setListInstanceData(data)
+            if (response.status === 200) {
+                // setListInstanceData(data)
+                setListInstanceData(data?.results ? data?.results : data)
+                if (!total) {
+                    setTotal(Math.ceil(data?.count / data?.results?.length))
+                }
+                setCount(data?.count)
+            }
 
         } catch (error) {
             console.error('Error fetching data:', error)
@@ -1147,16 +1202,19 @@ function Scheme() {
         data.append('Announced_by', instanceData?.Announced_by)
         data.append('details', instanceData?.details)
 
-        if(image){
+        if (image) {
             data.append('file', image)
         }
         try {
             const response = await axios.post(`${Config.BASE_URL}${postUrl}/`, data, Config.config);
             console.log(response.data);
             Config?.toastalert("Submitted Successfully", "success")
-            setListInstanceData((prevstate) => {
-                return [...prevstate, response?.data]
-            })
+            // setListInstanceData((prevstate) => {
+            //     return [...prevstate, response?.data]
+            // })
+            // setListInstanceData([response?.data, ...listInstanceData.slice(0, -1)])
+            // setCount(count + 1)
+            fetchListData()
 
             handleClose();
         } catch (error) {
@@ -1190,7 +1248,7 @@ function Scheme() {
         data.append('Period', instanceData?.Period)
         data.append('Announced_by', instanceData?.Announced_by)
         data.append('details', instanceData?.details)
-        if(image){
+        if (image) {
             data.append('file', image)
         }
 
@@ -1240,6 +1298,7 @@ function Scheme() {
                 if (response.status === 204) {
                     Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
+                    setCount(count - 1)
                     handleClose();
                 }
             })
@@ -1380,10 +1439,10 @@ function Scheme() {
                     }
 
 
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={8}>
                         <Typography variant="h6">{modalHeader + "s"} Details</Typography>
                     </Grid>
-                    <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+                    <Grid item xs={12} sm={4} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
 
                         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
                             Create {modalHeader}
@@ -1401,6 +1460,20 @@ function Scheme() {
                             getInstanceData={getInstanceData}
                             loader={loader}
                             setLoader={setLoader}
+                        />
+                    </Grid>
+
+
+                    <Grid item xs={12}>
+
+                        <PaginationController
+                            page={page}
+                            setPage={setPage}
+                            handlePageChange={handlePageChange}
+                            count={count}
+                            data={tableData}
+                            total={total}
+
                         />
                     </Grid>
 
@@ -1886,6 +1959,16 @@ function Events() {
     const [lazyLoading, setLazyLoading] = useState(true);
 
 
+    const [page, setPage] = useState(1);
+    const [count, setCount] = useState();
+    const [total, setTotal] = useState();
+
+
+    const handlePageChange = (event, value) => {
+        setPage(value)
+    }
+
+
 
     // META DATA
     const headersToShow = ["Date", "Time", "Event Name", "Place", "Details"]
@@ -1922,7 +2005,7 @@ function Events() {
 
 
         fetchListData();
-    }, [])
+    }, [page])
 
 
 
@@ -1930,10 +2013,17 @@ function Events() {
     const fetchListData = async () => {
         try {
 
-            const response = await fetch(Config.BASE_URL + getListUrl, Config?.config)
+            const response = await fetch(Config.BASE_URL + `get-events?page=${page}`, Config?.config)
             const data = await response.json()
             console.log(data)
-            setListInstanceData(data)
+            if (response.status === 200) {
+                // setListInstanceData(data)
+                setListInstanceData(data?.results ? data?.results : data)
+                if (!total) {
+                    setTotal(Math.ceil(data?.count / data?.results?.length))
+                }
+                setCount(data?.count)
+            }
 
         } catch (error) {
             console.error('Error fetching data:', error)
@@ -1997,7 +2087,7 @@ function Events() {
         data.append('Place', instanceData?.Place)
         data.append('details', instanceData?.details)
 
-        if(image){
+        if (image) {
             data.append('image', image)
         }
         try {
@@ -2005,9 +2095,12 @@ function Events() {
             console.log(response.data);
             Config?.toastalert("Submitted Successfully", "success")
 
-            setListInstanceData((prevstate) => {
-                return [...prevstate, response?.data]
-            })
+            // setListInstanceData((prevstate) => {
+            //     return [...prevstate, response?.data]
+            // })
+            // setListInstanceData([response?.data, ...listInstanceData.slice(0, -1)])
+            // setCount(count + 1)
+            fetchListData()
 
             handleClose();
         } catch (error) {
@@ -2040,7 +2133,7 @@ function Events() {
         data.append('event_name', instanceData?.event_name)
         data.append('Place', instanceData?.Place)
         data.append('details', instanceData?.details)
-        if(image){
+        if (image) {
             data.append('image', image)
         }
 
@@ -2090,7 +2183,8 @@ function Events() {
                 if (response.status === 204) {
                     console.log(response)
                     Config?.toastalert("Deleted Successfully", "info")
-                    setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
+                    setListInstanceData(listInstanceData?.filter((e) => e.id !== id));
+                    setCount(count + 1);
                     handleClose();
                 }
             })
@@ -2149,7 +2243,7 @@ function Events() {
 
         <>
 
-          
+
 
             {hide && (
                 <>
@@ -2256,6 +2350,20 @@ function Events() {
                             getInstanceData={getInstanceData}
                             loader={loader}
                             setLoader={setLoader}
+                        />
+                    </Grid>
+
+
+                    <Grid item xs={12}>
+
+                        <PaginationController
+                            page={page}
+                            setPage={setPage}
+                            handlePageChange={handlePageChange}
+                            count={count}
+                            data={tableData}
+                            total={total}
+
                         />
                     </Grid>
                 </>
@@ -2740,6 +2848,16 @@ function StaffNoticeBoard() {
     const [errString, seterrString] = useState();
     const [lazyLoading, setLazyLoading] = useState(true);
 
+
+    const [page, setPage] = useState(1);
+    const [count, setCount] = useState();
+    const [total, setTotal] = useState();
+
+
+    const handlePageChange = (event, value) => {
+        setPage(value)
+    }
+
     // META DATA
     const headersToShow = ["Date", "Subject", "Details"]
     const tableData = listInstanceData
@@ -2771,7 +2889,7 @@ function StaffNoticeBoard() {
 
 
         fetchListData();
-    }, [])
+    }, [page])
 
 
 
@@ -2779,10 +2897,18 @@ function StaffNoticeBoard() {
     const fetchListData = async () => {
         try {
 
-            const response = await fetch(Config.BASE_URL + getListUrl, Config?.config)
+            const response = await fetch(Config.BASE_URL + `get-staffnotice?page=${page}`, Config?.config)
             const data = await response.json()
             console.log(data)
-            setListInstanceData(data)
+            // setListInstanceData(data)
+            if (response.status === 200) {
+                setListInstanceData(data?.results ? data?.results : data)
+                if (!total) {
+                    setTotal(Math.ceil(data?.count / data?.results?.length))
+                }
+                setCount(data?.count)
+            }
+
 
         } catch (error) {
             console.error('Error fetching data:', error)
@@ -2844,16 +2970,19 @@ function StaffNoticeBoard() {
         data.append('subject', instanceData?.subject)
 
         data.append('details', instanceData?.details)
-        if(image){
+        if (image) {
             data.append('file', image)
         }
         try {
             const response = await axios.post(`${Config.BASE_URL}${postUrl}/`, data, Config.config);
             console.log(response.data);
             Config?.toastalert("Submitted Successfully", "success")
-            setListInstanceData((prevstate) => {
-                return [...prevstate, response?.data]
-            })
+            // setListInstanceData((prevstate) => {
+            //     return [...prevstate, response?.data]
+            // })
+            fetchListData()
+            // setListInstanceData([response?.data, ...listInstanceData.slice(0, -1)])
+            // setCount(count + 1)
 
             handleClose();
         } catch (error) {
@@ -2885,7 +3014,7 @@ function StaffNoticeBoard() {
         data.append('subject', instanceData?.subject)
 
         data.append('details', instanceData?.details)
-        if(image){
+        if (image) {
             data.append('file', image)
         }
 
@@ -2935,6 +3064,7 @@ function StaffNoticeBoard() {
                 if (response.status === 204) {
                     Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
+                    setCount(count - 1)
                     handleClose();
                 }
             })
@@ -2998,7 +3128,7 @@ function StaffNoticeBoard() {
 
         <>
 
-          
+
 
             {hide && (
                 <>
@@ -3102,6 +3232,19 @@ function StaffNoticeBoard() {
                             getInstanceData={getInstanceData}
                             loader={loader}
                             setLoader={setLoader}
+                        />
+                    </Grid>
+
+                    <Grid item xs={12}>
+
+                        <PaginationController
+                            page={page}
+                            setPage={setPage}
+                            handlePageChange={handlePageChange}
+                            count={count}
+                            data={tableData}
+                            total={total}
+
                         />
                     </Grid>
 
@@ -3532,6 +3675,16 @@ function Announcement() {
     const [lazyLoading, setLazyLoading] = useState(true);
 
 
+    const [page, setPage] = useState(1);
+    const [count, setCount] = useState();
+    const [total, setTotal] = useState();
+
+
+    const handlePageChange = (event, value) => {
+        setPage(value)
+    }
+
+
 
     // META DATA
     const headersToShow = ["Date", "Time", "Name", "Place", "Details", "Ward"]
@@ -3568,7 +3721,7 @@ function Announcement() {
 
 
         fetchListData();
-    }, [])
+    }, [page])
 
 
 
@@ -3576,10 +3729,17 @@ function Announcement() {
     const fetchListData = async () => {
         try {
 
-            const response = await fetch(Config.BASE_URL + getListUrl, Config?.config)
+            const response = await fetch(Config.BASE_URL + `get-announcement?page=${page}`, Config?.config)
             const data = await response.json()
             console.log(data)
-            setListInstanceData(data)
+            // setListInstanceData(data)
+            if (response.status === 200) {
+                setListInstanceData(data?.results ? data?.results : data)
+                if (!total) {
+                    setTotal(Math.ceil(data?.count / data?.results?.length))
+                }
+                setCount(data?.count)
+            }
 
         } catch (error) {
             console.error('Error fetching data:', error)
@@ -3640,7 +3800,7 @@ function Announcement() {
         data.append('time', instanceData?.time)
         data.append('name', instanceData?.name)
         data.append('place', instanceData?.place)
-        if(image){
+        if (image) {
             data.append('file', image)
         }
         const wardlist = instanceData?.ward
@@ -3659,9 +3819,12 @@ function Announcement() {
             console.log(response.data);
             Config?.toastalert("Submitted Successfully", "success")
 
-            setListInstanceData((prevstate) => {
-                return [...prevstate, response?.data]
-            })
+            // setListInstanceData((prevstate) => {
+            //     return [...prevstate, response?.data]
+            // })
+            // setListInstanceData([response?.data, ...listInstanceData.slice(0, -1)])
+            // setCount(count + 1)
+            fetchListData()
 
             handleClose();
         } catch (error) {
@@ -3696,7 +3859,7 @@ function Announcement() {
         data.append('place', instanceData?.place)
         // data.append('ward', instanceData?.ward)
         data.append('details', instanceData?.details)
-        if(image){
+        if (image) {
             data.append('file', image)
         }
 
@@ -3756,6 +3919,7 @@ function Announcement() {
                 if (response.status === 204) {
                     Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
+                    setCount(count - 1)
                     handleClose();
                 }
             })
@@ -3819,7 +3983,7 @@ function Announcement() {
 
         <>
 
-         
+
 
             {hide && (
                 <>
@@ -3925,6 +4089,21 @@ function Announcement() {
                             getInstanceData={getInstanceData}
                             loader={loader}
                             setLoader={setLoader}
+                        />
+                    </Grid>
+
+
+
+                    <Grid item xs={12}>
+
+                        <PaginationController
+                            page={page}
+                            setPage={setPage}
+                            handlePageChange={handlePageChange}
+                            count={count}
+                            data={tableData}
+                            total={total}
+
                         />
                     </Grid>
 

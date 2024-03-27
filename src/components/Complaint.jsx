@@ -33,6 +33,7 @@ import BasicDatePicker from "../utils/DatePicker";
 import InputBox from "../utils/NumberInput";
 import { TextField } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import PaginationController from "../utils/Pagination"
 
 const style = {
     position: 'absolute',
@@ -94,6 +95,17 @@ function Complaint(props) {
     const [lazyLoading, setLazyLoading] = useState(true);
 
 
+
+    const [page, setPage] = useState(1);
+    const [count, setCount] = useState();
+    const [total, setTotal] = useState();
+
+    const handlePageChange = (event, value) => {
+        setPage(value)
+    }
+
+
+
     const getWardLabel = (id) => {
         const label = wardlist?.find((e) => e?.id === id)?.name
         return label
@@ -145,7 +157,7 @@ function Complaint(props) {
 
     useEffect(() => {
         fetchrequests()
-    }, [])
+    }, [page])
 
 
 
@@ -153,12 +165,16 @@ function Complaint(props) {
     const fetchrequests = async () => {
         try {
             // Make an API call to fetch data from the backend
-            const response = await fetch(Config.BASE_URL + 'complaints', Config?.config)
+            const response = await fetch(Config.BASE_URL + `get-complaints?page=${page}`, Config?.config)
             const data = await response.json()
             console.log(data)
-            setListInstanceData(data)
-            // Assuming your data is an array of objects with 'value' and 'label' properties
-            // setWardList(data)
+            // setListInstanceData(data)
+            setListInstanceData(data?.results ? data?.results : data)
+            if (!total) {
+                setTotal(Math.ceil(data?.count / data?.results?.length))
+            }
+            setCount(data?.count)
+
         } catch (error) {
             console.error('Error fetching data:', error)
             Config?.toastalert("Something Went Wrong", "error")
@@ -175,6 +191,7 @@ function Complaint(props) {
             .then(function (response) {
                 if (response.status === 200) {
                     setInstanceData(response?.data)
+
                     setIsOpen(true);
                 }
             })
@@ -235,12 +252,14 @@ function Complaint(props) {
         try {
             const response = await axios.post(`${Config.BASE_URL}complaints`, data, Config.config);
             console.log(response.data); // Handle success response
-          
+
             // Clear form fields
             Config?.toastalert("Submitted Successfully", "success")
             setListInstanceData((prevstate) => {
                 return [...prevstate, response?.data]
             })
+            // setListInstanceData([response?.data, ...listInstanceData.slice(0, -1)])
+            // setCount(count + 1)
 
             handleClose();
         } catch (error) {
@@ -296,10 +315,10 @@ function Complaint(props) {
                         }
                         return prevArray
                     })
-                   
+
                     handleClose()
 
-                  
+
                 }
             })
             .catch(function (error) {
@@ -318,7 +337,7 @@ function Complaint(props) {
     //DELETE REQUESTS
 
     const deleteInstance = (id) => {
-       
+
 
         axios.delete(`${Config.BASE_URL}complaintsdelete/${id}`, Config.config)
             .then(function (response) {
@@ -327,11 +346,12 @@ function Complaint(props) {
                     Config?.toastalert("Deleted Successfully", "info")
 
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
+                    setCount(count - 1)
                     handleClose();
                 }
             })
             .catch(function (error) {
-                  if (error?.response?.status === 400) {
+                if (error?.response?.status === 400) {
                     console.log(error);
                     setErrorMsg(error?.response?.data)
                     Config?.toastalert("Failed to Delete", "warn")
@@ -492,10 +512,10 @@ function Complaint(props) {
                         )
                     }
 
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={8}>
                         <Typography variant="h6">{modalHeader}s Details</Typography>
                     </Grid>
-                    <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+                    <Grid item xs={12} sm={4} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
                         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
                             Create {modalHeader}
                         </Button>
@@ -513,6 +533,21 @@ function Complaint(props) {
                             setLoader={setLoader}
                         />
                     </Grid>
+
+                    <Grid item xs={12}>
+
+                        <PaginationController
+                            page={page}
+                            setPage={setPage}
+                            handlePageChange={handlePageChange}
+                            count={count}
+                            data={tableData}
+                            total={total}
+
+                        />
+                    </Grid>
+
+
                 </>
             )}
 

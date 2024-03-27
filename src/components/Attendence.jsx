@@ -29,6 +29,7 @@ import MultipleSelect from "./MultiDropdown";
 import AddIcon from '@mui/icons-material/Add';
 import { toast, ToastContainer } from 'react-toastify';
 import { Typography, Container, Paper, Card, CardContent, CardMedia } from '@mui/material';
+import PaginationController from "../utils/Pagination"
 
 
 function Attendance() {
@@ -48,6 +49,15 @@ function Attendance() {
   const [errorMsg, setErrorMsg] = useState({});
   const [errString, seterrString] = useState();
   const [lazyLoading, setLazyLoading] = useState(true);
+
+  const [page, setPage] = useState(1);
+  const [count, setCount] = useState();
+  const [total, setTotal] = useState();
+
+
+  const handlePageChange = (event, value) => {
+    setPage(value)
+  }
 
 
 
@@ -94,9 +104,12 @@ function Attendance() {
 
   useEffect(() => {
     fetchAttendanceData()
-    getCurr()
+    if (!total) {
+      getCurr();
+    }
+
     // fetchEmpAttendanceData();
-  }, [])
+  }, [page])
 
 
   // ------------------------------------------------------------
@@ -104,12 +117,21 @@ function Attendance() {
   const fetchAttendanceData = async () => {
     try {
       const response = await fetch(
-        Config.BASE_URL + 'worker-stats',
+        Config.BASE_URL + `employee-attendence-status?page=${page}`,
         Config?.config,
       )
 
       const data = await response.json()
-      console.log(data), setListInstanceData(data)
+      // console.log(data), setListInstanceData(data)
+      if (response.status === 200) {
+        setListInstanceData(data?.results ? data?.results : data)
+        if (!total) {
+          setTotal(Math.ceil(data?.count / data?.results?.length))
+        }
+        setCount(data?.count)
+      }
+
+
     } catch (error) {
       console.log('Scheme fetching data error', error)
       Config?.toastalert("Something Went Wrong", "error")
@@ -253,6 +275,19 @@ function Attendance() {
           setLoader={setLoader}
         />
 
+      </Grid>
+
+      <Grid item xs={12}>
+
+        <PaginationController
+          page={page}
+          setPage={setPage}
+          handlePageChange={handlePageChange}
+          count={count}
+          data={tableData}
+          total={total}
+
+        />
       </Grid>
 
 
@@ -491,7 +526,7 @@ const AttendenceModal = (props) => {
 
           {!instanceData?.attendances?.length && (
 
-                <div className="text-center p-5"> No data </div>
+            <div className="text-center p-5"> No data </div>
           )}
         </Grid>
 

@@ -302,7 +302,7 @@ function HouseCollector(props) {
             fetchListData();
         }
 
-    }, [role,page])
+    }, [role, page])
 
 
 
@@ -312,13 +312,13 @@ function HouseCollector(props) {
 
             const response = await fetch(Config.BASE_URL + getListUrl + `?page=${page}&employee__role=${role?.id ?? ""}`, Config?.config)
             const data = await response.json()
-           if (response.status ===200){
-            setListInstanceData(data?.results ? data?.results : data);
-            setCount(data?.count)
-            if (!total){
-                setTotal(Math.ceil(data?.count / data?.results?.length))
+            if (response.status === 200) {
+                setListInstanceData(data?.results ? data?.results : data);
+                setCount(data?.count)
+                if (!total) {
+                    setTotal(Math.ceil(data?.count / data?.results?.length))
+                }
             }
-           }
         } catch (error) {
             console.error('Error fetching data:', error)
         }
@@ -726,10 +726,10 @@ function HouseCollector(props) {
             }
 
 
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={8}>
                 <Typography variant="h6">{modalHeader}s Details</Typography>
             </Grid>
-            <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+            <Grid item xs={12} sm={4} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
                 <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
                     Create
                 </Button>
@@ -756,6 +756,7 @@ function HouseCollector(props) {
                     handlePageChange={handlePageChange}
                     count={count}
                     data={tableData}
+                    total={total}
 
                 />
 

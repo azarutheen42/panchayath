@@ -75,7 +75,7 @@ function Employee(props) {
 
     const [page, setPage] = useState(1);
     const [count, setCount] = useState();
-    const [total, setTotal] = useState();
+     const [total, setTotal] = useState();
 
 
     const handlePageChange = (event, value) => {
@@ -558,11 +558,13 @@ function Employee(props) {
 
                 <>
 
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={8} md={8}>
                         <Typography variant="h6">Permanent Employees Details</Typography>
                     </Grid>
-                    <Grid item  display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
-                        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
+                    <Grid item xs={12}  sm={4} md={4} display="flex" 
+                    justifyContent={Config?.isMobile ? 'flex-end' : 'center'}
+                    >
+                        <Button variant="contained"  startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
                             Add Employee
                         </Button>
                     </Grid>

@@ -38,7 +38,8 @@ import { TextField } from '@mui/material';
 import MultipleSelect from "./MultiDropdown";
 
 import AddIcon from '@mui/icons-material/Add';
-import TimePicker from "../utils/TimePicker"
+import TimePicker from "../utils/TimePicker";
+import PaginationController from "../utils/Pagination"
 
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -2582,6 +2583,16 @@ function Ward() {
     const [hide, setHide] = useState(true);
 
 
+    const [page, setPage] = useState(1);
+    const [count, setCount] = useState();
+    const [total, setTotal] = useState();
+
+
+    const handlePageChange = (event, value) => {
+        setPage(value)
+    }
+
+
     const getWardLabel = (id) => {
         const label = wardlist?.find((e) => e?.id === id)?.name
         return label
@@ -2626,7 +2637,7 @@ function Ward() {
 
 
         fetchListData();
-    }, [])
+    }, [page])
 
 
 
@@ -2634,11 +2645,17 @@ function Ward() {
     const fetchListData = async () => {
         try {
 
-            const response = await fetch(Config.BASE_URL + getListUrl, Config?.config)
+            const response = await fetch(Config.BASE_URL + `ward-list?page=${page}`, Config?.config)
             const data = await response.json()
             console.log(data)
-            setListInstanceData(data);
-            // dispatch(setWard(data));
+            if (response.status === 200) {
+                setListInstanceData(data?.results ? data?.results : data)
+                if (!total) {
+                    setTotal(Math.ceil(data?.count / data?.results?.length))
+                }
+                setCount(data?.count)
+            }
+
 
         } catch (error) {
             console.error('Error fetching data:', error)
@@ -2928,10 +2945,10 @@ function Ward() {
                 )
             }
 
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={8}>
                 <Typography variant="h6">{modalHeader + "s"} Details</Typography>
             </Grid>
-            <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+            <Grid item xs={12} sm={4} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
                 <IconButton color="primary" aria-label="add">
                     <AddButton
                         onClick={() => setisAdd(true)}
@@ -2950,6 +2967,19 @@ function Ward() {
                     getInstanceData={getInstanceData}
                     loader={loader}
                     setLoader={setLoader}
+                />
+            </Grid>
+
+            <Grid item xs={12}>
+
+                <PaginationController
+                    page={page}
+                    setPage={setPage}
+                    handlePageChange={handlePageChange}
+                    count={count}
+                    data={tableData}
+                    total={total}
+
                 />
             </Grid>
 
@@ -3347,6 +3377,16 @@ function Street() {
     const [errString, seterrString] = useState();
     const [lazyLoading, setLazyLoading] = useState(true);
 
+    const [page, setPage] = useState(1);
+    const [count, setCount] = useState();
+    const [total, setTotal] = useState();
+
+
+    const handlePageChange = (event, value) => {
+        setPage(value)
+    }
+
+
 
 
     // META DATA
@@ -3376,7 +3416,7 @@ function Street() {
 
     useEffect(() => {
         fetchListData();
-    }, [])
+    }, [page])
 
 
 
@@ -3384,10 +3424,17 @@ function Street() {
     const fetchListData = async () => {
         try {
 
-            const response = await fetch(Config.BASE_URL + getListUrl, Config?.config)
+            const response = await fetch(Config.BASE_URL + `street?page=${page}`, Config?.config)
             const data = await response.json()
             console.log(data)
-            setListInstanceData(data)
+            // setListInstanceData(data)
+            if (response.status === 200) {
+                setListInstanceData(data?.results ? data?.results : data)
+                if (!total) {
+                    setTotal(Math.ceil(data?.count / data?.results?.length))
+                }
+                setCount(data?.count)
+            }
 
         } catch (error) {
             console.error('Error fetching data:', error)
@@ -3666,10 +3713,10 @@ function Street() {
 
 
 
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={8}>
                 <Typography variant="h6">{modalHeader + "s"} Details</Typography>
             </Grid>
-            <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+            <Grid item xs={12} sm={4} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
                 <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
                     Create {modalHeader}
                 </Button>
@@ -3685,6 +3732,19 @@ function Street() {
                     getInstanceData={getInstanceData}
                     loader={loader}
                     setLoader={setLoader}
+                />
+            </Grid>
+
+            <Grid item xs={12}>
+
+                <PaginationController
+                    page={page}
+                    setPage={setPage}
+                    handlePageChange={handlePageChange}
+                    count={count}
+                    data={tableData}
+                    total={total}
+
                 />
             </Grid>
         </>
@@ -4124,6 +4184,16 @@ function House() {
     const [errString, seterrString] = useState();
     const [lazyLoading, setLazyLoading] = useState(true);
 
+
+    const [page, setPage] = useState(1);
+    const [count, setCount] = useState();
+    const [total, setTotal] = useState();
+
+
+    const handlePageChange = (event, value) => {
+        setPage(value)
+    }
+
     // META DATA
     const headersToShow = ["Name", "Contact No", "Door No", "Address", "Type", "Ward No", "Street", "QR code",]
     const tableData = listInstanceData
@@ -4157,8 +4227,11 @@ function House() {
     useEffect(() => {
 
         fetchListData();
-        fetchBuildingType();
-    }, [])
+        if (!buildingType) {
+            fetchBuildingType();
+        }
+
+    }, [page])
 
 
 
@@ -4187,10 +4260,18 @@ function House() {
     const fetchListData = async () => {
         try {
 
-            const response = await fetch(Config.BASE_URL + getListUrl, Config?.config)
+            const response = await fetch(Config.BASE_URL + `registered-buildings?page=${page}`, Config?.config)
             const data = await response.json()
             console.log(data)
-            setListInstanceData(data)
+            // setListInstanceData(data)
+            if (response.status === 200) {
+                setListInstanceData(data?.results ? data?.results : data)
+                if (!total) {
+                    setTotal(Math.ceil(data?.count / data?.results?.length))
+                }
+                setCount(data?.count)
+            }
+
 
 
         } catch (error) {
@@ -4494,6 +4575,20 @@ function House() {
                     getInstanceData={getInstanceData}
                     loader={loader}
                     setLoader={setLoader}
+                />
+            </Grid>
+
+
+            <Grid item xs={12}>
+
+                <PaginationController
+                    page={page}
+                    setPage={setPage}
+                    handlePageChange={handlePageChange}
+                    count={count}
+                    data={tableData}
+                    total={total}
+
                 />
             </Grid>
 
@@ -5113,6 +5208,16 @@ function TaxMessageInfo() {
     const [errString, seterrString] = useState();
     const [lazyLoading, setLazyLoading] = useState(true);
 
+
+    const [page, setPage] = useState(1);
+    const [count, setCount] = useState();
+    const [total, setTotal] = useState();
+
+
+    const handlePageChange = (event, value) => {
+        setPage(value)
+    }
+
     // META DATA
     const headersToShow = ["Tax ID", "Name", "Contact No", "Type", "Address", "House TAX", "", "Water TAX", ""]
     const tableData = listInstanceData
@@ -5148,8 +5253,10 @@ function TaxMessageInfo() {
     useEffect(() => {
 
         fetchListData();
-        fetchBuildingType();
-    }, [])
+        if (!buildingType) {
+            fetchBuildingType();
+        }
+    }, [page])
 
 
 
@@ -5178,10 +5285,17 @@ function TaxMessageInfo() {
     const fetchListData = async () => {
         try {
 
-            const response = await fetch(Config.BASE_URL + "building-tax-collection", Config?.config)
+            const response = await fetch(Config.BASE_URL + `tax-collection-details?page=${page}`, Config?.config)
             const data = await response.json()
             console.log(data)
-            setListInstanceData(data)
+            // setListInstanceData(data)
+            if (response.status === 200) {
+                setListInstanceData(data?.results ? data?.results : data)
+                if (!total) {
+                    setTotal(Math.ceil(data?.count / data?.results?.length))
+                }
+                setCount(data?.count)
+            }
 
 
         } catch (error) {
@@ -5472,6 +5586,20 @@ function TaxMessageInfo() {
             </Grid>
 
 
+            <Grid item xs={12}>
+
+                <PaginationController
+                    page={page}
+                    setPage={setPage}
+                    handlePageChange={handlePageChange}
+                    count={count}
+                    data={tableData}
+                    total={total}
+
+                />
+            </Grid>
+
+
 
         </>
     )
@@ -5504,7 +5632,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 
 function DenseTable(props) {
 
-    const { data, loader, setLoader, getInstanceData,setListInstanceData } = props
+    const { data, loader, setLoader, getInstanceData, setListInstanceData } = props
 
 
     const [edit, setEdit] = useState(false)
@@ -5514,7 +5642,7 @@ function DenseTable(props) {
     const [taxDetails, setTaxDetails] = useState();
 
 
-   
+
 
 
 
@@ -5584,7 +5712,7 @@ function DenseTable(props) {
         const data = new FormData();
 
         axios
-            .patch(`${Config.BASE_URL}send-tax-message/${id}/`,data, Config.config)
+            .patch(`${Config.BASE_URL}send-tax-message/${id}/`, data, Config.config)
             .then(function (response) {
                 if (response.status === 200) {
                     Config?.toastalert("Message Send Successfully", "success")
@@ -5628,27 +5756,27 @@ function DenseTable(props) {
 
         const data = new FormData();
 
-        if(taxDetails?.property_tax){
-            data.append("property_tax",taxDetails?.property_tax)
+        if (taxDetails?.property_tax) {
+            data.append("property_tax", taxDetails?.property_tax)
         }
-        if(taxDetails?.water_tax){
-            data.append("water_tax",taxDetails?.water_tax)
+        if (taxDetails?.water_tax) {
+            data.append("water_tax", taxDetails?.water_tax)
         }
-        if(taxDetails?.property_tax_paid){
-            data.append("property_tax_paid",taxDetails?.property_tax_paid)
+        if (taxDetails?.property_tax_paid) {
+            data.append("property_tax_paid", taxDetails?.property_tax_paid)
         }
 
-        if(taxDetails?.water_tax_paid){
-            data.append("water_tax_paid",taxDetails?.water_tax_paid)
+        if (taxDetails?.water_tax_paid) {
+            data.append("water_tax_paid", taxDetails?.water_tax_paid)
         }
-           
+
         // for (const key in taxDetails) {
 
         //     if (Object.hasOwnProperty.call(taxDetails, key)) {
         //         if (key){
         //             data.append(key, taxDetails[key]);
         //         }
-                
+
         //     }
         //     // data.append(key, taxDetails[key]);
         // }
@@ -5813,8 +5941,8 @@ function DenseTable(props) {
                                 {(edit && rowIndex === index) ? (
 
                                     <Input size="small" placeholder="water tax" type="number"
-                                      onChange={handleChange} name="water_tax" value={taxDetails?.water_tax || ""} />
-                                  
+                                        onChange={handleChange} name="water_tax" value={taxDetails?.water_tax || ""} />
+
 
                                 ) : (
 
@@ -5881,7 +6009,7 @@ function DenseTable(props) {
 
                                     (edit && rowIndex === index) ? (
                                         <button type="submit" class="btn btn-success" onClick={() => handleUpdateTaxDetails(row?.id)}   >
-                                           {(loader && rowIndex === index) &&  Config?.loader}  Update
+                                            {(loader && rowIndex === index) && Config?.loader}  Update
                                         </button>
 
                                     ) :
@@ -5893,12 +6021,13 @@ function DenseTable(props) {
                                             // className={(row?.get_tax_details?.property_tax_paid && row?.get_tax_details?.water_tax_paid) ? "btn btn-success" : "btn btn-secondary"}
                                             className="btn btn-success"
                                             onClick={() => {
-                                                setLoader(true) 
-                                                handleSendMessage(row?.id)}
+                                                setLoader(true)
+                                                handleSendMessage(row?.id)
+                                            }
                                             }
                                         >
                                             {/* <SendIcon size="small"/>  */}
-                                           {(loader && rowIndex === index) &&  Config?.loader} Send
+                                            {(loader && rowIndex === index) && Config?.loader} Send
                                         </button>)}
 
 

@@ -34,6 +34,7 @@ import InputBox from "../utils/NumberInput";
 import { TextField } from '@mui/material';
 
 import AddIcon from '@mui/icons-material/Add';
+import PaginationController from "../utils/Pagination"
 
 const style = {
     position: 'absolute',
@@ -57,7 +58,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 
 function Requests(props) {
 
-    const modalHeader="Request";
+    const modalHeader = "Request";
     const user = useSelector((state) => state?.user?.value);
     const wardlist = useSelector((state) => state?.ward?.value);
     const requestTypeList = useSelector((state) => state?.requesttype?.value);
@@ -78,8 +79,18 @@ function Requests(props) {
 
 
     const [errorMsg, setErrorMsg] = useState({});
-const [errString, seterrString] = useState();
-const [lazyLoading, setLazyLoading] = useState(true);
+    const [errString, seterrString] = useState();
+    const [lazyLoading, setLazyLoading] = useState(true);
+
+    const [page, setPage] = useState(1);
+    const [count, setCount] = useState();
+    const [total, setTotal] = useState();
+
+
+    const handlePageChange = (event, value) => {
+        setPage(value)
+    }
+
 
 
     const getWardLabel = (id) => {
@@ -100,7 +111,7 @@ const [lazyLoading, setLazyLoading] = useState(true);
     }
 
     // META DATA
-    const headersToShow = ["Request ID", "Date", "Name", "Ward","Street", "Type", "Address", "Details", "Image"]
+    const headersToShow = ["Request ID", "Date", "Name", "Ward", "Street", "Type", "Address", "Details", "Image"]
     const tableData = listInstanceData
     const fieldsToShow = []
     const fields = {
@@ -148,7 +159,7 @@ const [lazyLoading, setLazyLoading] = useState(true);
 
     useEffect(() => {
         fetchrequests()
-    }, [])
+    }, [page])
 
 
 
@@ -156,10 +167,15 @@ const [lazyLoading, setLazyLoading] = useState(true);
     const fetchrequests = async () => {
         try {
             // Make an API call to fetch data from the backend
-            const response = await fetch(Config.BASE_URL + 'request/', Config?.config)
+            const response = await fetch(Config.BASE_URL + `get-requests?page=${page}`, Config?.config)
             const data = await response.json()
             console.log(data)
-            setListInstanceData(data)
+            // setListInstanceData(data)
+            setListInstanceData(data?.results ? data?.results : data)
+            if (!total) {
+                setTotal(Math.ceil(data?.count / data?.results?.length))
+            }
+            setCount(data?.count)
 
         } catch (error) {
             Config?.toastalert("Something Went Wrong", "error")
@@ -227,8 +243,8 @@ const [lazyLoading, setLazyLoading] = useState(true);
         data.append('address', instanceData?.address);
         data.append('details', instanceData?.details);
         data.append('street', instanceData?.street);
-        if(image) {
-        data.append('image', image);
+        if (image) {
+            data.append('image', image);
 
         }
         data.append('type', instanceData?.type);
@@ -241,6 +257,9 @@ const [lazyLoading, setLazyLoading] = useState(true);
             setListInstanceData((prevstate) => {
                 return [...prevstate, response?.data]
             })
+            // fetchListData()
+            // setListInstanceData([response?.data, ...listInstanceData.slice(0, -1)])
+            // setCount(count + 1)
 
             handleClose();
         } catch (error) {
@@ -264,7 +283,7 @@ const [lazyLoading, setLazyLoading] = useState(true);
         const check = checkValidation()
 
         if (!check) {
-          return
+            return
         }
 
         const data = new FormData()
@@ -274,10 +293,10 @@ const [lazyLoading, setLazyLoading] = useState(true);
         data.append('address', instanceData?.address);
         data.append('details', instanceData?.details);
         data.append('street', instanceData?.street);
-        if(image) {
-            data.append('image',image);
-    
-            }
+        if (image) {
+            data.append('image', image);
+
+        }
         data.append('type', instanceData?.type);
 
         axios
@@ -301,7 +320,7 @@ const [lazyLoading, setLazyLoading] = useState(true);
                     // setIsOpen(false)
                     handleClose()
 
-                    
+
                 }
             })
             .catch(function (error) {
@@ -325,9 +344,10 @@ const [lazyLoading, setLazyLoading] = useState(true);
         axios.delete(`${Config.BASE_URL}request/${id}`, Config.config)
             .then(function (response) {
                 if (response.status === 204) {
-                   
+
                     Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
+                    setCount(count - 1)
                     handleClose();
                 }
             })
@@ -361,7 +381,7 @@ const [lazyLoading, setLazyLoading] = useState(true);
             console.log(e.target.files[0].name)
             let value = e.target.files[0]
             setImage(value)
-           
+
         }
         else {
 
@@ -386,41 +406,41 @@ const [lazyLoading, setLazyLoading] = useState(true);
 
             <ToastContainer />
 
-                <>
+            <>
 
-                    {
-                        (isOpen || isAdd) && (
+                {
+                    (isOpen || isAdd) && (
 
-                            // <CustomizedDialogs
-                            //     setIsOpen={setIsOpen}
-                            //     isAdd={isAdd}
-                            //     error={error}
+                        // <CustomizedDialogs
+                        //     setIsOpen={setIsOpen}
+                        //     isAdd={isAdd}
+                        //     error={error}
 
-                            //     setListData={tableData}
-                            //     instanceData={instanceData}
-                            //     setInstanceData={setInstanceData}
-                            //     handleClose={handleClose}
+                        //     setListData={tableData}
+                        //     instanceData={instanceData}
+                        //     setInstanceData={setInstanceData}
+                        //     handleClose={handleClose}
 
-                            //     // functions
-                            //     addInstance={addNewInstance}
-                            //     updateInstance={updateInstance}
-                            //     deleteInstance={deleteInstance}
-                            //     handleChange={handleChange}
-                            //     wardlist={wardlist}
-                            //     requestTypeList={requestTypeList}
-                            //     modalHeader={modalHeader}
+                        //     // functions
+                        //     addInstance={addNewInstance}
+                        //     updateInstance={updateInstance}
+                        //     deleteInstance={deleteInstance}
+                        //     handleChange={handleChange}
+                        //     wardlist={wardlist}
+                        //     requestTypeList={requestTypeList}
+                        //     modalHeader={modalHeader}
 
-                            // // setImage={setImage}
-                            // // image={image}
-
-
-                            // />
+                        // // setImage={setImage}
+                        // // image={image}
 
 
+                        // />
 
 
 
-                            <FormModal
+
+
+                        <FormModal
                             modalHeader={modalHeader}
                             lazyLoading={lazyLoading}
                             setIsOpen={setIsOpen}
@@ -469,36 +489,51 @@ const [lazyLoading, setLazyLoading] = useState(true);
 
                             />}
                         />
-                        )
-                    }
+                    )
+                }
 
 
-                    <Grid item  xs={12} sm={6}>
-                        <Typography variant="h6">{modalHeader+"s"} Details</Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+                <Grid item xs={12} sm={8}>
+                    <Typography variant="h6">{modalHeader + "s"} Details</Typography>
+                </Grid>
+                <Grid item xs={12} sm={4} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
 
-                        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
-                           Create {modalHeader}
-                        </Button>
+                    <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
+                        Create {modalHeader}
+                    </Button>
 
-                    </Grid>
+                </Grid>
 
 
-                    <Grid item xs={12}>
-                        
+                <Grid item xs={12}>
+
                     <CustomTable
-                            headers={headersToShow}
-                            data={tableData}
-                            fieldsToShow={fieldsToShow}
-                            fields={fields}
-                            getInstanceData={getInstanceData}
-                            loader={loader}
-                            setLoader={setLoader}
-                        />
-                    </Grid>
-                </>
-         
+                        headers={headersToShow}
+                        data={tableData}
+                        fieldsToShow={fieldsToShow}
+                        fields={fields}
+                        getInstanceData={getInstanceData}
+                        loader={loader}
+                        setLoader={setLoader}
+                    />
+                </Grid>
+
+
+
+                <Grid item xs={12}>
+
+                    <PaginationController
+                        page={page}
+                        setPage={setPage}
+                        handlePageChange={handlePageChange}
+                        count={count}
+                        data={tableData}
+                        total={total}
+
+                    />
+                </Grid>
+            </>
+
 
 
         </>
@@ -665,7 +700,7 @@ const RequestForm = (props) => {
                     />
 
                 </Grid>
-{/* 
+                {/* 
                 <Grid item xs={12} md={6} sm={6}>
 
                 </Grid> */}
@@ -942,7 +977,7 @@ function ViewModal(props) {
 
 function CustomizedDialogs(props) {
 
-    const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd,modalHeader,
+    const { instanceData, setInstanceData, setListData, roles, handleClose, isAdd, modalHeader,
         deleteInstance, updateInstance, handleChange, addInstance, error, wardlist, requestTypeList
         // setError, setImage, image 
     } = props

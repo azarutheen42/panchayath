@@ -307,7 +307,7 @@ function OverView() {
                         <Grid item xs={4}>
                             <CardMedia
                                 component="img"
-                                height="100"
+                                // height="100"
                                 image="assets/img/complain.png"
                                 alt="Placeholder"
                             />
@@ -331,7 +331,7 @@ function OverView() {
                         <Grid item xs={4}>
                             <CardMedia
                                 component="img"
-                                height="100"
+                                // height="100"
                                 image="assets/img/shopping-cart.png"
                                 alt="Placeholder"
                             />

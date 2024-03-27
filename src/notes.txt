@@ -12,34 +12,43 @@ const [count,setCount] =useState();
     }
 
 
-setlistInstanceData(response?.data?.results ? response?.data?.results : response?.data)
+setListInstanceData(response?.data?.results ? response?.data?.results : response?.data)
   setCount(data?.count)
+if (!total){
+                        setTotal(Math.ceil(response?.data?.count / response?.data?.results?.length))
+                    }
 
 
-
-setlistInstanceData(data?.results ? data?.results : data)
+  if (response.status === 200) {
+setListInstanceData(data?.results ? data?.results : data)
  if (!total){
                     setTotal(Math.ceil(data?.count / data?.results?.length))
                 }
 setCount(data?.count)
+  }
 
+
+  
 create
 ------
-setlistInstanceData([ response?.data, ...instanceData.slice(0, -1)])         
+setListInstanceData([ response?.data, ...listInstanceData.slice(0, -1)])         
 setCount(count+1)
 
 
 ?page=${page}
 
- <PaginationController 
-            page={page}
-            setPage={setPage}
-            handlePageChange={handlePageChange}
-            count={count}
-            data={tableData}
-             total={total}
-            
-            />
+   <Grid item xs={12}>
+
+                        <PaginationController
+                            page={page}
+                            setPage={setPage}
+                            handlePageChange={handlePageChange}
+                            count={count}
+                            data={tableData}
+                            total={total}
+
+                        />
+                    </Grid>
 
 
 
