@@ -9,11 +9,14 @@ and fetch data from particular page from API Pass the function from Parent Compo
 
 */
 
-const PaginationComponent = (props) => {
+ function PaginationComponent (props) {
   const { data, setData, count, fetchData } = props;
   //   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState();
   const [totalPages, setTotalPages] = useState();
+
+  // const { page, setPage, handlePageChange, count, data } = props
+
 
   /* Used for Prevent fetchData function running initialy mount */
   const isMounted = useRef(true);
@@ -21,7 +24,7 @@ const PaginationComponent = (props) => {
   /* intially set Total Page nos*/
   useEffect(() => {
     const total = Math.ceil(count / data?.length);
-    console.log(count, data?.length, total);
+    console.log(count, data, total);
     setTotalPages(total);
   }, []);
 
@@ -35,26 +38,6 @@ const PaginationComponent = (props) => {
       fetchData(currentPage);
     }
   }, [currentPage]);
-
-  //   const fetchData = async (page) => {
-  //     Config.axios({
-  //       url: `${Config.BASE_URL}/request-quote?page=${page}`,
-  //       method: "GET",
-  //       auth: true,
-  //       success: (response) => {
-  //         if (response.status === 200) {
-  //           setData(response?.data?.results);
-  //         } else {
-  //           Config.toast("Something went Wrong", "error");
-  //         }
-  //       },
-  //       error: (error) => {
-  //         console.log(error);
-  //       },
-  //     });
-  //   };
-
-
 
   /*
   Function To Handle currentPage change
@@ -131,9 +114,8 @@ import Typography from '@mui/material/Typography';
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
 
-export default function PaginationControlled(props) {
-  const { page, setPage, handlePageChange, count, data } = props
-
+function PaginationControlled(props) {
+  const { page, setPage, handlePageChange, count, data ,total} = props
 
 
   return (
@@ -144,7 +126,7 @@ export default function PaginationControlled(props) {
 
         <Stack spacing={2}>
           <Typography>Page: {page}</Typography>
-          <Pagination count={Math.ceil(count / data?.length)} page={page} onChange={handlePageChange} />
+          <Pagination count={total} page={page} onChange={handlePageChange} />
         </Stack>
       )}
     </>
@@ -152,3 +134,7 @@ export default function PaginationControlled(props) {
 
   );
 }
+
+
+
+export default  PaginationControlled;

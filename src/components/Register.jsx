@@ -32,7 +32,8 @@ import FileUploadComponent from "../utils/FileInput"
 import BasicDatePicker from "../utils/DatePicker";
 import InputBox from "../utils/NumberInput";
 import { TextField } from '@mui/material';
-
+import PaginationController from "../utils/Pagination"
+import { toast, ToastContainer } from 'react-toastify';
 
 
 function UserRegister() {
@@ -62,6 +63,17 @@ function UserRegister() {
 
 
     const modalHeader = "User Registration"
+
+
+    const [page, setPage] = useState(1);
+    const [count, setCount] = useState();
+    const [total, setTotal] = useState();
+
+
+    const handlePageChange = ( e,value) => {
+        
+        setPage(value)
+    }
 
     const getWardLabel = (id) => {
         const label = wardlist?.find((e) => e?.id === id)?.name
@@ -114,7 +126,7 @@ function UserRegister() {
         // fetchwards()
         fetchuser()
 
-    }, [])
+    }, [page])
 
 
 
@@ -123,10 +135,16 @@ function UserRegister() {
     const fetchuser = async () => {
         try {
             // Make an API call to fetch data from the backend
-            const response = await fetch(Config.BASE_URL + 'auth/registered-users/', Config?.config)
+            const response = await fetch(Config.BASE_URL + `auth/registered-users-list?page=${page}`, Config?.config)
             const data = await response.json()
-            console.log(data)
-            setListInstanceData(data)
+            if (response.status === 200) {
+                setListInstanceData(data?.results ? data?.results : data);
+                setCount(data?.count )
+                if (!total){
+                    setTotal(Math.ceil(data?.count / data?.results?.length))
+                }
+                
+            }
         } catch (error) {
             //   setLoading(false);
             console.error('Error fetching data:', error)
@@ -193,9 +211,11 @@ function UserRegister() {
             .then(function (response) {
                 if (response.status === 201) {
                     Config?.toastalert("Submitted Successfully", "success")
-                    setListInstanceData((prevstate) => {
-                        return [...prevstate, response?.data]
-                    })
+                    // setListInstanceData((prevstate) => {
+                    //     return [...prevstate, response?.data]
+                    // })
+                    setListInstanceData([response?.data, ...listInstanceData.slice(0, -1)])
+                    setCount(count + 1)
                 }
                 handleClose();
             })
@@ -298,6 +318,7 @@ function UserRegister() {
                     console.log(response)
                     Config?.toastalert("Deleted Successfully", "info")
                     setListInstanceData(listInstanceData?.filter((e) => e.id !== id))
+                    setCount(count - 1)
                     setIsOpen(false)
                 }
                 handleClose();
@@ -383,8 +404,8 @@ function UserRegister() {
     return (
 
         <>
-
-
+ <ToastContainer />
+        
             {
                 (isOpen || isAdd) && (
 
@@ -488,6 +509,20 @@ function UserRegister() {
                     getInstanceData={getInstanceData}
                     loader={loader}
                     setLoader={setLoader}
+                />
+            </Grid>
+
+
+            <Grid item xs={12}>
+                <PaginationController
+                    page={page}
+                    setPage={setPage}
+                    handlePageChange={handlePageChange}
+                    count={count}
+                    data={tableData}
+                    total={total}
+                    // fetchData={handlePageChange}
+
                 />
             </Grid>
 

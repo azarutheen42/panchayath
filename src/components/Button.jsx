@@ -37,14 +37,14 @@ function ButtonWithLoader(props) {
             <button className={class_name} onClick={handleClick}
                 disabled={(index === loader)}
             >
-                {((index === loader)) ? Config.loader : <span class={span_class}></span>} {text}
+                {((index === loader)) ? Config.loader : <span className={span_class}></span>} {text}
             </button>
 
 
             {/* <button className={class_name} onClick={handleClick}
                 disabled={(loading)}
             >
-                {(loading) ? Config.loader : <span class={span_class}></span>} {text}
+                {(loading) ? Config.loader : <span className={span_class}></span>} {text}
             </button> */}
 
 
@@ -77,7 +77,7 @@ export function UpdateButton({ onClick, loading, setLoading }) {
 
     return (
 
-        <button type="submit" class="button btn-update" onClick={onClick} disabled={loading} >
+        <button type="submit" className="button btn-update" onClick={onClick} disabled={loading} >
 
             {loading ? Config.loader : <span ></span>} Save/Update
         </button>
@@ -108,7 +108,7 @@ export function SaveButton({ onClick, loading, setLoading }) {
 
     return (
 
-        <button type="submit" class="button btn-create" onClick={handleClick} disabled={loading}  >
+        <button type="submit" className="button btn-create" onClick={handleClick} disabled={loading}  >
             {loading ? Config.loader : <span ></span>} Save
         </button>
 
@@ -123,7 +123,7 @@ export function CloseButton({ onClick }) {
 
     return (
 
-        <button type="submit" class="button btn-cancel" onClick={onClick} >Cancel</button>
+        <button type="submit" className="button btn-cancel" onClick={onClick} >Cancel</button>
 
     )
 }
@@ -147,7 +147,7 @@ export function DeleteButton({ onClick, loading, setLoading }) {
 
     return (
 
-        // <button type="submit" class="button btn-delete" onClick={handleClick} disabled={loading} >
+        // <button type="submit" className="button btn-delete" onClick={handleClick} disabled={loading} >
 
         //     {loading ? Config.loader : <span ></span>} Delete
         // </button>
@@ -170,7 +170,7 @@ export function AddButton({ onClick, text }) {
             onClick={onClick}
         >+{text}</Button>
 
-        // <button type="submit" class="button btn-edit" onClick={onClick} >
+        // <button type="submit" className="button btn-edit" onClick={onClick} >
         //     +{text}
         // </button>
 

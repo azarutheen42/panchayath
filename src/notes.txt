@@ -4,6 +4,7 @@ import  PaginationController from "../utils/Pagination"
 
 const [page,setPage] =useState(1);
 const [count,setCount] =useState();
+ const [total, setTotal] = useState();
 
 
     const handlePageChange =(event, value)=>{
@@ -17,15 +18,18 @@ setlistInstanceData(response?.data?.results ? response?.data?.results : response
 
 
 setlistInstanceData(data?.results ? data?.results : data)
+ if (!total){
+                    setTotal(Math.ceil(data?.count / data?.results?.length))
+                }
 setCount(data?.count)
 
-
-
+create
+------
 setlistInstanceData([ response?.data, ...instanceData.slice(0, -1)])         
 setCount(count+1)
 
 
-
+?page=${page}
 
  <PaginationController 
             page={page}
@@ -33,6 +37,7 @@ setCount(count+1)
             handlePageChange={handlePageChange}
             count={count}
             data={tableData}
+             total={total}
             
             />
 
@@ -44,3 +49,11 @@ setCount(count+1)
 
      paginated_queryset = paginator.paginate_queryset(queryset, request) 
      return paginator.get_paginated_response(serializer.data)
+
+
+
+
+      if (response.status ===200){
+            setListInstanceData(data?.results ? data?.results : data);
+            setCount(data?.count)
+           }

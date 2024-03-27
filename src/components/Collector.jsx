@@ -222,6 +222,7 @@ function HouseCollector(props) {
 
     const [page, setPage] = useState(1);
     const [count, setCount] = useState();
+    const [total, setTotal] = useState();
 
     const handlePageChange = (event, value) => {
         setPage(value)
@@ -314,6 +315,9 @@ function HouseCollector(props) {
            if (response.status ===200){
             setListInstanceData(data?.results ? data?.results : data);
             setCount(data?.count)
+            if (!total){
+                setTotal(Math.ceil(data?.count / data?.results?.length))
+            }
            }
         } catch (error) {
             console.error('Error fetching data:', error)

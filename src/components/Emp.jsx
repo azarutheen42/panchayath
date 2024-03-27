@@ -24,7 +24,7 @@ import SelectDropDown from "../utils/SelectDropDown"
 
 import FormModal from "../utils/FormModal";
 import { toast, ToastContainer } from 'react-toastify';
-import  PaginationController from "../utils/Pagination"
+import PaginationController from "../utils/Pagination"
 
 
 
@@ -75,6 +75,7 @@ function Employee(props) {
 
     const [page, setPage] = useState(1);
     const [count, setCount] = useState();
+    const [total, setTotal] = useState();
 
 
     const handlePageChange = (event, value) => {
@@ -161,7 +162,10 @@ function Employee(props) {
                 if (response.status === 200) {
                     console.log(response);
                     setPermEmployee(response?.data?.results ? response?.data?.results : response?.data)
-                    setCount(response?.data?.count)
+                    if(response?.data?.next !=null){
+                        setTotal(Math.ceil(response?.data?.count / response?.data?.results?.length))
+                    }
+                   
                     setLazyLoading(false);
 
                 }
@@ -242,9 +246,9 @@ function Employee(props) {
                     //     return [...prevstate, response?.data]
                     // })
 
-                    setPermEmployee([ response?.data, ...permEmployee.slice(0, -1)])
+                    setPermEmployee([response?.data, ...permEmployee.slice(0, -1)])
                     // setPermEmployee([response?.data, ...permEmployee])
-                    setCount(count+1)
+                    setCount(count + 1)
                     Config?.toastalert("Submitted Successfully", "success")
                     setEmployee();
                     handleClose();
@@ -327,7 +331,7 @@ function Employee(props) {
                     // setViewEmployee(response?.data)
                     setisEdit(edit)
                     setIsOpen(true)
-           
+
                 }
 
             })
@@ -420,7 +424,7 @@ function Employee(props) {
                 if (response.status === 204) {
                     console.log(response);
                     setPermEmployee(permEmployee?.filter((e) => e.id !== id))
-                    setCount(count-1)
+                    setCount(count - 1)
                     Config?.toastalert("Deleted Successfully", "info")
                     handleClose();
                     // setLoader()
@@ -557,7 +561,7 @@ function Employee(props) {
                     <Grid item xs={12} sm={6}>
                         <Typography variant="h6">Permanent Employees Details</Typography>
                     </Grid>
-                    <Grid item xs={12} sm={6} display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
+                    <Grid item  display="flex" justifyContent={Config?.isMobile ? 'flex-end' : 'center'}>
                         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setisAdd(true)}>
                             Add Employee
                         </Button>
@@ -580,14 +584,18 @@ function Employee(props) {
 
 
 
-                    <PaginationController
-                        page={page}
-                        setPage={setPage}
-                        handlePageChange={handlePageChange}
-                        count={count}
-                        data={tableData}
+                    <Grid item xs={12}>
 
-                    />
+                        <PaginationController
+                            page={page}
+                            setPage={setPage}
+                            handlePageChange={handlePageChange}
+                            count={count}
+                            data={tableData}
+                            total={total}
+
+                        />
+                    </Grid>
 
                 </>
 
