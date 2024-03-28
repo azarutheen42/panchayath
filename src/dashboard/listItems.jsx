@@ -52,8 +52,12 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import StarBorder from '@mui/icons-material/StarBorder';
 import PersonAddTwoToneIcon from '@mui/icons-material/PersonAddTwoTone';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import { ReceiptLong } from "@mui/icons-material";
+import { Padding, ReceiptLong } from "@mui/icons-material";
 // import AssignmentIcon from '@mui/icons-material/Assignment';
+
+import { GrUserWorker } from "react-icons/gr";
+import { VscGitPullRequestGoToChanges } from "react-icons/vsc";
+
 
 
 
@@ -140,6 +144,19 @@ export default function SideBar(props) {
 
 
 
+  const subIconStyle = {
+    fontSize: "12px",
+  
+  }
+
+
+  const MainIconStyle={
+   fontSize:22,
+    // color:"red"
+
+  }
+
+
 
   return (
 
@@ -181,7 +198,7 @@ export default function SideBar(props) {
 
           {/* {mainListItems} */} <ListItemButton onClick={() => handlenavigate("")}>
             <ListItemIcon>
-              <DashboardIcon />
+              <DashboardIcon   style={MainIconStyle}/>
             </ListItemIcon>
             <ListItemText primary="Dashboard" />
           </ListItemButton>
@@ -191,7 +208,7 @@ export default function SideBar(props) {
 
           <ListItemButton onClick={() => handlenavigate("m=employee&s=permenant")}>
             <ListItemIcon>
-              <PeopleIcon />
+              <PeopleIcon   style={MainIconStyle}/>
             </ListItemIcon>
             <ListItemText primary="Permanent Employees" />
           </ListItemButton>
@@ -199,12 +216,13 @@ export default function SideBar(props) {
 
 
           {/* COLLECTORS */}
-          <ListItemButton onClick={() => handleClick("collector")} 
+          <ListItemButton onClick={() => handleClick("collector")}
           // className={show?.collector && "bg-info"}
           >
             <ListItemIcon>
-              <BarChartIcon />
+            <GrUserWorker   style={MainIconStyle}/>
             </ListItemIcon>
+            
             <ListItemText primary="Collectors" />
             {show?.collector ? <ExpandLess /> : <ExpandMore />}
           </ListItemButton>
@@ -213,15 +231,15 @@ export default function SideBar(props) {
             <List component="div" disablePadding>
 
               <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=collector&s=house")}>
-                <ListItemIcon>
-                  <StarBorder />
+                <ListItemIcon style={{ width: 1 }}>
+                  <FiberManualRecordIcon style={subIconStyle} />
                 </ListItemIcon>
                 <ListItemText primary="House collector" />
               </ListItemButton>
 
               <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=collector&s=street")}>
                 <ListItemIcon>
-                  <StarBorder />
+                  <FiberManualRecordIcon style={subIconStyle} />
                 </ListItemIcon>
                 <ListItemText primary="Street collector" />
               </ListItemButton>
@@ -229,7 +247,7 @@ export default function SideBar(props) {
 
               <ListItemButton sx={{ pl: 4 }} a onClick={() => handlenavigate("m=collector&s=shop")} >
                 <ListItemIcon>
-                  <StarBorder />
+                  <FiberManualRecordIcon style={subIconStyle} />
                 </ListItemIcon>
                 <ListItemText primary="Shop collector" />
               </ListItemButton>
@@ -237,7 +255,7 @@ export default function SideBar(props) {
 
               <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=collector&s=overall-weighing")}>
                 <ListItemIcon>
-                  <StarBorder />
+                  <FiberManualRecordIcon style={subIconStyle} />
                 </ListItemIcon>
                 <ListItemText primary="Overall weighing" />
               </ListItemButton>
@@ -251,7 +269,7 @@ export default function SideBar(props) {
           {/* ATTENDENCE */}
           <ListItemButton onClick={() => handlenavigate("m=attendance")}>
             <ListItemIcon>
-              <PeopleIcon />
+              <PeopleIcon   style={MainIconStyle}/>
             </ListItemIcon>
             <ListItemText primary="Attendance" />
           </ListItemButton>
@@ -262,7 +280,7 @@ export default function SideBar(props) {
           <ListItemButton onClick={() => handlenavigate("m=user-register")}>
             <ListItemIcon>
               {/* <PeopleIcon /> */}
-              < PersonAddTwoToneIcon />
+              < PersonAddTwoToneIcon  style={MainIconStyle} />
               {/* <ShoppingCartIcon /> */}
             </ListItemIcon>
             <ListItemText primary="User Registeration" />
@@ -275,7 +293,7 @@ export default function SideBar(props) {
           <ListItemButton onClick={() => handlenavigate("m=complaint&s=list")} >
             <ListItemIcon>
 
-              <AssignmentIcon />
+              <AssignmentIcon   style={MainIconStyle}/>
 
             </ListItemIcon>
             <ListItemText primary="Complaints" />
@@ -297,14 +315,14 @@ export default function SideBar(props) {
 
                             <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=complaint&s=list")}>
                                 <ListItemIcon>
-                                    <StarBorder />
+                                    <FiberManualRecordIcon style={subIconStyle}/>
                                 </ListItemIcon>
                                 <ListItemText primary="Complaints List" />
                             </ListItemButton>
 
                             <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=complaint&s=water-supply")}>
                                 <ListItemIcon>
-                                    <StarBorder />
+                                    <FiberManualRecordIcon style={subIconStyle}/>
                                 </ListItemIcon>
                                 <ListItemText primary="Water Supply" />
                             </ListItemButton>
@@ -312,7 +330,7 @@ export default function SideBar(props) {
 
                             <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=complaint&s=street-light")}>
                                 <ListItemIcon>
-                                    <StarBorder />
+                                    <FiberManualRecordIcon style={subIconStyle}/>
                                 </ListItemIcon>
                                 <ListItemText primary="Street Light" />
                             </ListItemButton>
@@ -320,14 +338,14 @@ export default function SideBar(props) {
 
                             <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=complaint&s=solid-waste")}>
                                 <ListItemIcon>
-                                    <StarBorder />
+                                    <FiberManualRecordIcon style={subIconStyle}/>
                                 </ListItemIcon>
                                 <ListItemText primary="Solid Waste" />
                             </ListItemButton>
 
                             <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=complaint&s=sanittion")}>
                                 <ListItemIcon>
-                                    <StarBorder />
+                                    <FiberManualRecordIcon style={subIconStyle}/>
                                 </ListItemIcon>
                                 <ListItemText primary="Sanitation" />
                             </ListItemButton>
@@ -335,7 +353,7 @@ export default function SideBar(props) {
 
                             <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=complaint&s=qr-issue")}>
                                 <ListItemIcon>
-                                    <StarBorder />
+                                    <FiberManualRecordIcon style={subIconStyle}/>
                                 </ListItemIcon>
                                 <ListItemText primary="Solid Waste" />
                             </ListItemButton>
@@ -351,7 +369,8 @@ export default function SideBar(props) {
           {/* REQUEST */}
           <ListItemButton onClick={() => handlenavigate("m=request&s=list")}>
             <ListItemIcon>
-              <BarChartIcon />
+              {/* <BarChartIcon   style={MainIconStyle}/> */}
+              <VscGitPullRequestGoToChanges   style={MainIconStyle}/>
             </ListItemIcon>
             <ListItemText primary="Request" />
 
@@ -362,7 +381,7 @@ export default function SideBar(props) {
           {/* ACTIVITIES */}
           <ListItemButton onClick={() => handleClick("activity")}>
             <ListItemIcon>
-              <BarChartIcon />
+              <BarChartIcon   style={MainIconStyle}/>
             </ListItemIcon>
             <ListItemText primary="Activities" />
 
@@ -375,35 +394,35 @@ export default function SideBar(props) {
 
               <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=activity&s=minutes-of-meeting")}>
                 <ListItemIcon>
-                  <StarBorder />
+                  <FiberManualRecordIcon style={subIconStyle} />
                 </ListItemIcon>
                 <ListItemText primary="Minutes of Meeting" />
               </ListItemButton>
 
               <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=activity&s=scheme")}>
                 <ListItemIcon>
-                  <StarBorder />
+                  <FiberManualRecordIcon style={subIconStyle} />
                 </ListItemIcon>
                 <ListItemText primary="Scheme" />
               </ListItemButton>
 
               <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=activity&s=events")}>
                 <ListItemIcon>
-                  <StarBorder />
+                  <FiberManualRecordIcon style={subIconStyle} />
                 </ListItemIcon>
                 <ListItemText primary="Events" />
               </ListItemButton>
 
               <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=activity&s=staff-notice")}>
                 <ListItemIcon>
-                  <StarBorder />
+                  <FiberManualRecordIcon style={subIconStyle} />
                 </ListItemIcon>
                 <ListItemText primary="Staff Notice Board" />
               </ListItemButton>
 
               <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=activity&s=announcements")}>
                 <ListItemIcon>
-                  <StarBorder />
+                  <FiberManualRecordIcon style={subIconStyle} />
                 </ListItemIcon>
                 <ListItemText primary="Announcements" />
               </ListItemButton>
@@ -416,7 +435,7 @@ export default function SideBar(props) {
           <ListItemButton onClick={() => handleClick("reports")}>
             <ListItemIcon>
               {/* <LayersIcon /> */}
-              <ReceiptLongIcon />
+              <ReceiptLongIcon  style={MainIconStyle} />
             </ListItemIcon>
             <ListItemText primary="Reports" />
             {show?.reports ? <ExpandLess /> : <ExpandMore />}
@@ -429,14 +448,14 @@ export default function SideBar(props) {
 
               <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=reports&s=street")}>
                 <ListItemIcon>
-                  <StarBorder />
+                  <FiberManualRecordIcon style={subIconStyle} />
                 </ListItemIcon>
                 <ListItemText primary="Ward Reports" />
               </ListItemButton>
 
               <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=reports&s=overall")}>
                 <ListItemIcon>
-                  <StarBorder />
+                  <FiberManualRecordIcon style={subIconStyle} />
                 </ListItemIcon>
                 <ListItemText primary="Overall Reports" />
               </ListItemButton>
@@ -448,7 +467,7 @@ export default function SideBar(props) {
           {/* MASTERS */}
           <ListItemButton onClick={() => handleClick("masters")}>
             <ListItemIcon>
-              <LayersIcon />
+              <LayersIcon   style={MainIconStyle}/>
             </ListItemIcon>
             <ListItemText primary="Masters" />
             {show?.masters ? <ExpandLess /> : <ExpandMore />}
@@ -460,7 +479,7 @@ export default function SideBar(props) {
               {/* 
               <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=masters&s=panchayath")}>
                 <ListItemIcon>
-                  <StarBorder />
+                  <FiberManualRecordIcon style={subIconStyle}/>
                 </ListItemIcon>
                 <ListItemText primary="Panchayath" />
               </ListItemButton> */}
@@ -469,14 +488,14 @@ export default function SideBar(props) {
 
               <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=masters&s=ward")}>
                 <ListItemIcon>
-                  <StarBorder />
+                  <FiberManualRecordIcon style={subIconStyle} />
                 </ListItemIcon>
                 <ListItemText primary="Ward" />
               </ListItemButton>
 
               <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=masters&s=streets")}>
                 <ListItemIcon>
-                  <StarBorder />
+                  <FiberManualRecordIcon style={subIconStyle} />
                 </ListItemIcon>
                 <ListItemText primary="Street" />
               </ListItemButton>
@@ -484,14 +503,14 @@ export default function SideBar(props) {
 
               <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=masters&s=building")}>
                 <ListItemIcon>
-                  <StarBorder />
+                  <FiberManualRecordIcon style={subIconStyle} />
                 </ListItemIcon>
                 <ListItemText primary="Building" />
               </ListItemButton>
 
               <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=masters&s=tax")}>
                 <ListItemIcon>
-                  <StarBorder />
+                  <FiberManualRecordIcon style={subIconStyle} />
                 </ListItemIcon>
                 <ListItemText primary="Tax" />
               </ListItemButton>
@@ -509,7 +528,7 @@ export default function SideBar(props) {
 
           <ListItemButton onClick={() => handlenavigate("m=settings&s=roles")} >
             <ListItemIcon>
-              <BarChartIcon />
+              <BarChartIcon   style={MainIconStyle}/>
             </ListItemIcon>
             <ListItemText primary="Permissions" />
 
@@ -532,14 +551,14 @@ export default function SideBar(props) {
 
                             <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=settings&s=roles")}>
                                 <ListItemIcon>
-                                    <StarBorder />
+                                    <FiberManualRecordIcon style={subIconStyle}/>
                                 </ListItemIcon>
                                 <ListItemText primary="Role" />
                             </ListItemButton>
 
                             <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=masters&s=streets")}>
                                 <ListItemIcon>
-                                    <StarBorder />
+                                    <FiberManualRecordIcon style={subIconStyle}/>
                                 </ListItemIcon>
                                 <ListItemText primary="Street" />
                             </ListItemButton>
@@ -547,7 +566,7 @@ export default function SideBar(props) {
 
                             <ListItemButton sx={{ pl: 4 }} onClick={() => handlenavigate("m=masters&s=house")}>
                                 <ListItemIcon>
-                                    <StarBorder />
+                                    <FiberManualRecordIcon style={subIconStyle}/>
                                 </ListItemIcon>
                                 <ListItemText primary="Building" />
                             </ListItemButton>

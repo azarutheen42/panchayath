@@ -40,13 +40,19 @@ const Config = {
     return useMediaQuery('(max-width:600px)');
   },
   fileType: (e) => {
-    const supported = ["jpg", "png"]
+
+    const supported = [
+      '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg'];
     let ext = e.split(".").pop()
     return supported.includes(ext)
   },
 
   DocfileType: (e) => {
     const supported = ["jpg", "png", "pdf", "doc", "docx", "csv", "jpeg"]
+
+    const fileExtensions = [
+      '.txt','.doc', '.docx','.pdf','.xls', '.xlsx','.ppt', '.pptx','.jpg', '.jpeg','.png','.bmp','.json','.xml', "csv"
+    ];
     let ext = e.split(".").pop()
     return supported.includes(ext)
   },

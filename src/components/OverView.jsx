@@ -18,8 +18,11 @@ function OverView() {
 
 
     const [overData, setOverData] = useState();
+    const [todayData, settodayData] = useState();
     const [worker, setWorker] = useState();
     const [compData, setcompData] = useState([]);
+    const [requstStat, setRequestStat] = useState();
+    const [garbagecollectionstats, setgarbagecollectionstats] = useState();
 
     const [registerUser, setRegisterUser] = useState();
     const [totalWeight, setTotalWeight] = useState();
@@ -32,12 +35,12 @@ function OverView() {
 
 
     useEffect(() => {
-
-
         getoverData();
         getComplaints();
         getAtendence();
-        getRegisteredUsers()
+        getRegisteredUsers();
+        getRequestStats();
+        getBuildingstats();
 
 
     }, [])
@@ -45,7 +48,7 @@ function OverView() {
 
 
     const headersToShow = ["Employee", "Role", "Timing", "Status"]
-    const tableData = worker
+    const tableData = worker?.employee ? worker?.employee : worker
     const fieldsToShow = []
     const fields = {
         'name': (value) => value,
@@ -68,13 +71,14 @@ function OverView() {
 
 
     const getoverData = () => {
-        axios.get(`${Config.BASE_URL}garbage-stats`,
+        axios.get(`${Config.BASE_URL}overall-garbage-stats`,
             Config?.config
         )
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response);
-                    setOverData(response?.data)
+                    setOverData(response?.data?.overall)
+                    settodayData(response?.data?.today)
                     // weighconversion()
 
 
@@ -106,6 +110,46 @@ function OverView() {
 
             });
     }
+
+
+
+    const getRequestStats = () => {
+        axios.get(`${Config.BASE_URL}request-stats`,
+            Config?.config
+        )
+            .then(function (response) {
+                if (response.status === 200) {
+                    console.log(response);
+                    setRequestStat(response?.data)
+
+                }
+
+            })
+            .catch(function (error) {
+                console.log(error);
+
+            });
+    }
+
+
+    const getBuildingstats = () => {
+        axios.get(`${Config.BASE_URL}garbage-collection-stats/`,
+            Config?.config
+        )
+            .then(function (response) {
+                if (response.status === 200) {
+                    console.log(response);
+                    setgarbagecollectionstats(response?.data)
+
+                }
+
+            })
+            .catch(function (error) {
+                console.log(error);
+
+            });
+    }
+
 
 
     const getAtendence = () => {
@@ -157,7 +201,7 @@ function OverView() {
             });
     }
 
-    const data = {
+    const overallData = {
         labels: [
             'bio',
             'non-bio',
@@ -177,9 +221,23 @@ function OverView() {
     };
 
 
-    const config = {
-        type: 'pie',
-        data: data,
+    const todaycollectionData = {
+        labels: [
+            'bio',
+            'non-bio',
+            'hazard'
+        ],
+        datasets: [{
+            label: 'Garbage Report',
+            data: [todayData?.bio, todayData?.non_bio, todayData?.hazard],
+            backgroundColor: [
+
+                'rgb(54, 162, 235)',
+                'rgb(255, 205, 86)',
+                'rgb(255, 99, 132)',
+            ],
+            hoverOffset: 4
+        }]
     };
 
 
@@ -217,171 +275,298 @@ function OverView() {
         <>
 
             {/* first card */}
-            <Grid item xs={12}  sm={3}  >
-                <Card style={{ backgroundColor: '#ff9f43' }}>
-                    <CardContent>
-                        <Typography variant="h6" component="div" sx={styles.card1Title}>
-                            {parseFloat(overData?.total) < 1000 ? parseFloat(overData?.total) : (parseFloat(overData?.total) / 1000)}{" "}
-                            {parseFloat(overData?.total) < 1000 ? "Kg" : "Ton"}
-                        </Typography>
-                        <Typography variant="body2" component="div" sx={styles.card1Text}>
-                            Total Waste
-                        </Typography>
-                    </CardContent>
-                </Card>
-            </Grid>
-            <Grid item xs={12} sm={3}>
-                <Card style={{ backgroundColor: '#28C76F' }}>
-                    <CardContent>
-                        <Typography variant="h6" component="div" sx={styles.card1Title}>
-                            {overData?.non_bio} kg
-                        </Typography>
-                        <Typography variant="body2" component="div" sx={styles.card1Text}>
-                            Degradable waste
-                        </Typography>
-                    </CardContent>
-                </Card>
-            </Grid>
-            <Grid item xs={12}  sm={3}>
-                <Card style={{ backgroundColor: '#1B2850' }}>
-                    <CardContent>
-                        <Typography variant="h6" component="div" sx={styles.card1Title}>
-                            {overData?.bio} kg
-                        </Typography>
-                        <Typography variant="body2" component="div" sx={styles.card1Text}>
-                            Bio Degradable waste
-                        </Typography>
-                    </CardContent>
-                </Card>
-            </Grid>
 
-            <Grid item xs={12}  sm={3} >
-                <Card style={{ backgroundColor: '#00CFE8' }}>
-                    <CardContent>
-                        <Typography variant="h6" component="div" sx={styles.card1Title}>
-                            {overData?.hazard} Kg
-                        </Typography>
-                        <Typography variant="body2" component="div" sx={styles.card1Text}>
-                            Hazard waste
-                        </Typography>
-                    </CardContent>
-                </Card>
-            </Grid>
+            <Container maxWidth="lg" sx={{ p: 3, mb: 4 }} component={Paper}>
+
+                <Grid container spacing={3} >
+                    <Grid item xs={12} sm={3}  >
+                        <Card style={{ backgroundColor: '#ff9f43' }}>
+                            <CardContent>
+                                <Typography variant="h6" component="div" sx={styles.card1Title}>
+                                    {parseFloat(overData?.total) < 1000 ? parseFloat(overData?.total) : (parseFloat(overData?.total) / 1000)}{" "}
+                                    {parseFloat(overData?.total) < 1000 ? "Kg" : "Ton"}
+                                </Typography>
+                                <Typography variant="body2" component="div" sx={styles.card1Text}>
+                                    Total Waste
+                                </Typography>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={3}>
+                        <Card style={{ backgroundColor: '#28C76F' }}>
+                            <CardContent>
+                                <Typography variant="h6" component="div" sx={styles.card1Title}>
+                                    {overData?.non_bio} kg
+                                </Typography>
+                                <Typography variant="body2" component="div" sx={styles.card1Text}>
+                                    Degradable waste
+                                </Typography>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={3}>
+                        <Card style={{ backgroundColor: '#1B2850' }}>
+                            <CardContent>
+                                <Typography variant="h6" component="div" sx={styles.card1Title}>
+                                    {overData?.bio} kg
+                                </Typography>
+                                <Typography variant="body2" component="div" sx={styles.card1Text}>
+                                    Bio Degradable waste
+                                </Typography>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+
+                    <Grid item xs={12} sm={3} >
+                        <Card style={{ backgroundColor: '#00CFE8' }}>
+                            <CardContent>
+                                <Typography variant="h6" component="div" sx={styles.card1Title}>
+                                    {overData?.hazard} Kg
+                                </Typography>
+                                <Typography variant="body2" component="div" sx={styles.card1Text}>
+                                    Hazard waste
+                                </Typography>
+                            </CardContent>
+                        </Card>
+                    </Grid>
 
 
-
+                </Grid>
+            </Container>
 
             {/* second card */}
 
             {/* ----------------------------------------- */}
+            <Container maxWidth="lg" component={Paper} sx={{ p: 3, mb: 4, }}  >
+                <Grid container spacing={3} >
 
-            <Grid item xs={12} sm={4}>
-                <Card sx={{ padding: '25px' }}>
-                    <Grid container>
-                        <Grid item xs={4}>
-                            <CardMedia
-                                component="img"
-                                // height="100"
-                                image="assets/img/customer-review.png"
-                                alt="Placeholder"
-                            />
-                        </Grid>
-                        <Grid item xs={8}>
-                            <CardContent>
-                                <Typography variant="h6" component="div" sx={styles.card2Title}>
-                                    <CountUp
-                                        end={registerUser?.user_count}
+                    <Grid item xs={12} sm={4}  >
+                        <Card sx={{ padding: '25px' }}>
+                            <Grid container>
+                                <Grid item xs={4}>
+                                    <CardMedia
+                                        component="img"
+                                        // height="100"
+                                        image="assets/img/customer-review.png"
+                                        alt="Placeholder"
                                     />
-                                </Typography>
-                                <Typography variant="body2" component="div" sx={styles.card2Text}>
-                                    User Registration
-                                </Typography>
-                            </CardContent>
-                        </Grid>
+                                </Grid>
+                                <Grid item xs={8}>
+                                    <CardContent>
+                                        <Typography variant="h6" component="div" sx={styles.card2Title}>
+                                            <CountUp
+                                                end={registerUser?.user_count}
+                                            />
+                                        </Typography>
+                                        <Typography variant="body2" component="div" sx={styles.card2Text}>
+                                            User Registration
+                                        </Typography>
+                                    </CardContent>
+                                </Grid>
+                            </Grid>
+                        </Card>
                     </Grid>
-                </Card>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-                <Card sx={{ padding: '25px' }}>
-                    <Grid container>
-                        <Grid item xs={4}>
-                            <CardMedia
-                                component="img"
-                                // height="100"
-                                image="assets/img/complain.png"
-                                alt="Placeholder"
-                            />
-                        </Grid>
-                        <Grid item xs={8}>
-                            <CardContent>
-                                <Typography variant="h6" component="div" sx={styles.card2Title}>
-                                    <CountUp end={compData?.total ? compData?.total : 0.00} />
-                                </Typography>
-                                <Typography variant="body2" component="div" sx={styles.card2Text} >
-                                    Ward Complaints
-                                </Typography>
-                            </CardContent>
-                        </Grid>
-                    </Grid>
-                </Card>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-                <Card sx={{ padding: '25px' }}>
-                    <Grid container>
-                        <Grid item xs={4}>
-                            <CardMedia
-                                component="img"
-                                // height="100"
-                                image="assets/img/shopping-cart.png"
-                                alt="Placeholder"
-                            />
-                        </Grid>
-                        <Grid item xs={8}>
-                            <CardContent>
-                                <Typography variant="h6" component="div" sx={styles.card2Title} >
-                                    <CountUp
-                                        end={parseFloat(overData?.total) < 1000 ? parseFloat(overData?.total) : (parseFloat(overData?.total) / 1000)}
+
+                    <Grid item xs={12} sm={4}  >
+                        <Card sx={{ padding: '25px' }}>
+                            <Grid container>
+                                <Grid item xs={4}>
+                                    <CardMedia
+                                        component="img"
+                                        // height="100"
+                                        image="src/assets/iconpic/attendence _1.png"
+                                        alt="Placeholder"
                                     />
-                                    {" "}{parseFloat(overData?.total) < 1000 ? "Kg" : "Ton"}
-                                </Typography>
-                                <Typography variant="body2" component="div" sx={styles.card2Text}>
-                                    Garbage Wastages
-                                </Typography>
-                            </CardContent>
-                        </Grid>
+                                </Grid>
+                                <Grid item xs={8}>
+                                    <CardContent>
+                                        <Typography variant="h6" component="div" sx={styles.card2Title} >
+                                            {/* <CountUp
+                                                end={parseFloat(overData?.total) < 1000 ? parseFloat(overData?.total) : (parseFloat(overData?.total) / 1000)}
+                                            /> */}
+                                            {/* {" "}{parseFloat(overData?.total) < 1000 ? "Kg" : "Ton"} */}
+                                        </Typography>
+                                        <Typography variant="body2" component="div" sx={styles.card2Text}>
+                                            Total Employees :  <CountUp end={worker?.emp_count || 0} />
+                                        </Typography>
+                                        <Typography variant="body2" component="div" sx={styles.card2Text}>
+                                            Present : <CountUp end={worker?.present || 0} />
+                                        </Typography>
+                                        <Typography variant="body2" component="div" sx={styles.card2Text}>
+                                            Abscent:  <CountUp end={worker?.absent || 0} />
+                                        </Typography>
+                                    </CardContent>
+                                </Grid>
+                            </Grid>
+                        </Card>
                     </Grid>
-                </Card>
-            </Grid>
+
+                    <Grid item xs={12} sm={4}  >
+                        <Card sx={{ padding: '25px' }}>
+                            <Grid container>
+                                <Grid item xs={4}>
+                                    <CardMedia
+                                        component="img"
+                                        // height="100"
+                                        image="src/assets/iconpic/attendence _1.png"
+                                        alt="Placeholder"
+                                    />
+                                </Grid>
+                                <Grid item xs={8}>
+                                    <CardContent>
+                                        <Typography variant="h6" component="div" sx={styles.card2Title} >
+                                        </Typography>
+                                        <Typography variant="body2" component="div" sx={styles.card2Text}>
+                                            Total Buildings : <CountUp end={garbagecollectionstats?.building_count || 0} />
+                                        </Typography>
+                                        <Typography variant="body2" component="div" sx={styles.card2Text}>
+                                            collected : <CountUp end={garbagecollectionstats?.taken || 0} />
+                                        </Typography>
+                                        <Typography variant="body2" component="div" sx={styles.card2Text}>
+                                            pending: <CountUp end={Number(garbagecollectionstats?.taken - garbagecollectionstats?.building_count) || 0} />
+                                        </Typography>
+                                    </CardContent>
+                                </Grid>
+                            </Grid>
+                        </Card>
+                    </Grid>
+
+                </Grid>
+
+            </Container>
 
 
+            {/* third  card */}
 
+            {/* ----------------------------------------- */}
+            <Container maxWidth="lg" component={Paper} sx={{ p: 3, mb: 4, }}  >
+                <Grid container spacing={3} >
 
+                    <Grid item xs={12} sm={4}  >
+                        <Card sx={{ padding: '25px' }}>
+                            <Grid container>
+                                <Grid item xs={4}>
+                                    <CardMedia
+                                        component="img"
+                                        // height="100"
+                                        image="src/assets/iconpic/check.png"
+                                        alt="Placeholder"
+                                    />
+                                </Grid>
+                                <Grid item xs={8}>
+                                    <CardContent>
+
+                                        <Typography variant="h6" component="div" sx={styles.card2Title}>
+                                            <CountUp end={requstStat?.total ? requstStat?.total : 0.00} />
+                                        </Typography>
+                                        <Typography variant="body2" component="div" sx={styles.card2Text}>
+                                            Request
+                                        </Typography>
+                                    </CardContent>
+                                </Grid>
+                            </Grid>
+                        </Card>
+                    </Grid>
+
+                    <Grid item xs={12} sm={4} >
+                        <Card sx={{ padding: '25px' }}>
+                            <Grid container>
+                                <Grid item xs={4}>
+                                    <CardMedia
+                                        component="img"
+                                        // height="100"
+                                        image="src/assets/iconpic/complain.png"
+                                        alt="Placeholder"
+                                    />
+                                </Grid>
+                                <Grid item xs={8}>
+                                    <CardContent>
+                                        <Typography variant="h6" component="div" sx={styles.card2Title}>
+                                            <CountUp end={compData?.total ? compData?.total : 0.00} />
+                                        </Typography>
+                                        <Typography variant="body2" component="div" sx={styles.card2Text} >
+                                            Ward Complaints
+                                        </Typography>
+                                    </CardContent>
+                                </Grid>
+                            </Grid>
+                        </Card>
+                    </Grid>
+
+                    <Grid item xs={12} sm={4}  >
+                        <Card sx={{ padding: '25px' }}>
+                            <Grid container>
+                                <Grid item xs={4}>
+                                    <CardMedia
+                                        component="img"
+                                        // height="100"
+                                        image="src/assets/iconpic/industry.png"
+                                        alt="Placeholder"
+                                    />
+                                </Grid>
+                                <Grid item xs={8}>
+                                    <CardContent>
+                                        <Typography variant="h6" component="div" sx={styles.card2Title} >
+                                            <CountUp
+                                                end={parseFloat(overData?.total) < 1000 ? parseFloat(overData?.total) : (parseFloat(overData?.total) / 1000)}
+                                            />
+                                            {" "}{parseFloat(overData?.total) < 1000 ? "Kg" : "Ton"}
+                                        </Typography>
+                                        <Typography variant="body2" component="div" sx={styles.card2Text}>
+                                            Garbage Wastages
+                                        </Typography>
+                                    </CardContent>
+                                </Grid>
+                            </Grid>
+                        </Card>
+                    </Grid>
+
+                </Grid>
+            </Container>
 
 
             {/* ------------------------------------------------------------------- */}
-            {/* <Grid item xs={12} sm={6} >
-                <h2
-                //  style="color: black;"
-                >Overall Statistics</h2>
-            </Grid> */}
-            <Grid item xs={12} sm={6} display="flex" >
 
-                <Typography variant="h6" component="div" sx={styles.card2Title}>
-                    Overall Statistics
-                </Typography>
+            <Container maxWidth="lg" component={Paper} sx={{ p: 3, mb: 4, }}  >
+                <Grid container spacing={3} >
 
-                <Typography variant="body2" component="div" sx={styles.card2Text}>
-                <Pie data={data}
-                    arc={20}
-                // width={50} height={50}
-                // height={2000}
-                //     width={2000}
-                />
-                </Typography>
+                    <Grid item xs={12} sm={6} display="flex" >
+                        <Typography variant="h6" component="div" sx={styles.card2Title}>
+                            Overall Wastages
+                        </Typography>
 
-               
+                        <Typography variant="body2" component="div" sx={styles.card2Text}>
+                            <Pie data={overallData}
+                                arc={20}
+                            // width={50} height={50}
+                            // height={2000}
+                            //     width={2000}
+                            />
+                        </Typography>
+                    </Grid>
 
-            </Grid>
+
+                    <Grid item xs={12} sm={6} display="flex" >
+                        <Typography variant="h6" component="div" sx={styles.card2Title}>
+                            Today Wastages
+                        </Typography>
+
+                        <Typography variant="body2" component="div" sx={styles.card2Text}>
+                            <Pie data={todaycollectionData}
+                                arc={20}
+                            // width={50} height={50}
+                            // height={2000}
+                            //     width={2000}
+                            />
+                        </Typography>
+                    </Grid>
+
+
+
+
+
+                </Grid>
+            </Container>
 
 
             <Grid item xs={12}>

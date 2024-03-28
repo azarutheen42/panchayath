@@ -16,14 +16,15 @@ import ButtonWithLoader from "./Button";
 import { CircularProgress } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import { Typography } from '@mui/material';
+import { FileIcon, defaultStyles } from 'react-file-icon';
 
 
 
 export const StyledSmallImageThumbnail = styled('img')({
     width: 50,
-    height: 'auto', 
-    borderRadius: 4, 
-    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', 
+    height: 'auto',
+    borderRadius: 4,
+    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
     cursor: 'pointer',
     // border: '1px solid #000',
 });
@@ -68,8 +69,8 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 const StyledTableHead = styled(TableHead)({
     position: 'sticky',
-    top: '0', 
-    zIndex: '100', 
+    top: '0',
+    zIndex: '100',
 
     // backgroundColor: theme.palette.common.black,
     // color: theme.palette.common.white,
@@ -84,8 +85,8 @@ const StyledTableHead = styled(TableHead)({
 const StyledTable = styled(Table)(({ theme }) => ({
     // borderCollapse: 'separate', 
     borderSpacing: '0px',
-    borderRadius: '5px', 
-    minWidth: '100%', 
+    borderRadius: '5px',
+    minWidth: '100%',
 }));
 
 
@@ -99,7 +100,7 @@ const ActionCell = {
 
 
 const StyledTableContainer = styled(TableContainer)({
-    maxHeight: '100%', 
+    maxHeight: '100%',
     overflow: 'auto',
 });
 
@@ -138,25 +139,20 @@ function CustomTable(props) {
 
     }
 
- 
 
 
 
-    const [page,setPage] =useState(1);
+
+    const [page, setPage] = useState(1);
 
 
-    const handlePageChange =(event, value)=>{
+    const handlePageChange = (event, value) => {
         setPage(value)
     }
 
-    
 
 
-    // const tdata = data?.results ?? data
-    // const count=tdata?.count
 
-
-    console.log(data,"pppppppppppppppppppppppp")
 
 
     return (
@@ -164,7 +160,7 @@ function CustomTable(props) {
 
 
             <StyledTableContainer
-            component={Paper}
+                component={Paper}
             >
 
 
@@ -260,9 +256,15 @@ function CustomTable(props) {
 }
 
 
-
+'.gif', '.bmp', '.webp', '.svg'
 const isImageUrl = (url) => {
-    return /\.(jpeg|jpg|gif|png)$/i.test(url);
+    return /\.(jpeg|jpg|gif|png|bmp|webp|svg)$/i.test(url);
+};
+
+
+
+const isFileUrl = (url) => {
+    return /\.( txt|doc|docx|pdf|xls|xlsx|ppt|pptx|json|xml|csv)$/i.test(url);
 };
 
 const nestedFieldExtractor = (obj, path) => {
@@ -280,24 +282,32 @@ const nestedFieldExtractor = (obj, path) => {
 const renderField = (data, field) => {
     // Check if the field is nested
     if (field.includes('.')) {
-        const nestedFields = field.split('.'); 
+        const nestedFields = field.split('.');
         let value = data;
         for (let nestedField of nestedFields) {
-            value = value[nestedField]; 
-            if (!value) return ''; 
+            value = value[nestedField];
+            if (!value) return '';
         }
-        return renderImageOrText(value); 
+        return renderImageOrText(value);
     } else {
-        return renderImageOrText(data[field]); 
+        return renderImageOrText(data[field]);
     }
 };
 
+
+
+
+
+
 // Function to render value as image or text
 const renderImageOrText = (value) => {
-   
+
     if (isImageUrl(value)) {
         var alt_name = getImageName(value);
-        alt_name = Config.truncateText(alt_name, 7)
+        // alt_name = Config.truncateText(alt_name, 7)
+
+        const ext = value?.split(".")?.pop()
+        alt_name = Config?.truncateText(alt_name, 8) + "." + ext
         // return <img
         //     src={Config?.MEDIA_URL + value}
         //     alt={alt_name}
@@ -307,8 +317,10 @@ const renderImageOrText = (value) => {
 
         return <CustomTableCell imagePath={Config?.MEDIA_URL + value} altText={alt_name} />
 
+    }
+    else if (isFileUrl(value)) {
 
-        return
+        return <FileCell value={value} />
     } else {
         // return value;
         if (typeof value !== 'string') {
@@ -326,10 +338,10 @@ const renderImageOrText = (value) => {
 
 
 const getImageName = (imageUrl) => {
-    const imageNameWithExtension = imageUrl.split('/').pop(); 
-    const parts = imageNameWithExtension.split('.'); 
-    parts.pop(); 
-    return parts.join('.'); 
+    const imageNameWithExtension = imageUrl.split('/').pop();
+    const parts = imageNameWithExtension.split('.');
+    parts.pop();
+    return parts.join('.');
 };
 
 
@@ -402,8 +414,8 @@ const CustomTableCell = ({ imagePath, altText }) => {
                 maxWidth="sm" // Set the maximum width to sm (small)
                 PaperProps={{
                     style: {
-                        width: '50%', 
-                        margin: 'auto', 
+                        width: '50%',
+                        margin: 'auto',
                         padding: '20px',
                         display: 'flex',
                         justifyContent: 'center',
@@ -416,8 +428,8 @@ const CustomTableCell = ({ imagePath, altText }) => {
                     alt={altText}
                     style={{
                         maxWidth: '100%',
-                        height: 'auto', 
-                        objectFit: 'contain', 
+                        height: 'auto',
+                        objectFit: 'contain',
                     }}
                 />
 
@@ -425,7 +437,7 @@ const CustomTableCell = ({ imagePath, altText }) => {
                     <Button
                         variant="contained"
                         color="primary"
-                        size="small" 
+                        size="small"
                         onClick={handleDownload}
                     >
                         Download
@@ -444,7 +456,43 @@ const CustomTableCell = ({ imagePath, altText }) => {
 
 
 
+function FileCell({ value }) {
 
+
+    const iconStyle = {
+
+        // width: "50px",
+        // height: "auto"
+    }
+
+    const filename = value?.split("/")?.pop()
+
+    const ext = filename?.split(".")?.pop()
+
+    const nameonly = filename?.split(".")[0]
+
+    const name = Config?.truncateText(nameonly, 20) + "." + ext
+
+
+    return (
+        <>
+            <div style={{ display: "flex" }}>
+                <div style={{ display: 'block', width: "40px", WebkitFontSmoothing: 'antialiased' }}  >
+                    <FileIcon extension={ext} {...defaultStyles[ext]} 
+                       size={48}
+                       labelUppercase
+                       type="document"
+                      
+                    />
+                </div>
+                <div className='text-center p-3'>
+                    <a href={value}>{name}</a>
+                </div>
+            </div>
+         
+        </>
+    )
+}
 
 
 
@@ -462,11 +510,13 @@ function PaginationControlled(props) {
 
 
 
+
+
     return (
 
         <>
 
-            {(data && count )&& (
+            {(data && count) && (
 
                 <Stack spacing={2}>
                     <Typography>Page: {page}</Typography>

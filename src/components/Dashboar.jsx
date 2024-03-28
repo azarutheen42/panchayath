@@ -128,10 +128,8 @@ export default function Dashboard() {
 
                         <div style={{ margin: 10,padding:20}} className='container   bg-white'>
 
-                                <Content
-
-                                />
-                                {/* <MyTable/> */}
+                                <Content/>
+                               
                         </div>
 
 

@@ -1087,7 +1087,7 @@ function Scheme() {
 
 
     // META DATA
-    const headersToShow = ["Date", "Scheme Name", "Scheme period", "Announced by", "Details"]
+    const headersToShow = ["Date", "Scheme Name", "Scheme period", "Announced by","File", "Details"]
     const tableData = listInstanceData
     const fieldsToShow = []
     const fields = {
@@ -1097,6 +1097,7 @@ function Scheme() {
         'Period': (value) => value,
         // 'place': (value) => value,
         'Announced_by': (value) => value,
+        'file': (value) => value,
         'details': (value) => value,
 
 
@@ -3687,7 +3688,7 @@ function Announcement() {
 
 
     // META DATA
-    const headersToShow = ["Date", "Time", "Name", "Place", "Details", "Ward"]
+    const headersToShow = ["Date", "Time", "Name", "Place","File", "Details", "Ward"]
     const tableData = listInstanceData
     const fieldsToShow = []
     const fields = {
@@ -3697,6 +3698,7 @@ function Announcement() {
         'name': (value) => value,
         // 'place': (value) => value,
         'place': (value) => value,
+        'file': (value) => value,
         'details': (value) => value,
         "ward": (value) => getWardNames(value, wardlist)
 

@@ -12,7 +12,7 @@ import { AddButton } from "./Button";
 import { padding } from "@mui/system";
 import SelectDropDown from "../utils/SelectDropDown"
 import MUIDataTable from "mui-datatables";
-import  PaginationController from "../utils/Pagination"
+import PaginationController from "../utils/Pagination"
 
 
 
@@ -169,7 +169,7 @@ function House() {
 
 function Street() {
 
-    const [listInstanceData, setlistInstanceData] = useState([]);
+    const [listInstanceData, setListInstanceData] = useState([]);
     const [ward, setWard] = useState("");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
@@ -178,10 +178,13 @@ function Street() {
 
     const [loader, setLoader] = useState(false);
     const [trigger, setTrigger] = useState();
-    const [page,setPage] =useState(1);
 
 
-    const handlePageChange =(event, value)=>{
+    const [page, setPage] = useState(1);
+    const [count, setCount] = useState();
+    const [total, setTotal] = useState();
+
+    const handlePageChange = (event, value) => {
         setPage(value)
     }
 
@@ -191,11 +194,9 @@ function Street() {
 
     useEffect(() => {
 
-        getWardReports()
+        getWardReports();
 
-        // gettempemployee()
-
-    }, [ward, startDate, endDate, trigger,page])
+    }, [ward, startDate, endDate, trigger, page])
 
     const getWardLabel = (id) => {
         const label = wardlist?.find((e) => e?.id === id)?.name
@@ -207,7 +208,6 @@ function Street() {
 
     const headersToShow = ["Date", "Ward No", "	Bio (kg)", "Non-Bio (Kg)", "Hazard (kg)"]
     const tableData = listInstanceData
-    const count=Math.ceil(listInstanceData?.count / tableData?.results?.length)
     const fieldsToShow = []
     const fields = {
         'date': (value) => value,
@@ -226,7 +226,12 @@ function Street() {
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response);
-                    setlistInstanceData(response?.data?.results ? response?.data?.results : response?.data)
+                    // setlistInstanceData(response?.data?.results ? response?.data?.results : response?.data)
+                    setListInstanceData(response?.data?.results ? response?.data?.results : response?.data)
+                    setCount(response?.data?.count)
+                    if (!total) {
+                        setTotal(Math.ceil(response?.data?.count / response?.data?.results?.length))
+                    }
 
                 }
 
@@ -242,51 +247,51 @@ function Street() {
 
     const options = {
         filterType: 'checkbox',
-      };
+    };
 
 
-      const columns = [
+    const columns = [
         {
-         name: "date",
-         label: "Date",
-         options: {
-          filter: true,
-          sort: true,
-         }
+            name: "date",
+            label: "Date",
+            options: {
+                filter: true,
+                sort: true,
+            }
         },
         {
-         name: "ward",
-         label: "Ward No",
-         options: {
-          filter: true,
-          sort: false,
-         }
+            name: "ward",
+            label: "Ward No",
+            options: {
+                filter: true,
+                sort: false,
+            }
         },
         {
-         name: "bio",
-         label: "Bio (kg)",
-         options: {
-          filter: true,
-          sort: false,
-         }
+            name: "bio",
+            label: "Bio (kg)",
+            options: {
+                filter: true,
+                sort: false,
+            }
         },
         {
-         name: "non_bio",
-         label: "Non-Bio (Kg)",
-         options: {
-          filter: true,
-          sort: false,
-         }
+            name: "non_bio",
+            label: "Non-Bio (Kg)",
+            options: {
+                filter: true,
+                sort: false,
+            }
         },
         {
             name: "hazard",
             label: "Hazard (Kg)",
             options: {
-             filter: true,
-             sort: false,
+                filter: true,
+                sort: false,
             }
-           },
-       ];
+        },
+    ];
 
 
     return (
@@ -333,10 +338,10 @@ function Street() {
                     <input type="date" class="form-control" id="toDate" onChange={(e) => setEndDate(e.target.value)} />
                 </div>
 
-                <div class="form-group">
+                {/* <div class="form-group">
                     <label for="search" style={{ fontWeight: "bold" }}>Search :</label>
                     <button class="btn btn-success" onChange={(e) => setTrigger()}>Get Report</button>
-                </div>
+                </div> */}
             </Grid>
 
 
@@ -353,16 +358,20 @@ function Street() {
                 />
 
             </Grid>
-   
 
-            <PaginationController 
-            page={page}
-            setPage={setPage}
-            handlePageChange={handlePageChange}
-            count={count}
-            data={tableData}
-            
-            />
+
+            <Grid item xs={12}>
+
+                <PaginationController
+                    page={page}
+                    setPage={setPage}
+                    handlePageChange={handlePageChange}
+                    count={count}
+                    data={tableData}
+                    total={total}
+
+                />
+            </Grid>
 
 
         </>
@@ -532,7 +541,7 @@ function Shop() {
 
 function Overall() {
 
-    const [listInstanceData, setlistInstanceData] = useState([]);
+    const [listInstanceData, setListInstanceData] = useState([]);
     const [panchayat, setPanchayath] = useState("");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
@@ -543,15 +552,21 @@ function Overall() {
 
     const [loader, setLoader] = useState(false);
 
+
+    const [page, setPage] = useState(1);
+    const [count, setCount] = useState();
+    const [total, setTotal] = useState();
+
+
+    const handlePageChange = (event, value) => {
+        setPage(value)
+    }
+
     const actionShow = true;
 
     useEffect(() => {
-
-        getWardReports()
-
-        // gettempemployee()
-
-    }, [panchayat, startDate, endDate, trigger])
+        getWardReports();
+    }, [panchayat, startDate, endDate, trigger, page])
 
     const getPanchayathLabel = (id) => {
         const label = panchaytList?.find((e) => e?.id === id)?.name
@@ -576,13 +591,18 @@ function Overall() {
 
 
     const getWardReports = () => {
-        axios.get(`${Config.BASE_URL}collect-truck-garbage?panchayat=${panchayat}&start_date=${startDate}&end_date=${endDate}`,
+        axios.get(`${Config.BASE_URL}collect-truck-garbage?page=${page}&panchayat=${panchayat}&start_date=${startDate}&end_date=${endDate}`,
             Config?.config
         )
             .then(function (response) {
                 if (response.status === 200) {
                     console.log(response);
-                    setlistInstanceData(response?.data)
+                    // setlistInstanceData(response?.data)
+                    setListInstanceData(response?.data?.results ? response?.data?.results : response?.data)
+                    setCount(response?.data?.count)
+                    if (!total) {
+                        setTotal(Math.ceil(response?.data?.count / response?.data?.results?.length))
+                    }
 
                 }
 
@@ -619,10 +639,10 @@ function Overall() {
                     <input type="date" class="form-control" id="toDate" onChange={(e) => setEndDate(e.target.value)} />
                 </div>
 
-                <div class="form-group" style={{ paddingLeft: 5 }}>
+                {/* <div class="form-group" style={{ paddingLeft: 5 }}>
                     <label for="search" style={{ fontWeight: "bold" }}>Search :</label>
                     <button class="btn btn-success" onChange={(e) => setTrigger()}>Get Report</button>
-                </div>
+                </div> */}
             </Grid>
 
 
@@ -640,6 +660,20 @@ function Overall() {
                 />
 
             </Grid>
+
+            <Grid item xs={12}>
+
+                <PaginationController
+                    page={page}
+                    setPage={setPage}
+                    handlePageChange={handlePageChange}
+                    count={count}
+                    data={tableData}
+                    total={total}
+
+                />
+            </Grid>
+
 
         </>
 

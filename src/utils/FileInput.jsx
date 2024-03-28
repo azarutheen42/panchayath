@@ -6,6 +6,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Config from '../Config';
 import { StyledSmallImageThumbnail } from '../components/Table';
 import InputLabel from '@mui/material/InputLabel';
+import { toast, ToastContainer } from 'react-toastify';
 
 
 
@@ -31,8 +32,42 @@ const FileUploadBox = (props) => {
 
     const handleFileChange = (e) => {
 
+        const filename = e.target.files[0].name
+        const file = e.target.files[0]
 
-        setImage(e.target.files[0]);
+        const maxSizeInBytes = 10 * 1024 * 1024;
+
+        console.log(file.size / 1024)
+
+        if (name === "image") {
+            const check = Config?.fileType(filename)
+
+            if (!check) {
+                Config?.toastalert("File Format not supported", "warn")
+                return
+            }
+
+        }
+        else if (name === "file") {
+
+            const check = Config?.DocfileType(filename)
+
+            if (!check) {
+                Config?.toastalert("File Format not supported", "warn")
+                return
+            }
+
+        }
+
+
+        if (file?.size > maxSizeInBytes) {
+            Config?.toastalert("Maximum Filesize Exceed", "warn")
+            return
+
+        }
+
+
+        setImage(file);
     };
 
     const handleRemoveFile = () => {
@@ -41,8 +76,19 @@ const FileUploadBox = (props) => {
 
     console.log(value)
 
+
+    const getFileName = () => {
+        const filename = value?.split("/")?.pop()
+        const ext = filename?.split(".")?.pop()
+        const nameonly = filename?.split(".")[0]
+        const showfilename = Config?.truncateText(nameonly, 10) +"..  "+ "." + ext
+        return showfilename
+
+    }
+
     return (
         <>
+            <ToastContainer />
             <InputLabel id="demo-select-small-label " className='input-label'>{filelabel}</InputLabel>
             <div style={{ display: 'flex', alignItems: 'center', }} className='border border-2'>
                 <input
@@ -89,7 +135,8 @@ const FileUploadBox = (props) => {
                                         <span
                                             style={{ marginRight: '8px' }}
                                         // style={itemStyle}
-                                        >{image?.name}
+                                        >
+                                            {image?.name}
 
                                         </span>
 
@@ -107,7 +154,8 @@ const FileUploadBox = (props) => {
                                 // style={itemStyle}
                                 >
                                     <StyledSmallImageThumbnail src={value} alt="" />
-                                    {Config?.truncateText(value?.split("/")?.pop(), 20)}
+                                    {/* {Config?.truncateText(value?.split("/")?.pop(), 20)} */}
+                                    {getFileName()}
 
                                 </span>
                         }
